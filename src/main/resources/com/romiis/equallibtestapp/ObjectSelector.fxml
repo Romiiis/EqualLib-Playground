@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.romiis.equallibtestapp.controllers.ObjectSelectorController">
+
+    <!-- Hlavní obsah s rozdělením na dvě části pomocí SplitPane -->
+    <center>
+        <SplitPane dividerPositions="0.5">
+            <!-- Levá polovina s ListView pro výběr objektu -->
+            <items>
+                <AnchorPane>
+                    <ListView fx:id="objectListView" prefHeight="200" prefWidth="300" />
+                </AnchorPane>
+
+                <!-- Pravá polovina s TreeView pro zobrazení struktury objektu -->
+                <AnchorPane>
+                    <TreeView fx:id="treeView" prefHeight="200" prefWidth="300"/>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+    </center>
+
+    <!-- Spodní část s tlačítky pro výběr nebo zrušení -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <Button text="Select" onAction="#onSelectButtonClick"/>
+            <Button text="Cancel" onAction="#onCancelButtonClick"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

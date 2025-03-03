@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.romiis.equallibtestapp.controllers.MainSceneController"
+            stylesheets="@styles.css">
+
+    <!-- Horní menu -->
+    <top>
+        <MenuBar styleClass="menu-bar">
+            <Menu text="File">
+                <MenuItem text="Open"/>
+                <MenuItem text="Save"/>
+                <MenuItem text="Exit"/>
+            </Menu>
+            <Menu text="Help">
+                <MenuItem text="About"/>
+            </Menu>
+        </MenuBar>
+    </top>
+
+    <!-- Hlavní obsah -->
+    <center>
+        <SplitPane dividerPositions="0.5" styleClass="split-pane">
+            <items>
+                <!-- Levá polovina -->
+                <AnchorPane>
+                    <GridPane prefWidth="250" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" styleClass="left-panel">
+                        <rowConstraints>
+                            <RowConstraints percentHeight="10"/> <!-- Label -->
+                            <RowConstraints percentHeight="40"/> <!-- ListView -->
+                            <RowConstraints percentHeight="50"/> <!-- RadioButtons -->
+                        </rowConstraints>
+
+                        <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
+                        <ListView fx:id="objectListView1" GridPane.rowIndex="1" styleClass="list-view"/>
+                        <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
+                            <RadioButton fx:id="radioButton1" text="Option 1" styleClass="radio-button"/>
+                            <RadioButton fx:id="radioButton2" text="Option 2" styleClass="radio-button"/>
+                            <RadioButton fx:id="radioButton3" text="Option 3" styleClass="radio-button"/>
+                        </VBox>
+                    </GridPane>
+
+                    <Label text="Hierarchy" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="260" styleClass="panel-label"/>
+                    <TreeView fx:id="treeView1" AnchorPane.topAnchor="30" AnchorPane.leftAnchor="250" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
+                </AnchorPane>
+
+                <!-- Pravá polovina -->
+                <AnchorPane>
+                    <Label text="Hierarchy" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="10" styleClass="panel-label"/>
+                    <TreeView fx:id="treeView2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="250" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
+
+                    <GridPane prefWidth="250" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="0" styleClass="right-panel">
+                        <rowConstraints>
+                            <RowConstraints percentHeight="10"/> <!-- Label -->
+                            <RowConstraints percentHeight="40"/> <!-- ListView -->
+                            <RowConstraints percentHeight="50"/> <!-- RadioButtons -->
+                        </rowConstraints>
+
+                        <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
+                        <ListView fx:id="objectListView2" GridPane.rowIndex="1" styleClass="list-view"/>
+                        <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
+                            <RadioButton fx:id="radioButton4" text="Option A" styleClass="radio-button"/>
+                            <RadioButton fx:id="radioButton5" text="Option B" styleClass="radio-button"/>
+                            <RadioButton fx:id="radioButton6" text="Option C" styleClass="radio-button"/>
+                        </VBox>
+                    </GridPane>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+    </center>
+
+    <!-- Spodní část: Porovnání + Panel pro konfiguraci -->
+    <bottom>
+        <VBox spacing="15" styleClass="settings-container" alignment="CENTER">
+            <!-- Single TitledPane containing all settings -->
+            <TitledPane text="Comparison Settings" expanded="false" collapsible="true">
+                <content>
+                    <!-- SplitPane to create two dynamic columns with a divider style -->
+                    <SplitPane dividerPositions="0.25" styleClass="split-pane">
+
+                        <!-- First Split Pane Section: Max Depth and Use Equals after max depth -->
+                        <VBox spacing="15" alignment="CENTER_LEFT" styleClass="column-box">
+                            <!-- Label and Spinner next to each other -->
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Max Depth:" alignment="CENTER_LEFT">
+                                    <tooltip>
+                                        <Tooltip text="Limit how deep object comparison goes (-1 for no limit)." />
+                                    </tooltip>
+                                </Label>
+                                <!-- Spinner for numeric input -->
+                                <Spinner fx:id="maxDepthSpinner" prefWidth="100"/>
+                            </HBox>
+
+                            <!-- CheckBoxes below, aligned in a single column -->
+                            <VBox spacing="10" alignment="CENTER_LEFT">
+                                <CheckBox fx:id="useEqualsAfterMaxDepth" text="Use Equals after max depth">
+                                    <tooltip>
+                                        <Tooltip text="Use the object's equals() method if max depth is reached." />
+                                    </tooltip>
+                                </CheckBox>
+                                <CheckBox fx:id="equivalenceByInheritance" text="Include Inherited Fields">
+                                    <tooltip>
+                                        <Tooltip text="Compare fields from parent classes as well." />
+                                    </tooltip>
+                                </CheckBox>
+                                <CheckBox fx:id="compareByElementsAndKeys" text="Compare Collections">
+                                    <tooltip>
+                                        <Tooltip text="Decide whether collections should be compared element by element." />
+                                    </tooltip>
+                                </CheckBox>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Second Split Pane Section: Ignored Fields -->
+                        <VBox spacing="15" alignment="CENTER_LEFT" styleClass="column-box">
+                            <Label text="Ignored Fields:" alignment="CENTER_LEFT">
+                                <tooltip>
+                                    <Tooltip text="Specify fields to be ignored during comparison." />
+                                </tooltip>
+                            </Label>
+
+                            <!-- ListView to show the ignored fields -->
+                            <ListView fx:id="ignoredFieldsList" prefHeight="150" prefWidth="200">
+                                <items>
+                                    <!-- List items here -->
+                                </items>
+                            </ListView>
+
+                            <!-- Button to add new field -->
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <TextField fx:id="newIgnoredField" promptText="Enter ignored field" prefWidth="150"/>
+                                <Button text="Add Field" onAction="#onAddIgnoredField" styleClass="add-field-button"/>
+                                <Button text="Remove Selected" onAction="#onRemoveIgnoredField" styleClass="remove-field-button"/>
+                            </HBox>
+                        </VBox>
+                    </SplitPane>
+                </content>
+            </TitledPane>
+
+            <!-- Compare Button and Result -->
+            <HBox alignment="CENTER" spacing="20">
+                <padding>
+                    <Insets top="10" right="10" bottom="20" left="10"/>
+                </padding>
+                <Label fx:id="comparisonResult" styleClass="result-label"/>
+                <Button text="Compare" onAction="#onCompareButtonClick" styleClass="compare-button"/>
+            </HBox>
+        </VBox>
+    </bottom>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</BorderPane>
