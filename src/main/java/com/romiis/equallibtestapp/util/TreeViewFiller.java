@@ -14,7 +14,7 @@ public class TreeViewFiller {
             // Load the class dynamically based on its name
             Class<?> clazz = DynamicCompiler.loadClass(selectedObject);
             // Retrieve all fields (attributes) of the class
-            Field[] fields = clazz.getDeclaredFields();
+            Field[] fields = ReflectionUtil.getAllFields(clazz);
 
             // Create the root TreeItem to be displayed in the TreeView
             TreeItem<String> rootItem = new TreeItem<>(selectedObject);

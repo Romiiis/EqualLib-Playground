@@ -75,9 +75,13 @@
 
     <!-- Spodní část: Porovnání + Panel pro konfiguraci -->
     <bottom>
-        <VBox spacing="15" styleClass="settings-container" alignment="CENTER">
+        <VBox styleClass="settings-container" alignment="CENTER">
+
+            <TitledPane text="Objects settings" expanded="false">
+
+            </TitledPane>
             <!-- Single TitledPane containing all settings -->
-            <TitledPane text="Comparison Settings" expanded="false" collapsible="true">
+            <TitledPane text="Comparison Settings" expanded="false">
                 <content>
                     <!-- SplitPane to create two dynamic columns with a divider style -->
                     <SplitPane dividerPositions="0.25" styleClass="split-pane">
@@ -86,7 +90,7 @@
                         <VBox spacing="15" alignment="CENTER_LEFT" styleClass="column-box">
                             <!-- Label and Spinner next to each other -->
                             <HBox spacing="10" alignment="CENTER_LEFT">
-                                <Label text="Max Depth:" alignment="CENTER_LEFT">
+                                <Label text="Max Depth:">
                                     <tooltip>
                                         <Tooltip text="Limit how deep object comparison goes (-1 for no limit)." />
                                     </tooltip>
@@ -117,7 +121,7 @@
 
                         <!-- Second Split Pane Section: Ignored Fields -->
                         <VBox spacing="15" alignment="CENTER_LEFT" styleClass="column-box">
-                            <Label text="Ignored Fields:" alignment="CENTER_LEFT">
+                            <Label text="Ignored Fields:">
                                 <tooltip>
                                     <Tooltip text="Specify fields to be ignored during comparison." />
                                 </tooltip>
