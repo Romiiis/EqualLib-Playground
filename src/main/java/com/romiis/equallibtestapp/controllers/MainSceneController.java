@@ -1,34 +1,38 @@
 package com.romiis.equallibtestapp.controllers;
 
-import com.romiis.equallibtestapp.MainClass;
 import com.romiis.equallibtestapp.util.DynamicCompiler;
-import com.romiis.equallibtestapp.util.TreeViewFiller;
+import com.romiis.equallibtestapp.util.MyTreeView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.MalformedURLException;
 
 public class MainSceneController {
 
     // --- UI Components ---
-    @FXML private TreeView<String> treeView1;
-    @FXML private TreeView<String> treeView2;
-    @FXML private ListView<String> objectListView1;
-    @FXML private ListView<String> objectListView2;
-    @FXML private Label comparisonResult;
-    @FXML private ListView<String> ignoredFieldsList;
-    @FXML private TextField newIgnoredField;
-    @FXML private Spinner<Integer> maxDepthSpinner;
+    @FXML
+    private MyTreeView treeView1;
+    @FXML
+    private MyTreeView treeView2;
+    @FXML
+    private ListView<String> objectListView1;
+    @FXML
+    private ListView<String> objectListView2;
+    @FXML
+    private Label comparisonResult;
+    @FXML
+    private ListView<String> ignoredFieldsList;
+    @FXML
+    private TextField newIgnoredField;
+    @FXML
+    private Spinner<Integer> maxDepthSpinner;
 
-    // --- Object references ---
-    private Object selectedObject1;
-    private Object selectedObject2;
+    @FXML
+    private RadioButton collectionsMapsRB1;
+    @FXML
+    private RadioButton collectionsMapsRB2;
+
 
     // --- Initialization ---
     @FXML
@@ -36,7 +40,16 @@ public class MainSceneController {
         initializeMaxDepthSpinner();
         initializeObjects();
 
+        initializeCollectionsMapsRB();
+    }
 
+    private void initializeCollectionsMapsRB() {
+
+        collectionsMapsRB1.setSelected(true);
+        collectionsMapsRB2.setSelected(true);
+
+        collectionsMapsRB1.setOnAction(event -> treeView1.handleSelectionChange(collectionsMapsRB1.isSelected()));
+        collectionsMapsRB2.setOnAction(event -> treeView2.handleSelectionChange(collectionsMapsRB2.isSelected()));
     }
 
     // Initialize the spinner with appropriate value factory
@@ -44,6 +57,7 @@ public class MainSceneController {
         SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory =
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(-1, 100, -1); // Min: -1, Max: 100, Default: -1
         maxDepthSpinner.setValueFactory(valueFactory);
+
     }
 
     private void initializeObjects() {
@@ -56,14 +70,17 @@ public class MainSceneController {
         }
 
         objectListView1.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            TreeViewFiller.handleSelectionChange(newValue, treeView1);
+            treeView1.setSelectedObject(newValue);
+            treeView1.handleSelectionChange(collectionsMapsRB1.isSelected());
         });
 
         objectListView2.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            TreeViewFiller.handleSelectionChange(newValue, treeView2);
+            treeView2.setSelectedObject(newValue);
+            treeView2.handleSelectionChange(collectionsMapsRB2.isSelected());
         });
-    }
 
+
+    }
 
 
     // --- Ignored Fields ---

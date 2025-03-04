@@ -6,7 +6,9 @@ module com.romiis.equallibtestapp {
     requires org.kordamp.ikonli.javafx;
     requires java.desktop;
     requires java.compiler;
+    requires org.objenesis;
 
+    exports com.romiis.equallibtestapp.util;
     opens com.romiis.equallibtestapp to javafx.fxml;
     exports com.romiis.equallibtestapp;
     exports com.romiis.equallibtestapp.controllers;

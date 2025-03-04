@@ -4,5 +4,9 @@ public class Person {
     private int age;
     private Address address;
 
+    public Person() {
+        this.address = new Address();
+    }
+
 
 }

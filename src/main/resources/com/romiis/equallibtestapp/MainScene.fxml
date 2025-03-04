@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.geometry.Insets?>
+<?import com.romiis.equallibtestapp.util.MyTreeView?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.romiis.equallibtestapp.controllers.MainSceneController"
             stylesheets="@styles.css">
@@ -31,41 +32,37 @@
                     <GridPane prefWidth="250" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" styleClass="left-panel">
                         <rowConstraints>
                             <RowConstraints percentHeight="10"/> <!-- Label -->
-                            <RowConstraints percentHeight="40"/> <!-- ListView -->
-                            <RowConstraints percentHeight="50"/> <!-- RadioButtons -->
+                            <RowConstraints percentHeight="75"/> <!-- ListView -->
+                            <RowConstraints percentHeight="25"/> <!-- RadioButtons -->
                         </rowConstraints>
 
                         <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
                         <ListView fx:id="objectListView1" GridPane.rowIndex="1" styleClass="list-view"/>
                         <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
-                            <RadioButton fx:id="radioButton1" text="Option 1" styleClass="radio-button"/>
-                            <RadioButton fx:id="radioButton2" text="Option 2" styleClass="radio-button"/>
-                            <RadioButton fx:id="radioButton3" text="Option 3" styleClass="radio-button"/>
+                            <RadioButton fx:id="collectionsMapsRB1" text="Collections &amp; Maps as Objects" styleClass="radio-button"/>
                         </VBox>
                     </GridPane>
 
                     <Label text="Hierarchy" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="260" styleClass="panel-label"/>
-                    <TreeView fx:id="treeView1" AnchorPane.topAnchor="30" AnchorPane.leftAnchor="250" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
+                    <MyTreeView fx:id="treeView1" AnchorPane.topAnchor="30" AnchorPane.leftAnchor="250" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
                 </AnchorPane>
 
                 <!-- Pravá polovina -->
                 <AnchorPane>
                     <Label text="Hierarchy" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="10" styleClass="panel-label"/>
-                    <TreeView fx:id="treeView2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="250" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
+                    <MyTreeView fx:id="treeView2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="250" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
 
                     <GridPane prefWidth="250" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="0" styleClass="right-panel">
                         <rowConstraints>
                             <RowConstraints percentHeight="10"/> <!-- Label -->
-                            <RowConstraints percentHeight="40"/> <!-- ListView -->
-                            <RowConstraints percentHeight="50"/> <!-- RadioButtons -->
+                            <RowConstraints percentHeight="75"/> <!-- ListView -->
+                            <RowConstraints percentHeight="25"/> <!-- RadioButtons -->
                         </rowConstraints>
 
                         <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
                         <ListView fx:id="objectListView2" GridPane.rowIndex="1" styleClass="list-view"/>
                         <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
-                            <RadioButton fx:id="radioButton4" text="Option A" styleClass="radio-button"/>
-                            <RadioButton fx:id="radioButton5" text="Option B" styleClass="radio-button"/>
-                            <RadioButton fx:id="radioButton6" text="Option C" styleClass="radio-button"/>
+                            <RadioButton fx:id="collectionsMapsRB2" text="Collections &amp; Maps as Objects" styleClass="radio-button" />
                         </VBox>
                     </GridPane>
                 </AnchorPane>
