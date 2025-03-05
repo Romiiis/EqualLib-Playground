@@ -2,10 +2,11 @@
 public class Address {
 
     private String street;
-    private City city;
+    private City[] city;
 
     public Address() {
-        this.city = new City();
+        this.city = new City[10];
+        city[3] = new City();
     }
 
 

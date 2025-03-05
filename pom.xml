@@ -77,6 +77,13 @@
         </dependency>
 
 
+        <dependency>
+            <groupId>com.romiis.equallib</groupId>
+            <artifactId>equalLib</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>

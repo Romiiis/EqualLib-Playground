@@ -84,6 +84,20 @@ public class ObjectReference {
     }
 
 
+    public boolean isModifiable() {
+        boolean isModifiable = true;
+        if (field == null) {
+            isModifiable = false;
+        } else if (!field.getType().isPrimitive() && !ReflectionUtil.isWrapperOrString(field.getType())) {
+            isModifiable = false;
+        } // Static final fields are not modifiable
+        else if (Modifier.isFinal(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) {
+            isModifiable = false;
+        }
+        return isModifiable;
+    }
+
+
     @Override
     public String toString() {
         if (field == null) {

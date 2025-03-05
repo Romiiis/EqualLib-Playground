@@ -1,5 +1,6 @@
 package com.romiis.equallibtestapp.controllers;
 
+import com.romiis.core.EqualLib;
 import com.romiis.equallibtestapp.util.DynamicCompiler;
 import com.romiis.equallibtestapp.util.MyTreeView;
 import javafx.event.ActionEvent;
@@ -120,8 +121,8 @@ public class MainSceneController {
     // --- Comparison ---
     @FXML
     public void onCompareButtonClick() {
-        comparisonResult.setText("Comparing TreeViews...");
-        // Logic to compare treeView1 and treeView2 will go here
+        comparisonResult.setText(EqualLib.areEqual(treeView1.getSelectedObject(), treeView2.getSelectedObject()) ? "Objects are equal" : "Objects are not equal");
+
     }
 
     // --- Settings (Placeholder for future functionality) ---

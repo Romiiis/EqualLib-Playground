@@ -1,6 +1,7 @@
 module com.romiis.equallibtestapp {
     requires javafx.controls;
     requires javafx.fxml;
+    requires EqualLib;
 
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.javafx;
@@ -15,4 +16,5 @@ module com.romiis.equallibtestapp {
     exports com.romiis.equallibtestapp;
     exports com.romiis.equallibtestapp.controllers;
     opens com.romiis.equallibtestapp.controllers to javafx.fxml;
+
 }

@@ -1,10 +1,12 @@
 package com.romiis.equallibtestapp.util;
 
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -20,6 +22,7 @@ public class MyTreeView extends TreeView<ObjectReference> {
     /**
      * The object instance that is currently selected in the ListView
      */
+    @Getter
     private Object selectedObject;
 
     /**
@@ -40,10 +43,29 @@ public class MyTreeView extends TreeView<ObjectReference> {
         this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 ObjectReference objectReference = newValue.getValue();
-                if (objectReference.getField() != null) {
-                    log.info("Field: " + objectReference);
-                    startEdit(newValue);
+                if (objectReference.getField() != null && objectReference.isModifiable()) {
+                    log.info("Field: {}", objectReference);
+                }
+            }
+        });
 
+        this.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 ) {
+                TreeItem<ObjectReference> selectedItem = this.getSelectionModel().getSelectedItem();
+                if (selectedItem == null) {
+                    return;
+                }
+                if (!selectedItem.getChildren().isEmpty()) {
+                    return;
+                }
+                if (selectedItem.getValue().isModifiable()) {
+                    startEdit(selectedItem);
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Warning");
+                    alert.setHeaderText("Field is not modifiable");
+                    alert.setContentText("The selected field is not modifiable");
+                    alert.showAndWait();
                 }
             }
         });
@@ -53,57 +75,51 @@ public class MyTreeView extends TreeView<ObjectReference> {
         ObjectReference objectReference = item.getValue();
         Field field = objectReference.getField();
 
-        if (field == null) {
+        if (field == null || !objectReference.isModifiable()) {
             return;
         }
 
-        // Check if the field is editable (String, primitive types)
-        if (field.getType().isPrimitive() || field.getType() == String.class) {
-            startTextFieldEditor(item, objectReference, field);
-        }
-        // Handle other types (arrays, nested objects) if needed
+        startTextFieldEditor(item, objectReference, field);
     }
 
     private void startTextFieldEditor(TreeItem<ObjectReference> item, ObjectReference objectReference, Field field) {
-        // Get the current value of the field
         String currentValue = String.valueOf(objectReference.getFieldValue());
-
-        // Create a TextField for editing
         TextField textField = new TextField(currentValue);
-
-        // Create a HBox to contain the TextField and add a listener to handle editing
         HBox editorBox = new HBox(textField);
         editorBox.setStyle("-fx-padding: 5;");
 
-        // Show the editor box in place of the item
         setCellFactoryForEditor(item, textField);
+        textField.requestFocus();
 
-        // Commit the edit when Enter is pressed
         textField.setOnAction(event -> {
-            String newValue = textField.getText();
-            objectReference.modifyFieldValue(newValue);  // Modify the field with the new value
-            item.setValue(new ObjectReference(objectReference.getInObject(), field)); // Refresh the tree item
-            log.info("Updated value for field " + field.getName() + ": " + newValue);
+            objectReference.modifyFieldValue(textField.getText());
+            item.setValue(new ObjectReference(objectReference.getInObject(), field));
+            log.info("Updated value for field {}: {}", field.getName(), textField.getText());
+            finishEdit(item);
         });
 
-        // Cancel the edit on ESC press
         textField.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {
-                // You can add some logic here to revert changes if needed
-                setCellFactoryForEditor(item, null);  // Restore the cell to its original state
+                finishEdit(item);
+            }
+        });
+
+        textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                finishEdit(item);
             }
         });
     }
 
-    private void setCellFactoryForEditor(TreeItem<ObjectReference> item, TextField textField) {
-        // Replace the cell with the TextField editor (could be done using a custom cell factory in TreeView)
-        if (textField != null) {
-            item.setGraphic(textField);
-        } else {
-            // If it's a cancel, revert to the original cell (like restoring text view)
-            item.setGraphic(null); // Assuming it's just text. If needed, use the ObjectReference's toString method.
-        }
+    private void finishEdit(TreeItem<ObjectReference> item) {
+        setCellFactoryForEditor(item, null);
     }
+
+    private void setCellFactoryForEditor(TreeItem<ObjectReference> item, TextField textField) {
+        item.setGraphic(textField != null ? textField : null);
+    }
+
+
 
 
     /**
@@ -130,7 +146,11 @@ public class MyTreeView extends TreeView<ObjectReference> {
         this.treatAsObjects = treatAsObjects;
 
         // Create the root TreeItem to be displayed in the TreeView
-        TreeItem<ObjectReference> rootItem = createTree(selectedObject, null, null);
+        TreeItem<ObjectReference> rootItem = new TreeItem<>(new ObjectReference(selectedObject, null));
+
+
+        // Create the tree structure for the selected object
+        rootItem = createTree(rootItem);
 
         // Set the root item of the TreeView
         this.setRoot(rootItem);
@@ -144,79 +164,74 @@ public class MyTreeView extends TreeView<ObjectReference> {
     /**
      * Create a tree structure for the given object
      *
-     * @param obj         The object to create a tree for
-     * @param fieldInObject The field in the parent object that contains the object
-     * @param index       The index of the object in the parent object (if it is an array element)
      * @return The root TreeItem for the object
      */
-    private TreeItem<ObjectReference> createTree(Object obj, Field fieldInObject, Integer index) {
+    private TreeItem<ObjectReference> createTree(TreeItem<ObjectReference> parent) {
+
+        // Get the object instance from the parent TreeItem
+        Object obj = parent.getValue().getInObject();
+
+        if (parent.getValue().getIndex() != null) {
+            obj = Array.get(obj, parent.getValue().getIndex());
+        }
+
+        // if the object is null, create a TreeItem with a placeholder ObjectReference
         if (obj == null) return new TreeItem<>(new ObjectReference(null, null));
 
-        TreeItem<ObjectReference> root = new TreeItem<>(new ObjectReference(obj, fieldInObject));
+
         Field[] fields = ReflectionUtil.getAllFields(obj.getClass());
 
-
+        Object finalObj = obj;
         Arrays.stream(fields).forEach(field -> {
             field.setAccessible(true);
             try {
-                Object fieldValue = field.get(obj);
+                Object fieldValue = field.get(finalObj);
 
                 if (fieldValue == null) {
-                    root.getChildren().add(new TreeItem<>(new ObjectReference(obj, field)));
+                    parent.getChildren().add(new TreeItem<>(new ObjectReference(finalObj, field)));
                     return;
                 }
                 if (field.getType().isArray()) {
-                    root.getChildren().add(handleArray(fieldValue, field));
+                    parent.getChildren().add(handleArray(new TreeItem<>(new ObjectReference(finalObj, field))));
                 }
                 // Recursively handle nested objects
                 else if (!field.getType().isPrimitive() && !ReflectionUtil.isWrapperOrString(field.getType())) {
-                    root.getChildren().add(createTree(fieldValue, field,  index));
+                    parent.getChildren().add(createTree(new TreeItem<>(new ObjectReference(fieldValue, field))));
                 } else {
-                    TreeItem<ObjectReference> childNode = new TreeItem<>(new ObjectReference(obj, field));
-                    root.getChildren().add(childNode);
+                    TreeItem<ObjectReference> childNode = new TreeItem<>(new ObjectReference(finalObj, field));
+                    parent.getChildren().add(childNode);
 
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         });
-        return root;
+
+        return parent;
     }
 
 
     /**
      * Handle an array object
      *
-     * @param array         The array object to handle
-     * @param fieldInObject The field in the parent object that contains the array
      * @return The root TreeItem for the array object
      */
-    private TreeItem<ObjectReference> handleArray(Object array, Field fieldInObject) {
-
-        // Get the length of the array
+    private TreeItem<ObjectReference> handleArray(TreeItem<ObjectReference> parent) {
+        ObjectReference parentValue = parent.getValue();
+        Object array = ReflectionUtil.getFieldValue(parentValue.getInObject(), parentValue.getField());
         int length = Array.getLength(array);
-
-        // Create the root TreeItem for the array object
-        TreeItem<ObjectReference> root = new TreeItem<>(new ObjectReference(array, fieldInObject));
 
         for (int i = 0; i < length; i++) {
             Object element = Array.get(array, i);
-            TreeItem<ObjectReference> elementNode = new TreeItem<>(new ObjectReference(array, fieldInObject, i));
+            TreeItem<ObjectReference> child = new TreeItem<>(new ObjectReference(array, parentValue.getField(), i));
 
-            // Handle primitive or wrapper types (e.g., int, String)
-            if (element != null && (element.getClass().isPrimitive() || ReflectionUtil.isWrapperOrString(element.getClass()))) {
-                elementNode.setValue(new ObjectReference(array, fieldInObject, i));  // Set primitive/wrapper element value
-            }
-            // Handle nested objects or arrays inside the array
-            else if (element != null) {
-                // Recursively create a tree for nested objects
-                elementNode.getChildren().add(createTree(element, fieldInObject, i));
+            if (element != null && !element.getClass().isPrimitive() && !ReflectionUtil.isWrapperOrString(element.getClass())) {
+                child = createTree(child);
             }
 
-            root.getChildren().add(elementNode);
+            parent.getChildren().add(child);
         }
-
-        return root;
+        return parent;
     }
 
     /**
@@ -226,7 +241,7 @@ public class MyTreeView extends TreeView<ObjectReference> {
      */
     private void expandAll(TreeItem<?> item) {
         item.setExpanded(true);
-        for (TreeItem child : item.getChildren()) {
+        for (TreeItem<?> child : item.getChildren()) {
             expandAll(child);
         }
     }
