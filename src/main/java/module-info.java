@@ -5,8 +5,10 @@ module com.romiis.equallibtestapp {
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.javafx;
     requires java.desktop;
+    requires static lombok;
+    requires org.slf4j;
     requires java.compiler;
-    requires org.objenesis;
+
 
     exports com.romiis.equallibtestapp.util;
     opens com.romiis.equallibtestapp to javafx.fxml;

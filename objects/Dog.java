@@ -11,9 +11,6 @@ public class Dog extends Animal {
         super();
         this.names2 = new HashSet<>();
         this.names = new ArrayList<>();
-
-        this.names.add("Rex");
-
-        this.names2.add("Rex");
+        names.add("Rex");
     }
 }

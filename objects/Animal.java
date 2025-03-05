@@ -1,7 +1,10 @@
 public abstract class Animal {
 
     private int age;
-    private String name;
+    public String name;
+    protected String color;
+
+    private static final int MAX_AGE = 100;
 
 
 

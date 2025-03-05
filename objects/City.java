@@ -3,9 +3,11 @@ public class City {
 
     private String name;
     private Country country;
+    private int[] population;
 
     public City() {
-        this.country = Country.USA;
+        this.population = new int[10];
+        population[3] = 1000;
     }
 
 
