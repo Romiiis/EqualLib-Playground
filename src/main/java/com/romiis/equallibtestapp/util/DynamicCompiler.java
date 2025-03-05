@@ -14,10 +14,23 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DynamicCompiler.java
+ * <p>
+ * Compile .java files at runtime and load the compiled classes.
+ */
 public class DynamicCompiler {
 
+
+    /**
+     * Class loader for loading compiled classes
+     */
     private static URLClassLoader classLoader;
 
+
+    /**
+     * Output directory for compiled classes
+     */
     private static final String COMPILE_OUT = "dynamicCompileOut";
 
     /**

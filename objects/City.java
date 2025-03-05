@@ -8,6 +8,7 @@ public class City {
     public City() {
         this.population = new int[10];
         population[3] = 1000;
+        this.country = Country.CZ;
     }
 
 

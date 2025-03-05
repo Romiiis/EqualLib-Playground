@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.romiis.equallibtestapp.util.MyTreeView?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
-<?import javafx.geometry.Insets?>
-<?import com.romiis.equallibtestapp.util.MyTreeView?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.romiis.equallibtestapp.controllers.MainSceneController"
             stylesheets="@styles.css">
@@ -29,7 +28,8 @@
             <items>
                 <!-- Levá polovina -->
                 <AnchorPane>
-                    <GridPane prefWidth="250" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" styleClass="left-panel">
+                    <GridPane prefWidth="250" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                              styleClass="left-panel">
                         <rowConstraints>
                             <RowConstraints percentHeight="10"/> <!-- Label -->
                             <RowConstraints percentHeight="75"/> <!-- ListView -->
@@ -39,20 +39,26 @@
                         <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
                         <ListView fx:id="objectListView1" GridPane.rowIndex="1" styleClass="list-view"/>
                         <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
-                            <RadioButton fx:id="collectionsMapsRB1" text="Collections &amp; Maps as Objects" styleClass="radio-button"/>
+                            <RadioButton fx:id="collectionsMapsRB1" text="Collections &amp; Maps as Objects"
+                                         styleClass="radio-button"/>
                         </VBox>
                     </GridPane>
 
-                    <Label text="Hierarchy" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="260" styleClass="panel-label"/>
-                    <MyTreeView fx:id="treeView1" AnchorPane.topAnchor="30" AnchorPane.leftAnchor="250" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
+                    <Label text="Hierarchy" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="260"
+                           styleClass="panel-label"/>
+                    <MyTreeView fx:id="treeView1" AnchorPane.topAnchor="30" AnchorPane.leftAnchor="250"
+                                AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
                 </AnchorPane>
 
                 <!-- Pravá polovina -->
                 <AnchorPane>
-                    <Label text="Hierarchy" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="10" styleClass="panel-label"/>
-                    <MyTreeView fx:id="treeView2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="250" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
+                    <Label text="Hierarchy" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="10"
+                           styleClass="panel-label"/>
+                    <MyTreeView fx:id="treeView2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="250"
+                                AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
 
-                    <GridPane prefWidth="250" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="0" styleClass="right-panel">
+                    <GridPane prefWidth="250" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                              AnchorPane.rightAnchor="0" styleClass="right-panel">
                         <rowConstraints>
                             <RowConstraints percentHeight="10"/> <!-- Label -->
                             <RowConstraints percentHeight="75"/> <!-- ListView -->
@@ -62,7 +68,8 @@
                         <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
                         <ListView fx:id="objectListView2" GridPane.rowIndex="1" styleClass="list-view"/>
                         <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
-                            <RadioButton fx:id="collectionsMapsRB2" text="Collections &amp; Maps as Objects" styleClass="radio-button" />
+                            <RadioButton fx:id="collectionsMapsRB2" text="Collections &amp; Maps as Objects"
+                                         styleClass="radio-button"/>
                         </VBox>
                     </GridPane>
                 </AnchorPane>
@@ -89,7 +96,7 @@
                             <HBox spacing="10" alignment="CENTER_LEFT">
                                 <Label text="Max Depth:">
                                     <tooltip>
-                                        <Tooltip text="Limit how deep object comparison goes (-1 for no limit)." />
+                                        <Tooltip text="Limit how deep object comparison goes (-1 for no limit)."/>
                                     </tooltip>
                                 </Label>
                                 <!-- Spinner for numeric input -->
@@ -100,17 +107,18 @@
                             <VBox spacing="10" alignment="CENTER_LEFT">
                                 <CheckBox fx:id="useEqualsAfterMaxDepth" text="Use Equals after max depth">
                                     <tooltip>
-                                        <Tooltip text="Use the object's equals() method if max depth is reached." />
+                                        <Tooltip text="Use the object's equals() method if max depth is reached."/>
                                     </tooltip>
                                 </CheckBox>
                                 <CheckBox fx:id="equivalenceByInheritance" text="Include Inherited Fields">
                                     <tooltip>
-                                        <Tooltip text="Compare fields from parent classes as well." />
+                                        <Tooltip text="Compare fields from parent classes as well."/>
                                     </tooltip>
                                 </CheckBox>
                                 <CheckBox fx:id="compareByElementsAndKeys" text="Compare Collections">
                                     <tooltip>
-                                        <Tooltip text="Decide whether collections should be compared element by element." />
+                                        <Tooltip
+                                                text="Decide whether collections should be compared element by element."/>
                                     </tooltip>
                                 </CheckBox>
                             </VBox>
@@ -120,7 +128,7 @@
                         <VBox spacing="15" alignment="CENTER_LEFT" styleClass="column-box">
                             <Label text="Ignored Fields:">
                                 <tooltip>
-                                    <Tooltip text="Specify fields to be ignored during comparison." />
+                                    <Tooltip text="Specify fields to be ignored during comparison."/>
                                 </tooltip>
                             </Label>
 
@@ -135,7 +143,8 @@
                             <HBox spacing="10" alignment="CENTER_LEFT">
                                 <TextField fx:id="newIgnoredField" promptText="Enter ignored field" prefWidth="150"/>
                                 <Button text="Add Field" onAction="#onAddIgnoredField" styleClass="add-field-button"/>
-                                <Button text="Remove Selected" onAction="#onRemoveIgnoredField" styleClass="remove-field-button"/>
+                                <Button text="Remove Selected" onAction="#onRemoveIgnoredField"
+                                        styleClass="remove-field-button"/>
                             </HBox>
                         </VBox>
                     </SplitPane>
@@ -152,27 +161,6 @@
             </HBox>
         </VBox>
     </bottom>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 </BorderPane>

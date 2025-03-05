@@ -39,6 +39,9 @@ public class MyTreeView extends TreeView<ObjectReference> {
         initializeClickHandler();
     }
 
+    /**
+     * Initialize the click handler for the TreeView
+     */
     private void initializeClickHandler() {
         this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -71,6 +74,12 @@ public class MyTreeView extends TreeView<ObjectReference> {
         });
     }
 
+
+    /**
+     * Start editing the selected field
+     *
+     * @param item The TreeItem to start editing
+     */
     private void startEdit(TreeItem<ObjectReference> item) {
         ObjectReference objectReference = item.getValue();
         Field field = objectReference.getField();
@@ -79,45 +88,14 @@ public class MyTreeView extends TreeView<ObjectReference> {
             return;
         }
 
-        startTextFieldEditor(item, objectReference, field);
+        EditorsUtil editors = new EditorsUtil();
+        editors.decideEditor(item, objectReference, field);
+
     }
 
-    private void startTextFieldEditor(TreeItem<ObjectReference> item, ObjectReference objectReference, Field field) {
-        String currentValue = String.valueOf(objectReference.getFieldValue());
-        TextField textField = new TextField(currentValue);
-        HBox editorBox = new HBox(textField);
-        editorBox.setStyle("-fx-padding: 5;");
 
-        setCellFactoryForEditor(item, textField);
-        textField.requestFocus();
 
-        textField.setOnAction(event -> {
-            objectReference.modifyFieldValue(textField.getText());
-            item.setValue(new ObjectReference(objectReference.getInObject(), field));
-            log.info("Updated value for field {}: {}", field.getName(), textField.getText());
-            finishEdit(item);
-        });
 
-        textField.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ESCAPE) {
-                finishEdit(item);
-            }
-        });
-
-        textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-            if (!isNowFocused) {
-                finishEdit(item);
-            }
-        });
-    }
-
-    private void finishEdit(TreeItem<ObjectReference> item) {
-        setCellFactoryForEditor(item, null);
-    }
-
-    private void setCellFactoryForEditor(TreeItem<ObjectReference> item, TextField textField) {
-        item.setGraphic(textField != null ? textField : null);
-    }
 
 
 
@@ -193,6 +171,8 @@ public class MyTreeView extends TreeView<ObjectReference> {
                 }
                 if (field.getType().isArray()) {
                     parent.getChildren().add(handleArray(new TreeItem<>(new ObjectReference(finalObj, field))));
+                } else if (field.getType().isEnum()) {
+                    parent.getChildren().add(new TreeItem<>(new ObjectReference(finalObj, field)));
                 }
                 // Recursively handle nested objects
                 else if (!field.getType().isPrimitive() && !ReflectionUtil.isWrapperOrString(field.getType())) {
@@ -203,7 +183,7 @@ public class MyTreeView extends TreeView<ObjectReference> {
 
                 }
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                log.error("Error getting field value", e);
             }
         });
 

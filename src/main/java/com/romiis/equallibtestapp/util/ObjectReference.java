@@ -7,14 +7,16 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Getter
 public class ObjectReference {
     private final Object inObject;
     private final Field field;
-    private Integer index;
+    private final Integer index;
 
 
     public ObjectReference(Object reference, Field fieldName) {
@@ -56,7 +58,15 @@ public class ObjectReference {
                 } else if (field.getType().equals(char.class)) {
                     field.setChar(inObject, newValue.charAt(0));
                 }
-            } else {
+            } else if (field.getType().isEnum()) {
+                // Set the enum value
+                Object enumValue = Arrays.stream(field.getType().getEnumConstants())
+                        .filter(e -> e.toString().equals(newValue))
+                        .findFirst()
+                        .orElse(null);
+
+                field.set(inObject, enumValue);
+            }else {
                 // Set the value for non-primitive fields
                 field.set(inObject, newValue);
             }
@@ -70,12 +80,16 @@ public class ObjectReference {
             // Check if the field is an array type
             if (field.getType().isArray()) {
                 // Get the array value
-                return Array.get(inObject, index);
+                if (index == null) {
+                    return "[NULL]";
+                }
+                Object val = Array.get(inObject, index);
+                return Objects.requireNonNullElse(val, "[NULL]");
 
             }
 
             // For non-array fields (primitives, Strings, etc.)
-            return field.get(inObject);
+            return Objects.requireNonNullElse(field.get(inObject), "[NULL]");
 
         } catch (IllegalAccessException e) {
             log.error("Error getting field value", e);
@@ -88,7 +102,7 @@ public class ObjectReference {
         boolean isModifiable = true;
         if (field == null) {
             isModifiable = false;
-        } else if (!field.getType().isPrimitive() && !ReflectionUtil.isWrapperOrString(field.getType())) {
+        } else if (!field.getType().isPrimitive() && !ReflectionUtil.isWrapperOrString(field.getType()) && !field.getType().isEnum() ) {
             isModifiable = false;
         } // Static final fields are not modifiable
         else if (Modifier.isFinal(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) {
@@ -109,8 +123,10 @@ public class ObjectReference {
         String modifiers = getModifiers(field);
 
         if (index != null && field.getType().isArray()) {
-            return String.format("%s %s[%d] (%s): %s", modifiers, fieldName, index, field.getType().getComponentType().getSimpleName(), getFieldValue());
+            return String.format("%s[%d]: %s", field.getType().getComponentType().getSimpleName(), index, getFieldValue());
         } else if (field.getType().isPrimitive() || ReflectionUtil.isWrapperOrString(field.getType())) {
+            return String.format("%s %s (%s): %s", modifiers, fieldName, fieldType, getFieldValue());
+        } else if (field.getType().isEnum()) {
             return String.format("%s %s (%s): %s", modifiers, fieldName, fieldType, getFieldValue());
         } else {
             return String.format("%s %s (%s)", modifiers, fieldName, fieldType);
@@ -138,10 +154,21 @@ public class ObjectReference {
             modifiers.add("⚡");   // static
         }
         if (Modifier.isFinal(mod)) {
-            modifiers.add("🏁");   // final - Cíl nebo závěr, něco, co nelze změnit
+            modifiers.add("🏁");   // final
+        }
+        if (Modifier.isVolatile(mod)) {
+            modifiers.add("💨");   // volatile
+        }
+        if (Modifier.isTransient(mod)) {
+            modifiers.add("🚫");   // transient
         }
 
-        // Pokud je více než jeden modifikátor, zkrátíme a oddělíme je čárkami
+        if ((mod & (Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED)) == 0) {
+            modifiers.add("📦");   // package-private (default)
+        }
+
+
+        /// Vrácení modifikátorů
         return modifiers.isEmpty() ? "" : "[" + String.join(", ", modifiers) + "]";
     }
 

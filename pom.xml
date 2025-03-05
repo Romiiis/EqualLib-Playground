@@ -20,7 +20,7 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.34</version>
-            <scope>provided</scope> <!-- Change this as needed -->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -54,7 +54,6 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -75,7 +74,6 @@
             <artifactId>jcabi-log</artifactId>
             <version>0.17.1</version>
         </dependency>
-
 
         <dependency>
             <groupId>com.romiis.equallib</groupId>
