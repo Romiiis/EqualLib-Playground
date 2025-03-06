@@ -1,9 +1,11 @@
 package com.romiis.equallibtestapp.controllers;
 
 import com.romiis.core.EqualLib;
+import com.romiis.core.EqualLibConfig;
 import com.romiis.equallibtestapp.components.listView.MyListView;
 import com.romiis.equallibtestapp.util.DynamicCompiler;
 import com.romiis.equallibtestapp.components.treeView.MyTreeView;
+import com.romiis.equallibtestapp.util.JsonUtil;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -47,6 +49,10 @@ public class MainSceneController {
     private RadioButton collectionsMapsRB1;
     @FXML
     private RadioButton collectionsMapsRB2;
+
+
+    @FXML
+    private Button serializeButton;
 
 
     // --- Initialization ---
@@ -128,7 +134,10 @@ public class MainSceneController {
     // --- Comparison ---
     @FXML
     public void onCompareButtonClick() {
-        comparisonResult.setText(EqualLib.areEqual(treeView1.getSelectedObject(), treeView2.getSelectedObject()) ? "Objects are equal" : "Objects are not equal");
+        EqualLibConfig config = new EqualLibConfig();
+        config.setDebugMode(true);
+
+        comparisonResult.setText(EqualLib.areEqual(treeView1.getSelectedObject(), treeView2.getSelectedObject(), config) ? "Objects are equal" : "Objects are not equal");
 
     }
 
@@ -141,6 +150,15 @@ public class MainSceneController {
     @FXML
     public void onSettingsOption2() {
         // Handle setting option 2
+    }
+
+    @FXML
+    public void onSerializeButtonClick() throws Exception {
+        String json = JsonUtil.serialize(treeView1.getSelectedObject());
+        System.out.println(json);
+
+        Object deserializedObject = JsonUtil.deserialize(json);
+        treeView2.setSelectedObject(deserializedObject);
     }
 
 }

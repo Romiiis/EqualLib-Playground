@@ -42,6 +42,8 @@
                         <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
                             <RadioButton fx:id="collectionsMapsRB1" text="Collections &amp; Maps as Objects"
                                          styleClass="radio-button"/>
+                            <Button fx:id="serializeButton" text="Serialize" onAction="#onSerializeButtonClick"
+                                    styleClass="serialize-button"/>
                         </VBox>
                     </GridPane>
 

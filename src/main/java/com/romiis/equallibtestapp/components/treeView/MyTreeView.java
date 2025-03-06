@@ -108,6 +108,12 @@ public class MyTreeView extends TreeView<ObjectReference> {
         handleSelectionChange(treatAsObjects);
     }
 
+    public void setSelectedObject(Object selectedObject) {
+        this.selectedObject = selectedObject;
+        modified = false;
+        handleSelectionChange(treatAsObjects);
+    }
+
 
     /**
      * Handle the selection change in the ListView of objects

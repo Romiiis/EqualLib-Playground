@@ -25,7 +25,7 @@ public class ObjectReference {
     // Index of the array element (if the field is an array)
     private final Integer index;
 
-    private final String NULL = "NULL";
+    private final String NULL = "null";
 
 
     /**

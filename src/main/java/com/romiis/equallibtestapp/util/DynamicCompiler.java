@@ -1,5 +1,7 @@
 package com.romiis.equallibtestapp.util;
 
+import lombok.Getter;
+
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
@@ -25,6 +27,7 @@ public class DynamicCompiler {
     /**
      * Class loader for loading compiled classes
      */
+    @Getter
     private static URLClassLoader classLoader;
 
 
