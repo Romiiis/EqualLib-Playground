@@ -1,13 +1,16 @@
 package com.romiis.equallibtestapp.controllers;
 
 import com.romiis.core.EqualLib;
+import com.romiis.equallibtestapp.components.listView.MyListView;
 import com.romiis.equallibtestapp.util.DynamicCompiler;
-import com.romiis.equallibtestapp.util.MyTreeView;
+import com.romiis.equallibtestapp.components.treeView.MyTreeView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainSceneController {
 
@@ -16,18 +19,29 @@ public class MainSceneController {
     private MyTreeView treeView1;
     @FXML
     private MyTreeView treeView2;
+
+
+
     @FXML
-    private ListView<String> objectListView1;
+    private MyListView objectListView1;
     @FXML
-    private ListView<String> objectListView2;
+    private MyListView objectListView2;
+
+
+
     @FXML
     private Label comparisonResult;
+
+
+
     @FXML
     private ListView<String> ignoredFieldsList;
     @FXML
     private TextField newIgnoredField;
     @FXML
     private Spinner<Integer> maxDepthSpinner;
+
+
 
     @FXML
     private RadioButton collectionsMapsRB1;
@@ -40,8 +54,10 @@ public class MainSceneController {
     private void initialize() {
         initializeMaxDepthSpinner();
         initializeObjects();
-
         initializeCollectionsMapsRB();
+
+        objectListView1.setAssignedTreeView(treeView1);
+        objectListView2.setAssignedTreeView(treeView2);
     }
 
     private void initializeCollectionsMapsRB() {
@@ -70,18 +86,9 @@ public class MainSceneController {
             throw new RuntimeException(e);
         }
 
-        objectListView1.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            treeView1.setSelectedObject(newValue);
-            treeView1.handleSelectionChange(collectionsMapsRB1.isSelected());
-        });
-
-        objectListView2.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            treeView2.setSelectedObject(newValue);
-            treeView2.handleSelectionChange(collectionsMapsRB2.isSelected());
-        });
-
-
     }
+
+
 
 
     // --- Ignored Fields ---

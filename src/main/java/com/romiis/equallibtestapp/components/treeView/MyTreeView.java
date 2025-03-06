@@ -1,15 +1,13 @@
-package com.romiis.equallibtestapp.util;
+package com.romiis.equallibtestapp.components.treeView;
 
+import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.HBox;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -29,6 +27,11 @@ public class MyTreeView extends TreeView<ObjectReference> {
      * Whether to treat fields as objects or just print simple values
      */
     private boolean treatAsObjects = true;
+
+
+    @Getter
+    @Setter
+    private boolean modified = false;
 
 
     /**
@@ -53,7 +56,7 @@ public class MyTreeView extends TreeView<ObjectReference> {
         });
 
         this.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2 ) {
+            if (event.getClickCount() == 2) {
                 TreeItem<ObjectReference> selectedItem = this.getSelectionModel().getSelectedItem();
                 if (selectedItem == null) {
                     return;
@@ -89,15 +92,9 @@ public class MyTreeView extends TreeView<ObjectReference> {
         }
 
         EditorsUtil editors = new EditorsUtil();
-        editors.decideEditor(item, objectReference, field);
+        editors.decideEditor(this,item, objectReference, field);
 
     }
-
-
-
-
-
-
 
 
     /**
@@ -105,12 +102,10 @@ public class MyTreeView extends TreeView<ObjectReference> {
      *
      * @param selectedObjectName The name of the selected object
      */
-    public void setSelectedObject(String selectedObjectName) {
-        try {
-            Class<?> clazz = DynamicCompiler.loadClass(selectedObjectName);
-            selectedObject = ReflectionUtil.createInstance(clazz);
-        } catch (ClassNotFoundException | IOException e) {
-        }
+    public void setSelectedObject(Class<?> selectedObjectName) {
+        selectedObject = ReflectionUtil.createInstance(selectedObjectName);
+        modified = false;
+        handleSelectionChange(treatAsObjects);
     }
 
 

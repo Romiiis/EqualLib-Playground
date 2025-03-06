@@ -199,8 +199,8 @@ public class DynamicCompiler {
      * @throws IOException            If an I/O error occurs
      * @throws ClassNotFoundException If a class is not found
      */
-    public static String[] getAllCompiledObjects() throws IOException, ClassNotFoundException {
-        List<String> compiledObjects = new ArrayList<>();
+    public static Class<?>[] getAllCompiledObjects() throws IOException, ClassNotFoundException {
+        List<Class<?>> compiledObjects = new ArrayList<>();
 
         // Check if the class loader is initialized
         File classDir = new File(COMPILE_OUT);
@@ -229,10 +229,10 @@ public class DynamicCompiler {
             }
 
             // Add the class name to the list
-            compiledObjects.add(className);
+            compiledObjects.add(clazz);
         }
 
-        return compiledObjects.toArray(new String[0]);
+        return compiledObjects.toArray(new Class[0]);
     }
 
 

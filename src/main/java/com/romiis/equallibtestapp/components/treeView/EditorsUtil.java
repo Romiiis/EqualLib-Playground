@@ -1,9 +1,7 @@
-package com.romiis.equallibtestapp.util;
+package com.romiis.equallibtestapp.components.treeView;
 
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Control;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeItem;
+import com.romiis.equallibtestapp.util.ReflectionUtil;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import lombok.extern.slf4j.Slf4j;
@@ -14,14 +12,16 @@ import java.lang.reflect.Field;
 @Slf4j
 public class EditorsUtil {
 
+    private MyTreeView treeView;
+
     /**
      * Start editing the selected field
      *
-     * @param item The TreeItem to start editing
+     * @param item            The TreeItem to start editing
      * @param objectReference The object reference to edit
-     * @param field The field to edit
+     * @param field           The field to edit
      */
-    public void startTextFieldEditor(TreeItem<ObjectReference> item, ObjectReference objectReference, Field field) {
+    private void startTextFieldEditor(TreeItem<ObjectReference> item, ObjectReference objectReference, Field field) {
         String currentValue = String.valueOf(objectReference.getFieldValue());
         TextField textField = new TextField(currentValue);
         HBox editorBox = new HBox(textField);
@@ -39,6 +39,7 @@ public class EditorsUtil {
             item.setValue(new ObjectReference(objectReference.getInObject(), field));
             log.info("Updated value for field {}: {}", field.getName(), textField.getText());
             finishEdit(item);
+            treeView.setModified(true);
         });
 
         textField.setOnKeyPressed(event -> {
@@ -53,7 +54,6 @@ public class EditorsUtil {
             }
         });
     }
-
 
 
     /**
@@ -76,18 +76,34 @@ public class EditorsUtil {
     }
 
 
-    public void decideEditor(TreeItem<ObjectReference> item, ObjectReference objectReference, Field field) {
+    /**
+     * Decide which editor to use for the field
+     *
+     * @param item            The TreeItem to decide the editor for
+     * @param objectReference The object reference to edit
+     * @param field           The field to edit
+     */
+    public void decideEditor(MyTreeView tree, TreeItem<ObjectReference> item, ObjectReference objectReference, Field field) {
+        this.treeView = tree;
+
         if (field.getType().equals(boolean.class) || field.getType().equals(Boolean.class)) {
             startBooleanEditor(item, objectReference, field);
         } else if (ReflectionUtil.isWrapperOrString(field.getType()) || field.getType().isPrimitive()) {
             startTextFieldEditor(item, objectReference, field);
         } else if (field.getType().isEnum()) {
-            startEnumEditor(item, objectReference, field);;
+            startEnumEditor(item, objectReference, field);
         } else {
             log.info("Field type not supported for editing: {}", field.getType());
         }
     }
 
+    /**
+     * Start editing the selected field
+     *
+     * @param item            The TreeItem to start editing
+     * @param objectReference The object reference to edit
+     * @param field           The field to edit
+     */
     private void startBooleanEditor(TreeItem<ObjectReference> item, ObjectReference objectReference, Field field) {
         ComboBox<Boolean> comboBox = new ComboBox<>();
         comboBox.getItems().addAll(true, false);
@@ -97,6 +113,7 @@ public class EditorsUtil {
             item.setValue(new ObjectReference(objectReference.getInObject(), field));
             log.info("Updated value for field {}: {}", field.getName(), comboBox.getValue());
             finishEdit(item);
+            treeView.setModified(true);
         });
         setCellFactoryForEditor(item, comboBox);
         comboBox.requestFocus();
@@ -117,6 +134,13 @@ public class EditorsUtil {
 
     }
 
+    /**
+     * Start editing the selected field
+     *
+     * @param item            The TreeItem to start editing
+     * @param objectReference The object reference to edit
+     * @param field           The field to edit
+     */
     private void startEnumEditor(TreeItem<ObjectReference> item, ObjectReference objectReference, Field field) {
         // ComboBox for enum types
         ComboBox<Object> comboBox = new ComboBox<>();
@@ -128,6 +152,7 @@ public class EditorsUtil {
             item.setValue(new ObjectReference(objectReference.getInObject(), field));
             log.info("Updated value for field {}: {}", field.getName(), comboBox.getValue());
             finishEdit(item);
+            treeView.setModified(true);
         });
 
         setCellFactoryForEditor(item, comboBox);

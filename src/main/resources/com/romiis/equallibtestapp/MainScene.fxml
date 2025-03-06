@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.romiis.equallibtestapp.util.MyTreeView?>
+<?import com.romiis.equallibtestapp.components.treeView.MyTreeView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import com.romiis.equallibtestapp.components.listView.MyListView?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.romiis.equallibtestapp.controllers.MainSceneController"
             stylesheets="@styles.css">
 
     <!-- Horní menu -->
     <top>
-        <MenuBar styleClass="menu-bar">
+        <MenuBar>
             <Menu text="File">
                 <MenuItem text="Open"/>
                 <MenuItem text="Save"/>
@@ -37,7 +38,7 @@
                         </rowConstraints>
 
                         <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
-                        <ListView fx:id="objectListView1" GridPane.rowIndex="1" styleClass="list-view"/>
+                        <MyListView fx:id="objectListView1" GridPane.rowIndex="1" styleClass="list-view"/>
                         <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
                             <RadioButton fx:id="collectionsMapsRB1" text="Collections &amp; Maps as Objects"
                                          styleClass="radio-button"/>
@@ -66,7 +67,7 @@
                         </rowConstraints>
 
                         <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
-                        <ListView fx:id="objectListView2" GridPane.rowIndex="1" styleClass="list-view"/>
+                        <MyListView fx:id="objectListView2" GridPane.rowIndex="1" styleClass="list-view"/>
                         <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
                             <RadioButton fx:id="collectionsMapsRB2" text="Collections &amp; Maps as Objects"
                                          styleClass="radio-button"/>
@@ -79,7 +80,7 @@
 
     <!-- Spodní část: Porovnání + Panel pro konfiguraci -->
     <bottom>
-        <VBox styleClass="settings-container" alignment="CENTER">
+        <VBox alignment="CENTER">
 
             <TitledPane text="Objects settings" expanded="false">
 
