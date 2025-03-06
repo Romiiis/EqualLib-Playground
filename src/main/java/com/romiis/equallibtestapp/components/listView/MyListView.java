@@ -6,7 +6,6 @@ import lombok.Setter;
 
 public class MyListView extends ListView<Class<?>> {
 
-    // Nastavovací metoda pro přiřazení MyTreeView
     @Setter
     private MyTreeView assignedTreeView;
 

@@ -3,6 +3,7 @@ package com.romiis.equallibtestapp.controllers;
 import com.romiis.core.EqualLib;
 import com.romiis.core.EqualLibConfig;
 import com.romiis.equallibtestapp.components.listView.MyListView;
+import com.romiis.equallibtestapp.io.FileManager;
 import com.romiis.equallibtestapp.util.DynamicCompiler;
 import com.romiis.equallibtestapp.components.treeView.MyTreeView;
 import com.romiis.equallibtestapp.util.JsonUtil;
@@ -155,10 +156,7 @@ public class MainSceneController {
     @FXML
     public void onSerializeButtonClick() throws Exception {
         String json = JsonUtil.serialize(treeView1.getSelectedObject());
-        System.out.println(json);
-
-        Object deserializedObject = JsonUtil.deserialize(json);
-        treeView2.setSelectedObject(deserializedObject);
+        FileManager.saveFile("teest", json);
     }
 
 }

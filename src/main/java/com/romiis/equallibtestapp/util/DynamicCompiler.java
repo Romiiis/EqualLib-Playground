@@ -182,7 +182,6 @@ public class DynamicCompiler {
             throw new ClassNotFoundException("Class loader not initialized.");
         }
 
-
         try {
             Class<?> clazz = classLoader.loadClass(className);
             System.out.println("Class loaded: " + clazz.getName());
