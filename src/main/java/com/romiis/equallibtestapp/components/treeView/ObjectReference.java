@@ -147,7 +147,7 @@ public class ObjectReference {
         } else if (!field.getType().isPrimitive() && !ReflectionUtil.isWrapperOrString(field.getType()) && !field.getType().isEnum()) {
             isModifiable = false;
         } // Static final fields are not modifiable
-        else if (Modifier.isFinal(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) {
+        else if (!ReflectionUtil.isModifiable(field.getModifiers())) {
             isModifiable = false;
         }
         return isModifiable;
@@ -216,6 +216,8 @@ public class ObjectReference {
         /// return the modifiers as a string
         return modifiers.isEmpty() ? "" : "[" + String.join(", ", modifiers) + "]";
     }
+
+
 
 
 }

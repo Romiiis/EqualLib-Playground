@@ -140,7 +140,7 @@ public class JsonUtil {
                 continue;
             }
 
-            if (Modifier.isFinal(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) {
+            if (Modifier.isFinal(field.getModifiers()) && Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
 

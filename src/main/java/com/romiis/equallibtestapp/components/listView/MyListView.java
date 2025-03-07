@@ -1,8 +1,13 @@
 package com.romiis.equallibtestapp.components.listView;
 
 import com.romiis.equallibtestapp.components.treeView.MyTreeView;
+import com.romiis.equallibtestapp.io.FileManager;
+import com.romiis.equallibtestapp.util.JsonUtil;
 import javafx.scene.control.*;
 import lombok.Setter;
+
+import java.util.Optional;
+
 
 public class MyListView extends ListView<Class<?>> {
 
@@ -15,6 +20,9 @@ public class MyListView extends ListView<Class<?>> {
     private final String CANCEL_BUTTON_TEXT = "Cancel";
 
 
+    /**
+     * Create a new MyListView instance
+     */
     public MyListView() {
         super();
 
@@ -36,29 +44,30 @@ public class MyListView extends ListView<Class<?>> {
 
     private void initializeClickHandler() {
         this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            // Pokud je nový výběr stejný jako aktuálně vybraný objekt, nic nedělej
-            if (isSameSelection(newValue)) {
-                return;
-            }
 
-            // Pokud jsou neuložené změny, zobrazí se potvrzovací alert
+            // If the selection is the same, do nothing
+            if (this.assignedTreeView.getSelectedObject() != null
+                    && this.assignedTreeView.getSelectedObject().getClass().equals(newValue)) return;
+
+            // If the tree view is modified, show an alert
             if (assignedTreeView.isModified()) {
                 showUnsavedChangesAlert(newValue, oldValue);
             } else {
-                handleSelectionChange(newValue);
+                assignedTreeView.setSelectedObject(newValue);
             }
         });
-
-
     }
 
-    private boolean isSameSelection(Class<?> newValue) {
 
-        return this.assignedTreeView.getSelectedObject() != null && this.assignedTreeView.getSelectedObject().getClass().equals(newValue);
-    }
 
-    // Metoda pro zobrazení alertu při neuložených změnách
+    /**
+     * Show an alert if there are unsaved changes (dirty flag)
+     *
+     * @param newValue The new value to select
+     * @param oldValue The old value to select
+     */
     private void showUnsavedChangesAlert(Class<?> newValue, Class<?> oldValue) {
+
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation");
         alert.setHeaderText("Unsaved changes");
@@ -72,11 +81,19 @@ public class MyListView extends ListView<Class<?>> {
         alert.showAndWait().ifPresent(buttonType -> handleAlertResponse(buttonType, newValue, oldValue));
     }
 
-    // Metoda pro zpracování reakce na potvrzovací alert
+    /**
+     * Handle the response from the alert
+     *
+     * @param buttonType The button type that was clicked
+     * @param newValue   The new value to select
+     * @param oldValue   The old value to select
+     */
     private void handleAlertResponse(ButtonType buttonType, Class<?> newValue, Class<?> oldValue) {
         if (buttonType.getText().equals(SAVE_BUTTON_TEXT)) {
-
-            // TODO: Implement the save logic
+            boolean saved = assignedTreeView.save();
+            if (saved) {
+                assignedTreeView.setSelectedObject(newValue);
+            }
         } else if (buttonType.getText().equals(DISCARD_BUTTON_TEXT)) {
             assignedTreeView.setSelectedObject(newValue);
 
@@ -86,10 +103,6 @@ public class MyListView extends ListView<Class<?>> {
     }
 
 
-    // Metoda pro zpracování výběru bez neuložených změn
-    private void handleSelectionChange(Class<?> newValue) {
-        assignedTreeView.setSelectedObject(newValue);
 
-    }
 
 }

@@ -46,14 +46,15 @@ public class MainSceneController {
 
 
 
-    @FXML
-    private RadioButton collectionsMapsRB1;
-    @FXML
-    private RadioButton collectionsMapsRB2;
+
+
 
 
     @FXML
     private Button serializeButton;
+
+    @FXML
+    private Button loadButton;
 
 
     // --- Initialization ---
@@ -68,12 +69,6 @@ public class MainSceneController {
     }
 
     private void initializeCollectionsMapsRB() {
-
-        collectionsMapsRB1.setSelected(true);
-        collectionsMapsRB2.setSelected(true);
-
-        collectionsMapsRB1.setOnAction(event -> treeView1.handleSelectionChange(collectionsMapsRB1.isSelected()));
-        collectionsMapsRB2.setOnAction(event -> treeView2.handleSelectionChange(collectionsMapsRB2.isSelected()));
     }
 
     // Initialize the spinner with appropriate value factory
@@ -97,8 +92,6 @@ public class MainSceneController {
 
 
 
-
-    // --- Ignored Fields ---
     @FXML
     private void onAddIgnoredField(ActionEvent event) {
         String ignoredField = newIgnoredField.getText().trim();
@@ -142,21 +135,17 @@ public class MainSceneController {
 
     }
 
-    // --- Settings (Placeholder for future functionality) ---
-    @FXML
-    public void onSettingsOption1() {
-        // Handle setting option 1
-    }
-
-    @FXML
-    public void onSettingsOption2() {
-        // Handle setting option 2
-    }
 
     @FXML
     public void onSerializeButtonClick() throws Exception {
-        String json = JsonUtil.serialize(treeView1.getSelectedObject());
-        FileManager.saveFile("teest", json);
+        treeView1.save();
+    }
+
+    @FXML
+    public void onLoadButtonClick() {
+        treeView2.load();
+
+
     }
 
 }

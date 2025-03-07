@@ -1,6 +1,7 @@
 package com.romiis.equallibtestapp.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 public class ReflectionUtil {
 
@@ -79,5 +80,10 @@ public class ReflectionUtil {
                 type.equals(Byte.class) ||
                 type.equals(Boolean.class) ||
                 type.equals(String.class);
+    }
+
+
+    public static boolean isModifiable(int modifier) {
+        return !Modifier.isFinal(modifier) || !Modifier.isStatic(modifier);
     }
 }

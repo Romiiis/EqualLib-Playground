@@ -1,9 +1,9 @@
 package com.romiis.equallibtestapp.components.treeView;
 
+import com.romiis.equallibtestapp.io.FileManager;
+import com.romiis.equallibtestapp.util.JsonUtil;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Optional;
 
 
 @Slf4j
@@ -29,6 +30,9 @@ public class MyTreeView extends TreeView<ObjectReference> {
     private boolean treatAsObjects = true;
 
 
+    /**
+     * Whether the object has been modified (dirty flag)
+     */
     @Getter
     @Setter
     private boolean modified = false;
@@ -108,6 +112,13 @@ public class MyTreeView extends TreeView<ObjectReference> {
         handleSelectionChange(treatAsObjects);
     }
 
+
+    /**
+     * Set the selected object instance in the ListView
+     * Already created object instance
+     *
+     * @param selectedObject The object instance to set
+     */
     public void setSelectedObject(Object selectedObject) {
         this.selectedObject = selectedObject;
         modified = false;
@@ -225,6 +236,71 @@ public class MyTreeView extends TreeView<ObjectReference> {
         for (TreeItem<?> child : item.getChildren()) {
             expandAll(child);
         }
+    }
+
+
+
+    public boolean save() {
+        TextInputDialog dialog = new TextInputDialog("savedObject");
+        dialog.setTitle("Save File");
+        dialog.setHeaderText("Enter file name:");
+        dialog.setContentText("File Name:");
+
+        Optional<String> result = dialog.showAndWait();
+
+        if (result.isPresent() && !result.get().trim().isEmpty()) {
+            try {
+                String content = JsonUtil.serialize(this.getSelectedObject());
+                log.info("Serialized object: {}", content);
+                FileManager.saveFile(result.get(), content);
+            } catch (Exception e) {
+                return false;
+            }
+            return true;
+
+        }
+        return false;
+    }
+
+
+    public void load() {
+        // Open a dialog to select a file
+        String[] files = FileManager.getSavedFiles();
+        if (files.length == 0) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Warning");
+            alert.setHeaderText("No files found");
+            alert.setContentText("No files found in the save folder");
+            alert.showAndWait();
+            return;
+        }
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(files[0], files);
+        dialog.setTitle("Load File");
+        dialog.setHeaderText("Select a file to load:");
+        dialog.setContentText("Available files:");
+
+        // Show the dialog and get the user's choice
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(selectedFile -> {
+            // Call the method to load the selected file
+            String content = FileManager.loadFile(selectedFile);
+            if (content != null) {
+                Object loadedObject = null;
+                try {
+                    loadedObject = JsonUtil.deserialize(content);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                setSelectedObject(loadedObject);
+            }
+        });
+
+
+
+
+
     }
 
 

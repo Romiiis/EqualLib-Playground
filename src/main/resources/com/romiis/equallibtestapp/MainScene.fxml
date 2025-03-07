@@ -40,8 +40,6 @@
                         <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
                         <MyListView fx:id="objectListView1" GridPane.rowIndex="1" styleClass="list-view"/>
                         <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
-                            <RadioButton fx:id="collectionsMapsRB1" text="Collections &amp; Maps as Objects"
-                                         styleClass="radio-button"/>
                             <Button fx:id="serializeButton" text="Serialize" onAction="#onSerializeButtonClick"
                                     styleClass="serialize-button"/>
                         </VBox>
@@ -71,8 +69,8 @@
                         <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
                         <MyListView fx:id="objectListView2" GridPane.rowIndex="1" styleClass="list-view"/>
                         <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
-                            <RadioButton fx:id="collectionsMapsRB2" text="Collections &amp; Maps as Objects"
-                                         styleClass="radio-button"/>
+                            <Button fx:id="loadButton" text="Load" onAction="#onLoadButtonClick"
+                                    styleClass="load-button"/>
                         </VBox>
                     </GridPane>
                 </AnchorPane>

@@ -1,12 +1,12 @@
 {
   "country" : {
     "@class" : "Country",
-    "value" : "CZ"
+    "value" : "USA"
   },
   "@class" : "City",
   "name" : {
     "@class" : "java.lang.String",
-    "value" : "negr"
+    "value" : "Žatec"
   },
   "population" : {
     "@class" : "[I",
