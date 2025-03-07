@@ -3,6 +3,14 @@ package com.romiis.equallibtestapp.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+/**
+ * Utility class for reflection operations
+ *
+ * @version 1.0
+ * @since 1.0
+ * @see ReflectionUtil
+ * @author Roman Pejs
+ */
 public class ReflectionUtil {
 
     /**
@@ -83,6 +91,12 @@ public class ReflectionUtil {
     }
 
 
+    /**
+     * Check if a field is modifiable
+     *
+     * @param modifier The modifier of the field
+     * @return True if the field is modifiable, false otherwise
+     */
     public static boolean isModifiable(int modifier) {
         return !Modifier.isFinal(modifier) || !Modifier.isStatic(modifier);
     }

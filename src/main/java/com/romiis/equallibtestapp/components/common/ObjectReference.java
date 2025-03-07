@@ -1,4 +1,4 @@
-package com.romiis.equallibtestapp.components.treeView;
+package com.romiis.equallibtestapp.components.common;
 
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import lombok.Getter;
@@ -12,6 +12,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * ObjectReference.java
+ * <p>
+ * Represents a reference to a field in an object for the TreeView. Contains information about the field and the object
+ * Used to display and modify field values in the TreeView
+ */
 @Slf4j
 @Getter
 public class ObjectReference {
@@ -25,6 +31,7 @@ public class ObjectReference {
     // Index of the array element (if the field is an array)
     private final Integer index;
 
+    // String representation of a null value
     private final String NULL = "null";
 
 
@@ -161,8 +168,10 @@ public class ObjectReference {
      */
     @Override
     public String toString() {
+
+        String objectId = inObject.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(inObject));
         if (field == null) {
-            return inObject.getClass().getSimpleName();
+            return inObject.getClass().getSimpleName() + " [" + objectId + "]";
         }
 
         String fieldType = field.getType().getSimpleName();
@@ -176,7 +185,7 @@ public class ObjectReference {
         } else if (field.getType().isEnum()) {
             return String.format("%s %s (%s): %s", modifiers, fieldName, fieldType, getFieldValue());
         } else {
-            return String.format("%s %s (%s)", modifiers, fieldName, fieldType);
+            return String.format("%s %s (%s) [%s]", modifiers, fieldName, fieldType, objectId);
         }
     }
 
@@ -213,11 +222,9 @@ public class ObjectReference {
             modifiers.add("📦");   // package-private (default)
         }
 
-        /// return the modifiers as a string
+        // return the modifiers as a string
         return modifiers.isEmpty() ? "" : "[" + String.join(", ", modifiers) + "]";
     }
-
-
 
 
 }

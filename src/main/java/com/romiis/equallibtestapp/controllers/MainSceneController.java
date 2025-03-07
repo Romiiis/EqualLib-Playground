@@ -2,18 +2,12 @@ package com.romiis.equallibtestapp.controllers;
 
 import com.romiis.core.EqualLib;
 import com.romiis.core.EqualLibConfig;
-import com.romiis.equallibtestapp.components.listView.MyListView;
-import com.romiis.equallibtestapp.io.FileManager;
-import com.romiis.equallibtestapp.util.DynamicCompiler;
-import com.romiis.equallibtestapp.components.treeView.MyTreeView;
-import com.romiis.equallibtestapp.util.JsonUtil;
+import com.romiis.equallibtestapp.CacheUtil;
+import com.romiis.equallibtestapp.components.mainScene.ClassListView;
+import com.romiis.equallibtestapp.components.common.MyTreeView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainSceneController {
 
@@ -24,17 +18,14 @@ public class MainSceneController {
     private MyTreeView treeView2;
 
 
-
     @FXML
-    private MyListView objectListView1;
+    private ClassListView objectListView1;
     @FXML
-    private MyListView objectListView2;
-
+    private ClassListView objectListView2;
 
 
     @FXML
     private Label comparisonResult;
-
 
 
     @FXML
@@ -44,32 +35,23 @@ public class MainSceneController {
     @FXML
     private Spinner<Integer> maxDepthSpinner;
 
-
-
-
-
-
-
-    @FXML
-    private Button serializeButton;
-
-    @FXML
-    private Button loadButton;
-
-
     // --- Initialization ---
     @FXML
     private void initialize() {
+
+        CacheUtil.getInstance().updateCache();
+
         initializeMaxDepthSpinner();
         initializeObjects();
-        initializeCollectionsMapsRB();
 
         objectListView1.setAssignedTreeView(treeView1);
         objectListView2.setAssignedTreeView(treeView2);
+
+        treeView2.setClassListView(objectListView2);
+        treeView1.setClassListView(objectListView1);
+
     }
 
-    private void initializeCollectionsMapsRB() {
-    }
 
     // Initialize the spinner with appropriate value factory
     private void initializeMaxDepthSpinner() {
@@ -80,16 +62,9 @@ public class MainSceneController {
     }
 
     private void initializeObjects() {
-        try {
-            DynamicCompiler.compile("objects");
-            objectListView1.getItems().addAll(DynamicCompiler.getAllCompiledObjects());
-            objectListView2.getItems().addAll(DynamicCompiler.getAllCompiledObjects());
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
+        objectListView1.getItems().addAll(CacheUtil.getInstance().getClasses(true));
+        objectListView2.getItems().addAll(CacheUtil.getInstance().getClasses(true));
     }
-
 
 
     @FXML
@@ -118,13 +93,6 @@ public class MainSceneController {
     }
 
 
-    // Method to add an object to the TreeView
-    public void addObjectToTreeView(String selectedObject, TreeView<String> treeView) {
-        if (selectedObject != null) {
-            treeView.getRoot().getChildren().add(new TreeItem<>(selectedObject));
-        }
-    }
-
     // --- Comparison ---
     @FXML
     public void onCompareButtonClick() {
@@ -137,13 +105,32 @@ public class MainSceneController {
 
 
     @FXML
-    public void onSerializeButtonClick() throws Exception {
+    public void onSaveAsButton1Click() throws Exception {
         treeView1.save();
     }
 
     @FXML
-    public void onLoadButtonClick() {
+    public void onSaveAsButton2Click() throws Exception {
+        treeView2.save();
+    }
+
+    @FXML
+    public void onLoadButton1Click() {
+        treeView1.load();
+    }
+
+    @FXML
+    public void onLoadButton2Click() {
         treeView2.load();
+    }
+
+
+
+    @FXML
+    public void onLoadButtonClick() {
+        // LoadObjectSceneController.loadObject(treeView1);
+        treeView1.load();
+
 
 
     }

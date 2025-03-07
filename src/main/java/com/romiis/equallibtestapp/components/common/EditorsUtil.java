@@ -1,4 +1,4 @@
-package com.romiis.equallibtestapp.components.treeView;
+package com.romiis.equallibtestapp.components.common;
 
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.scene.control.*;

@@ -1,6 +1,7 @@
 package com.romiis.equallibtestapp.util;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -21,14 +22,8 @@ import java.util.List;
  * <p>
  * Compile .java files at runtime and load the compiled classes.
  */
+@Slf4j
 public class DynamicCompiler {
-
-
-    /**
-     * Class loader for loading compiled classes
-     */
-    @Getter
-    private static URLClassLoader classLoader;
 
 
     /**
@@ -36,13 +31,17 @@ public class DynamicCompiler {
      */
     private static final String COMPILE_OUT = "dynamicCompileOut";
 
+
+
+
+
     /**
      * Compile all .java files in the specified directory.
      *
      * @param sourceFolder Path to the directory containing .java files
      * @throws IOException If an I/O error occurs
      */
-    public static void compile(String sourceFolder) throws IOException {
+    public static ClassLoader compile(String sourceFolder) throws IOException {
 
         // Get the directory containing .java files
         File directory = new File(sourceFolder);
@@ -55,8 +54,8 @@ public class DynamicCompiler {
 
         // Check if any .java files were found
         if (javaFiles.isEmpty()) {
-            System.out.println("No .java files found in directory: " + sourceFolder);
-            return;
+            log.error("No .java files found in directory: {}", directory.getAbsolutePath());
+            return new URLClassLoader(new URL[0]);
         }
 
         // Get the system Java compiler
@@ -85,14 +84,19 @@ public class DynamicCompiler {
 
         // Print the result
         if (success) {
-            System.out.println("Compilation successful.");
-            refreshClassLoader();
+            log.info("Compilation successful.");
+            return refreshClassLoader();
         } else {
-            System.out.println("Compilation failed.");
+            log.error("Compilation failed.");
+            return new URLClassLoader(new URL[0]);
         }
-
-
     }
+
+
+
+
+
+
 
     /**
      * Find all .java files in the specified directory.
@@ -122,14 +126,14 @@ public class DynamicCompiler {
      * @throws FileNotFoundException If the directory or .class files are not found
      * @throws MalformedURLException If a URL is not formatted correctly
      */
-    private static void refreshClassLoader() throws FileNotFoundException, MalformedURLException {
+    private static ClassLoader refreshClassLoader() throws FileNotFoundException, MalformedURLException {
 
         File classDir = new File(COMPILE_OUT);
         List<URL> urls = getUrls(classDir);
 
         // Create a new URLClassLoader with the URLs
         if (!urls.isEmpty()) {
-            classLoader = new URLClassLoader(urls.toArray(new URL[0]));
+            return new URLClassLoader(urls.toArray(new URL[0]));
         } else {
             throw new FileNotFoundException("No .class files found in the directory.");
         }
@@ -167,75 +171,7 @@ public class DynamicCompiler {
     }
 
 
-    /**
-     * Load a class by its name
-     *
-     * @param className Name of the class
-     * @return Loaded class
-     * @throws ClassNotFoundException If the class is not found
-     * @throws IOException            If an I/O error occurs
-     */
-    public static Class<?> loadClass(String className) throws ClassNotFoundException, IOException {
 
-        // Check if the class loader is initialized
-        if (classLoader == null) {
-            throw new ClassNotFoundException("Class loader not initialized.");
-        }
-
-        try {
-            Class<?> clazz = classLoader.loadClass(className);
-            System.out.println("Class loaded: " + clazz.getName());
-            return clazz;
-        } catch (ClassNotFoundException e) {
-            throw new ClassNotFoundException("Class not found: " + className, e);
-        }
-    }
-
-
-    /**
-     * Get the names of all compiled classes.
-     * <p>
-     * Enum and abstract classes are excluded.
-     *
-     * @return Array of class names
-     * @throws IOException            If an I/O error occurs
-     * @throws ClassNotFoundException If a class is not found
-     */
-    public static Class<?>[] getAllCompiledObjects() throws IOException, ClassNotFoundException {
-        List<Class<?>> compiledObjects = new ArrayList<>();
-
-        // Check if the class loader is initialized
-        File classDir = new File(COMPILE_OUT);
-        if (!classDir.exists() || !classDir.isDirectory()) {
-            throw new FileNotFoundException("Directory not found: " + classDir.getAbsolutePath());
-        }
-
-        // Get all .class files in the directory
-        File[] files = classDir.listFiles((dir, name) -> name.endsWith(".class"));
-        if (files == null || files.length == 0) {
-            throw new FileNotFoundException("No .class files found in directory: " + classDir.getAbsolutePath());
-        }
-
-        // Get the class names from the .class files
-        for (File file : files) {
-            String className = file.getName();
-
-            className = className.substring(0, className.length() - 6);
-
-            // Load the class
-            Class<?> clazz = loadClass(className);
-
-            // Exclude enum and abstract classes
-            if (clazz.isEnum() || Modifier.isAbstract(clazz.getModifiers())) {
-                continue;
-            }
-
-            // Add the class name to the list
-            compiledObjects.add(clazz);
-        }
-
-        return compiledObjects.toArray(new Class[0]);
-    }
 
 
 }

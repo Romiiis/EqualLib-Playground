@@ -9,6 +9,7 @@ module com.romiis.equallibtestapp {
     requires org.slf4j;
     requires java.compiler;
     requires com.fasterxml.jackson.databind;
+    requires jdk.unsupported;
 
 
     exports com.romiis.equallibtestapp.util;
@@ -16,7 +17,8 @@ module com.romiis.equallibtestapp {
     exports com.romiis.equallibtestapp;
     exports com.romiis.equallibtestapp.controllers;
     opens com.romiis.equallibtestapp.controllers to javafx.fxml;
-    exports com.romiis.equallibtestapp.components.treeView;
-    exports com.romiis.equallibtestapp.components.listView;
+    exports com.romiis.equallibtestapp.components.common;
+    exports com.romiis.equallibtestapp.components.mainScene;
+    exports com.romiis.equallibtestapp.components.loadObjectScene;
 
 }

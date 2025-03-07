@@ -3,47 +3,37 @@ package com.romiis.equallibtestapp.io;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.romiis.equallibtestapp.CacheUtil;
+import com.romiis.equallibtestapp.util.JsonUtil;
+import javafx.scene.control.Alert;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * FileManager.java
+ * <p>
+ * Handles file saving and loading
+ */
 @Slf4j
 public class FileManager {
 
+    // File extension
     private static final String EXTENSION = ".json";
+
+    // Folder to save files
     private static final String SAVE_FOLDER = "savedFiles";
 
-    public static boolean saveFile(String name, String content) {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        if (!new File(SAVE_FOLDER).exists()) {
-            new File(SAVE_FOLDER).mkdir();
-        }
-
-        try {
-            // Convert the JSON string into a JsonNode (tree model)
-            JsonNode jsonNode = objectMapper.readTree(content);
-
-            // Configure ObjectMapper to pretty print
-            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-            // Write the JSON tree to the file with pretty printing
-            File file = new File(SAVE_FOLDER + File.separator + name + EXTENSION);
-            objectMapper.writeValue(file, jsonNode);
-
-            log.info("File saved: {}", file.getAbsolutePath());
-
-            return true;
-        } catch (IOException e) {
-            log.error("Error saving file", e);
-        }
-
-        return false;
-    }
+    private static final String DEFAULT_FILE_NAME = "savedObject";
 
 
+
+    /**
+     * Get the names of the saved files
+     *
+     * @return An array of the names of the saved files
+     */
     public static String[] getSavedFiles() {
         File folder = new File(SAVE_FOLDER);
         File[] files = folder.listFiles();
@@ -61,6 +51,66 @@ public class FileManager {
     }
 
 
+    private static boolean fileExists(String fileName) {
+        File file = new File(SAVE_FOLDER + File.separator + fileName + EXTENSION);
+        return file.exists();
+    }
+
+
+    /**
+     * Save a file with the given name and content
+     *
+     * @param name    The name of the file
+     * @param content The content of the file
+     * @return True if the file was saved successfully, false otherwise
+     */
+    public static boolean saveFile(String name, String content) {
+
+        // Create an ObjectMapper instance
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // Create the save folder if it doesn't exist
+        if (!new File(SAVE_FOLDER).exists()) {
+
+            boolean result = new File(SAVE_FOLDER).mkdir();
+
+            if (!result) {
+                log.error("Error creating save folder");
+                return false;
+            }
+        }
+
+        try {
+
+            // Convert the JSON string into a JsonNode (tree model)
+            JsonNode jsonNode = objectMapper.readTree(content);
+
+            // Configure ObjectMapper to pretty print
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+            // Write the JSON tree to the file with pretty printing
+            File file = new File(SAVE_FOLDER + File.separator + name + EXTENSION);
+            objectMapper.writeValue(file, jsonNode);
+
+            log.info("File saved: {}", file.getAbsolutePath());
+
+            CacheUtil.getInstance().updateCache();
+
+            return true;
+        } catch (IOException e) {
+            log.error("Error saving file", e);
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Load a file with the given name
+     *
+     * @param name The name of the file to load
+     * @return The content of the file as a JSON string
+     */
     public static String loadFile(String name) {
         ObjectMapper objectMapper = new ObjectMapper();
 

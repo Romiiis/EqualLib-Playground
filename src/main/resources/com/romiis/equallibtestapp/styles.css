@@ -1,159 +1,127 @@
-
-/* Stylování SplitPane */
-.split-pane {
-    -fx-border-color: #dfe6e9;
-    -fx-border-width: 1px;
-    -fx-border-radius: 5px;
+/* Root & Global Styles */
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-background-color: #FDFDFD;  /* nearly white */
 }
 
-/* Styling pro jednotlivé sloupce v SplitPane */
-.column-box {
-    -fx-background-color: #f9f9f9;
-    -fx-border-color: #dfe6e9;
-    -fx-border-width: 1px;
-    -fx-padding: 15px;
-    -fx-alignment: CENTER;
-    -fx-background-radius: 5px;
+/* MenuBar: White background with dark text */
+.menu-bar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 0 0 1 0;
 }
-
-/* Zajistit, aby obsah v každém sloupci byl zarovnán na střed */
-.column-box > * {
-    -fx-alignment: CENTER;
-}
-
-/* Optional: Stylování splitteru */
-.split-pane > .divider {
-    -fx-background-color: #95a5a6;
-    -fx-background-insets: 0;
-    -fx-border-color: #7f8c8d;
-    -fx-border-width: 1px;
-}
-
-/* Styl pro levý panel */
-.left-panel {
-    -fx-background-color: #ecf0f1;
-    -fx-padding: 15px;
-    -fx-border-color: #bdc3c7;
-    -fx-border-width: 1px;
-    -fx-border-radius: 10px;
-}
-
-/* Styl pro pravý panel */
-.right-panel {
-    -fx-background-color: #f8f9fa;
-    -fx-padding: 15px;
-    -fx-border-color: #bdc3c7;
-    -fx-border-width: 1px;
-    -fx-border-radius: 10px;
-}
-
-/* Styl ListView */
-.list-view {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #dfe6e9;
-    -fx-border-width: 1px;
-    -fx-padding: 10px;
-    -fx-background-radius: 5px;
-}
-
-/* Styl TreeView */
-.tree-view {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #dfe6e9;
-    -fx-border-width: 1px;
-    -fx-padding: 10px;
-    -fx-background-radius: 5px;
-}
-
-/* Styl RadioButton */
-.radio-button {
-    -fx-text-fill: #34495e;
+.menu-bar .menu, .menu-bar .menu-item {
+    -fx-text-fill: #333333;
     -fx-font-size: 14px;
 }
 
-/* Styl pro spodní panel */
-.bottom-container {
-    -fx-padding: 20px;
-    -fx-background-color: #f4f6f7;
-    -fx-border-color: #bdc3c7;
-    -fx-border-width: 1px;
-    -fx-border-radius: 10px;
-}
-
-/* Tlačítko pro porovnání */
-.compare-button {
-    -fx-background-color: #3498db;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-padding: 10px 20px;
-    -fx-border-radius: 5px;
-    -fx-alignment: CENTER;
-    -fx-margin: 10px 0; /* Přidání mezery kolem tlačítka */
-}
-
-.compare-button:hover {
-    -fx-background-color: #2980b9;
-}
-
-/* Výsledek porovnání */
-.result-label {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #2C3E50;
-    -fx-padding: 10px 0;
-}
-
-/* TextField a Button pro zadávání a odstranění ignorovaných polí */
-.text-field {
-    -fx-border-color: #dfe6e9;
-    -fx-border-width: 1px;
-    -fx-background-color: #ffffff;
-    -fx-padding: 8px 10px;
-    -fx-background-radius: 5px;
-}
-
-.add-field-button  {
-    -fx-background-color: #074215;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-padding: 8px 15px;
-    -fx-border-radius: 5px;
-}
-
-.remove-field-button {
-    -fx-background-color: #5a1a12;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-padding: 8px 15px;
-    -fx-border-radius: 5px;
-}
-
-.remove-field-button:hover {
-    -fx-background-color: #922b21;
-}
-
-.add-field-button:hover {
-    -fx-background-color: #0e6b0e;
-}
-
-/* ScrollBar */
-.scroll-bar {
-    -fx-background-color: #bdc3c7;
-}
-
-.scroll-bar .thumb {
-    -fx-background-color: #251e25;
-}
-
-.scroll-bar .thumb:hover {
-    -fx-background-color: #231a23;
-}
-
+/* Panel Labels */
 .panel-label {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
-    -fx-text-fill: #2C3E50;
-    -fx-padding: 10px 0;
-    -fx-alignment: center;
+    -fx-text-fill: #2C3E50;  /* dark slate blue */
+    -fx-padding: 8 0 4 0;
+    -fx-border-color: transparent transparent #E0E0E0 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+/* Sub-labels */
+.sub-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #555555;
+}
+
+/* ListView & TreeView */
+.list-view, .tree-view {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 4;
+}
+
+/* Modern Flat Load Button */
+.load-button {
+    -fx-background-color: #5DADE2;  /* Soft blue */
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-padding: 8 16;
+    -fx-border-color: #515151;
+    -fx-border-width: 1;
+}
+.load-button:hover {
+    -fx-background-color: #3498DB;  /* Slightly deeper blue on hover */
+}
+
+/* Modern Flat Save Button */
+.save-button {
+    -fx-background-color: #3b6fa6;  /* Soft blue */
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-padding: 8 16;
+    -fx-border-color: #515151;
+    -fx-border-width: 1;
+}
+.save-button:hover {
+    -fx-background-color: #315e8c;  /* Soft blue */
+}
+
+
+
+/* TitledPane */
+.titled-pane {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+/* SplitPane Dividers */
+.split-pane:vertical > .split-pane-divider,
+.split-pane:horizontal > .split-pane-divider {
+    -fx-background-color: #E0E0E0;
+}
+
+/* VBox Divider (custom style for your empty VBox) */
+.split-pane-divider {
+    -fx-background-color: #B0BEC5;  /* medium blue-gray */
+    -fx-min-width: 3px;  /* slightly thicker */
+    -fx-max-width: 3px;
+}
+
+/* Bottom Column Box */
+.column-box {
+    -fx-padding: 10;
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+/* Additional Button Styling for Add/Remove/Compare */
+.add-field-button, .remove-field-button, .compare-button {
+    -fx-background-color: #3498DB;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 4;
+    -fx-padding: 8 16;
+    -fx-font-size: 14px;
+}
+.add-field-button:hover, .remove-field-button:hover, .compare-button:hover {
+    -fx-background-color: #2980B9;
+}
+
+/* TextField Styling */
+.text-field {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 6;
 }

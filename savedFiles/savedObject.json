@@ -1,0 +1,66 @@
+{
+  "@class" : "Person",
+  "address" : {
+    "@class" : "Address",
+    "city" : {
+      "@class" : "[LCity;",
+      "value" : [ null, null, null, {
+        "country" : {
+          "@class" : "Country",
+          "value" : "CZ"
+        },
+        "@class" : "City",
+        "name" : {
+          "@class" : "java.lang.String",
+          "value" : null
+        },
+        "population" : {
+          "@class" : "[I",
+          "value" : [ {
+            "@class" : "java.lang.Integer",
+            "value" : 0
+          }, {
+            "@class" : "java.lang.Integer",
+            "value" : 0
+          }, {
+            "@class" : "java.lang.Integer",
+            "value" : 0
+          }, {
+            "@class" : "java.lang.Integer",
+            "value" : 1000
+          }, {
+            "@class" : "java.lang.Integer",
+            "value" : 0
+          }, {
+            "@class" : "java.lang.Integer",
+            "value" : 0
+          }, {
+            "@class" : "java.lang.Integer",
+            "value" : 0
+          }, {
+            "@class" : "java.lang.Integer",
+            "value" : 0
+          }, {
+            "@class" : "java.lang.Integer",
+            "value" : 0
+          }, {
+            "@class" : "java.lang.Integer",
+            "value" : 0
+          } ]
+        }
+      }, null, null, null, null, null, null ]
+    },
+    "street" : {
+      "@class" : "java.lang.String",
+      "value" : null
+    }
+  },
+  "name" : {
+    "@class" : "java.lang.String",
+    "value" : null
+  },
+  "age" : {
+    "@class" : "int",
+    "value" : 440
+  }
+}

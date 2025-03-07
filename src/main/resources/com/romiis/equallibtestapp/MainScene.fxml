@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.romiis.equallibtestapp.components.treeView.MyTreeView?>
-<?import javafx.geometry.Insets?>
+<?import com.romiis.equallibtestapp.components.common.MyTreeView?>
+<?import com.romiis.equallibtestapp.components.mainScene.ClassListView?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import com.romiis.equallibtestapp.components.listView.MyListView?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.romiis.equallibtestapp.controllers.MainSceneController"
             stylesheets="@styles.css">
 
-    <!-- Horní menu -->
+    <!-- Top Menu -->
     <top>
         <MenuBar>
             <Menu text="File">
@@ -23,136 +23,161 @@
         </MenuBar>
     </top>
 
-    <!-- Hlavní obsah -->
+    <!-- Center Content: GridPane with 4 columns (20% 30% 30% 20%) -->
     <center>
-        <SplitPane dividerPositions="0.5" styleClass="split-pane">
-            <items>
-                <!-- Levá polovina -->
-                <AnchorPane>
-                    <GridPane prefWidth="250" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                              styleClass="left-panel">
-                        <rowConstraints>
-                            <RowConstraints percentHeight="10"/> <!-- Label -->
-                            <RowConstraints percentHeight="75"/> <!-- ListView -->
-                            <RowConstraints percentHeight="25"/> <!-- RadioButtons -->
-                        </rowConstraints>
+        <GridPane vgap="5" alignment="CENTER" GridPane.vgrow="ALWAYS"
+                  style="-fx-background-color: transparent;">
+            <!-- Padding around the GridPane -->
+            <padding>
+                <Insets top="10" right="10" bottom="20" left="10"/>
+            </padding>
 
-                        <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
-                        <MyListView fx:id="objectListView1" GridPane.rowIndex="1" styleClass="list-view"/>
-                        <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
-                            <Button fx:id="serializeButton" text="Serialize" onAction="#onSerializeButtonClick"
-                                    styleClass="serialize-button"/>
-                        </VBox>
+            <!-- Define 4 columns with percentages -->
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50" halignment="CENTER"/>
+                <ColumnConstraints percentWidth="0.5" halignment="CENTER"/>
+                <ColumnConstraints percentWidth="50" halignment="CENTER"/>
+            </columnConstraints>
+
+            <rowConstraints>
+                <RowConstraints vgrow="ALWAYS"/>
+            </rowConstraints>
+
+            <SplitPane GridPane.rowIndex="0" GridPane.columnIndex="0" dividerPositions="0.4">
+                <!-- Column 0: Objects List Panel -->
+                <VBox spacing="10" alignment="CENTER" GridPane.vgrow="ALWAYS">
+                    <padding>
+                        <Insets top="5" right="5" bottom="5" left="5"/>
+                    </padding>
+
+                    <Label text="Objects List" styleClass="panel-label" maxWidth="Infinity" alignment="CENTER"/>
+                    <ClassListView fx:id="objectListView1" styleClass="list-view" VBox.vgrow="ALWAYS"/>
+                    <HBox spacing="5" alignment="CENTER">
+                        <Label text="Setting:" styleClass="sub-label"/>
+                        <TextField fx:id="listSetting1" promptText="Enter setting" prefWidth="100"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Column 1: First Hierarchy Panel -->
+                <VBox spacing="5" alignment="CENTER" GridPane.vgrow="ALWAYS">
+                    <padding>
+                        <Insets top="5" right="5" bottom="5" left="5"/>
+                    </padding>
+                    <Label text="Hierarchy" styleClass="panel-label" alignment="CENTER" maxWidth="Infinity"/>
+                    <MyTreeView fx:id="treeView1" styleClass="tree-view" VBox.vgrow="ALWAYS"/>
+                    <HBox spacing="5" alignment="CENTER">
+                        <!-- GridPane to control button widths -->
+                        <GridPane HBox.hgrow="ALWAYS">
+                            <padding>
+                                <Insets top="5" right="5" bottom="5" left="5"/>
+                            </padding>
+                            <columnConstraints>
+                                <!-- Each button gets 5% of the width -->
+                                <ColumnConstraints percentWidth="45"/>
+                                <ColumnConstraints percentWidth="10"/>
+                                <ColumnConstraints percentWidth="45"/>
+                            </columnConstraints>
+                            <Button fx:id="loadTreeButton1" text="Load" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" styleClass="load-button" onAction="#onLoadButtonClick"
+                                    maxWidth="Infinity"/>
+                            <Button fx:id="saveTreeButton1" text="Save" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" styleClass="save-button" onAction="#onSaveAsButton1Click"
+                                    maxWidth="Infinity"/>
+                        </GridPane>
+                    </HBox>
+                </VBox>
+            </SplitPane>
+
+
+            <VBox styleClass="split-pane-divider" GridPane.rowIndex="0" GridPane.columnIndex="1">
+
+            </VBox>
+
+
+            <SplitPane GridPane.rowIndex="0" GridPane.columnIndex="2" dividerPositions="0.6">
+                <!-- Column 2: Second Hierarchy Panel -->
+                <VBox spacing="5" alignment="CENTER" GridPane.vgrow="ALWAYS">
+                <padding>
+                    <Insets top="5" right="5" bottom="5" left="5"/>
+                </padding>
+                <Label text="Hierarchy" styleClass="panel-label" alignment="CENTER" maxWidth="Infinity"/>
+                <MyTreeView fx:id="treeView2" styleClass="tree-view" VBox.vgrow="ALWAYS"/>
+                <HBox spacing="5" alignment="CENTER">
+                    <!-- GridPane to control button widths -->
+                    <GridPane HBox.hgrow="ALWAYS">
+                        <padding>
+                            <Insets top="5" right="5" bottom="5" left="5"/>
+                        </padding>
+                        <columnConstraints>
+                            <!-- Each button gets 5% of the width -->
+                            <ColumnConstraints percentWidth="45"/>
+                            <ColumnConstraints percentWidth="10"/>
+                            <ColumnConstraints percentWidth="45"/>
+                        </columnConstraints>
+                        <Button fx:id="loadTreeButton2" text="Load" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" styleClass="load-button" onAction="#onLoadButton2Click"
+                                maxWidth="Infinity"/>
+                        <Button fx:id="saveTreeButton2" text="Save" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" styleClass="save-button" onAction="#onSaveAsButton2Click"
+                                maxWidth="Infinity"/>
                     </GridPane>
+                </HBox>
+            </VBox>
 
-                    <Label text="Hierarchy" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="260"
-                           styleClass="panel-label"/>
-                    <MyTreeView fx:id="treeView1" AnchorPane.topAnchor="30" AnchorPane.leftAnchor="250"
-                                AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
-                </AnchorPane>
+                <!-- Column 3: Objects List Panel -->
+                <VBox spacing="10" alignment="CENTER" GridPane.vgrow="ALWAYS">
+                    <padding>
+                        <Insets top="5" right="5" bottom="5" left="5"/>
+                    </padding>
 
-                <!-- Pravá polovina -->
-                <AnchorPane>
-                    <Label text="Hierarchy" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="10"
-                           styleClass="panel-label"/>
-                    <MyTreeView fx:id="treeView2" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="250"
-                                AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0" styleClass="tree-view"/>
-
-                    <GridPane prefWidth="250" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                              AnchorPane.rightAnchor="0" styleClass="right-panel">
-                        <rowConstraints>
-                            <RowConstraints percentHeight="10"/> <!-- Label -->
-                            <RowConstraints percentHeight="75"/> <!-- ListView -->
-                            <RowConstraints percentHeight="25"/> <!-- RadioButtons -->
-                        </rowConstraints>
-
-                        <Label text="Objects List" GridPane.rowIndex="0" styleClass="panel-label"/>
-                        <MyListView fx:id="objectListView2" GridPane.rowIndex="1" styleClass="list-view"/>
-                        <VBox GridPane.rowIndex="2" alignment="CENTER" spacing="10">
-                            <Button fx:id="loadButton" text="Load" onAction="#onLoadButtonClick"
-                                    styleClass="load-button"/>
-                        </VBox>
-                    </GridPane>
-                </AnchorPane>
-            </items>
-        </SplitPane>
+                    <Label text="Objects List" styleClass="panel-label" maxWidth="Infinity" alignment="CENTER"/>
+                    <ClassListView fx:id="objectListView2" styleClass="list-view" VBox.vgrow="ALWAYS"/>
+                    <HBox spacing="5" alignment="CENTER">
+                        <Label text="Setting:" styleClass="sub-label"/>
+                        <TextField fx:id="listSetting2" promptText="Enter setting" prefWidth="100"/>
+                    </HBox>
+                </VBox>
+            </SplitPane>
+        </GridPane>
     </center>
 
-    <!-- Spodní část: Porovnání + Panel pro konfiguraci -->
+    <!-- Bottom Panel -->
     <bottom>
-        <VBox alignment="CENTER">
-
-            <TitledPane text="Objects settings" expanded="false">
-
-            </TitledPane>
-            <!-- Single TitledPane containing all settings -->
+        <VBox alignment="CENTER" spacing="10">
             <TitledPane text="Comparison Settings" expanded="false">
                 <content>
-                    <!-- SplitPane to create two dynamic columns with a divider style -->
                     <SplitPane dividerPositions="0.25" styleClass="split-pane">
-
-                        <!-- First Split Pane Section: Max Depth and Use Equals after max depth -->
-                        <VBox spacing="15" alignment="CENTER_LEFT" styleClass="column-box">
-                            <!-- Label and Spinner next to each other -->
-                            <HBox spacing="10" alignment="CENTER_LEFT">
-                                <Label text="Max Depth:">
-                                    <tooltip>
-                                        <Tooltip text="Limit how deep object comparison goes (-1 for no limit)."/>
-                                    </tooltip>
-                                </Label>
-                                <!-- Spinner for numeric input -->
-                                <Spinner fx:id="maxDepthSpinner" prefWidth="100"/>
-                            </HBox>
-
-                            <!-- CheckBoxes below, aligned in a single column -->
-                            <VBox spacing="10" alignment="CENTER_LEFT">
-                                <CheckBox fx:id="useEqualsAfterMaxDepth" text="Use Equals after max depth">
-                                    <tooltip>
-                                        <Tooltip text="Use the object's equals() method if max depth is reached."/>
-                                    </tooltip>
-                                </CheckBox>
-                                <CheckBox fx:id="equivalenceByInheritance" text="Include Inherited Fields">
-                                    <tooltip>
-                                        <Tooltip text="Compare fields from parent classes as well."/>
-                                    </tooltip>
-                                </CheckBox>
-                                <CheckBox fx:id="compareByElementsAndKeys" text="Compare Collections">
-                                    <tooltip>
-                                        <Tooltip
-                                                text="Decide whether collections should be compared element by element."/>
-                                    </tooltip>
-                                </CheckBox>
+                        <items>
+                            <!-- Left Side: Max Depth and Options -->
+                            <VBox spacing="15" alignment="CENTER_LEFT" styleClass="column-box">
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="Max Depth:" styleClass="panel-label">
+                                        <tooltip>
+                                            <Tooltip text="Limit how deep object comparison goes (-1 for no limit)."/>
+                                        </tooltip>
+                                    </Label>
+                                    <Spinner fx:id="maxDepthSpinner" prefWidth="100"/>
+                                </HBox>
+                                <VBox spacing="10" alignment="CENTER_LEFT">
+                                    <CheckBox fx:id="useEqualsAfterMaxDepth" text="Use Equals after max depth"/>
+                                    <CheckBox fx:id="equivalenceByInheritance" text="Include Inherited Fields"/>
+                                    <CheckBox fx:id="compareByElementsAndKeys" text="Compare Collections"/>
+                                </VBox>
                             </VBox>
-                        </VBox>
 
-                        <!-- Second Split Pane Section: Ignored Fields -->
-                        <VBox spacing="15" alignment="CENTER_LEFT" styleClass="column-box">
-                            <Label text="Ignored Fields:">
-                                <tooltip>
-                                    <Tooltip text="Specify fields to be ignored during comparison."/>
-                                </tooltip>
-                            </Label>
-
-                            <!-- ListView to show the ignored fields -->
-                            <ListView fx:id="ignoredFieldsList" prefHeight="150" prefWidth="200">
-                                <items>
-                                    <!-- List items here -->
-                                </items>
-                            </ListView>
-
-                            <!-- Button to add new field -->
-                            <HBox spacing="10" alignment="CENTER_LEFT">
-                                <TextField fx:id="newIgnoredField" promptText="Enter ignored field" prefWidth="150"/>
-                                <Button text="Add Field" onAction="#onAddIgnoredField" styleClass="add-field-button"/>
-                                <Button text="Remove Selected" onAction="#onRemoveIgnoredField"
-                                        styleClass="remove-field-button"/>
-                            </HBox>
-                        </VBox>
+                            <!-- Right Side: Ignored Fields -->
+                            <VBox spacing="15" alignment="CENTER_LEFT" styleClass="column-box">
+                                <Label text="Ignored Fields:" styleClass="panel-label"/>
+                                <ListView fx:id="ignoredFieldsList" prefHeight="150" prefWidth="200"/>
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <TextField fx:id="newIgnoredField" promptText="Enter ignored field"
+                                               prefWidth="150"/>
+                                    <Button text="Add Field" onAction="#onAddIgnoredField"
+                                            styleClass="add-field-button"/>
+                                    <Button text="Remove Selected" onAction="#onRemoveIgnoredField"
+                                            styleClass="remove-field-button"/>
+                                </HBox>
+                            </VBox>
+                        </items>
                     </SplitPane>
                 </content>
             </TitledPane>
-
-            <!-- Compare Button and Result -->
             <HBox alignment="CENTER" spacing="20">
                 <padding>
                     <Insets top="10" right="10" bottom="20" left="10"/>
@@ -162,6 +187,4 @@
             </HBox>
         </VBox>
     </bottom>
-
-
 </BorderPane>

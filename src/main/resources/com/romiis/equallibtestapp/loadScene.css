@@ -1,0 +1,113 @@
+/* Root & Global Styles */
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-background-color: #FDFDFD;  /* Nearly white */
+}
+
+/* Panel Labels */
+.panel-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50;  /* Dark slate blue */
+    -fx-padding: 8 0 4 0;
+    -fx-border-color: transparent transparent #E0E0E0 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+/* Sub-labels */
+.sub-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #555555;
+}
+
+/* ClassComboBox styling */
+.combo-box {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 4;
+}
+
+/* LoadObjectListView & ListView styling */
+.load-object-list-view, .list-view {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 4;
+}
+
+/* TreeView styling */
+.tree-view {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 4;
+}
+
+/* Modern Smooth Load Button */
+.load-button {
+    -fx-background-color: #5DADE2;  /* Soft blue */
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-padding: 8 16;
+    -fx-border-color: #515151;
+    -fx-border-width: 1;
+}
+.load-button:hover {
+    -fx-background-color: #3498DB;  /* Slightly deeper blue on hover */
+}
+
+/* Modern Smooth Cancel Button */
+.cancel-button {
+    -fx-background-color: linear-gradient(#E0E0E0, #BDBDBD); /* Soft gray gradient */
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-padding: 8 16;
+    -fx-border-color: #9E9E9E;
+    -fx-border-width: 1;
+}
+.cancel-button:hover {
+    -fx-background-color: linear-gradient(#BDBDBD, #9E9E9E);
+}
+
+/* AnchorPane, VBox, HBox Padding for Consistency */
+.anchor-pane {
+    -fx-padding: 10;
+}
+.vbox {
+    -fx-padding: 10;
+    -fx-spacing: 10;
+}
+.hbox {
+    -fx-padding: 10;
+    -fx-spacing: 10;
+}
+
+/* Optionally style the custom controls if needed */
+.class-combo-box {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 4;
+}
+
+.load-object-list-view {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 4;
+}
