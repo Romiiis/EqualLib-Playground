@@ -2,6 +2,7 @@ package com.romiis.equallibtestapp.components.common;
 
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Array;
@@ -23,7 +24,8 @@ import java.util.Objects;
 public class ObjectReference {
 
     // Reference to the object containing the field
-    private final Object inObject;
+    @Setter
+    private Object inObject;
 
     // Field that is referenced
     private final Field field;
@@ -33,6 +35,11 @@ public class ObjectReference {
 
     // String representation of a null value
     private final String NULL = "null";
+
+    // Cycle detection flag
+    private boolean cyclic = false;
+
+    private boolean editContentItem = false;
 
 
     /**
@@ -46,6 +53,22 @@ public class ObjectReference {
         this.field = fieldName;
         index = null;
 
+    }
+
+    public ObjectReference(boolean editContentItem, Object reference, Field fieldName) {
+        this.inObject = reference;
+        this.field = fieldName;
+        index = null;
+        this.editContentItem = editContentItem;
+
+    }
+
+
+    public ObjectReference(Object reference, Field fieldName, boolean cyclic) {
+        this.inObject = reference;
+        this.field = fieldName;
+        index = null;
+        this.cyclic = cyclic;
     }
 
     /**
@@ -69,10 +92,12 @@ public class ObjectReference {
      */
     public void modifyFieldValue(String newValue) {
         try {
+
             if (field.getType().isArray()) {
                 if (index == null) {
                     return;
                 }
+
                 // Set the array value
                 Array.set(inObject, index, newValue);
 
@@ -96,7 +121,6 @@ public class ObjectReference {
                     field.setChar(inObject, newValue.charAt(0));
                 }
             } else if (field.getType().isEnum()) {
-
                 // Set the enum value
                 Object enumValue = Arrays.stream(field.getType().getEnumConstants())
                         .filter(e -> e.toString().equals(newValue))
@@ -149,6 +173,9 @@ public class ObjectReference {
      */
     public boolean isModifiable() {
         boolean isModifiable = true;
+        if (editContentItem) {
+            return true;
+        }
         if (field == null) {
             isModifiable = false;
         } else if (!field.getType().isPrimitive() && !ReflectionUtil.isWrapperOrString(field.getType()) && !field.getType().isEnum()) {
@@ -161,33 +188,39 @@ public class ObjectReference {
     }
 
 
-    /**
-     * Get the string representation of the ObjectReference
-     *
-     * @return String representation of the ObjectReference
-     */
     @Override
     public String toString() {
 
-        String objectId = inObject.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(inObject));
-        if (field == null) {
-            return inObject.getClass().getSimpleName() + " [" + objectId + "]";
+        if (editContentItem) {
+            return "(Edit content ...)";
         }
 
-        String fieldType = field.getType().getSimpleName();
-        String fieldName = field.getName();
+        String cyclicMarker = cyclic ? " (\uD83D\uDD01)" : "";
+        String fullClassName = inObject.getClass().getName();
+        String objectIdHex = Integer.toHexString(System.identityHashCode(inObject));
+        String objectId = fullClassName + "@" + objectIdHex;
+        String simpleClassName = inObject.getClass().getSimpleName();
+
+        if (field == null) {
+            return String.format("%s {%s}%s", simpleClassName, objectId, cyclicMarker);
+        }
+
         String modifiers = getModifiers(field);
+        String fieldName = field.getName();
+        String fieldType = field.getType().getSimpleName();
 
         if (index != null && field.getType().isArray()) {
-            return String.format("%s[%d]: %s", field.getType().getComponentType().getSimpleName(), index, getFieldValue());
-        } else if (field.getType().isPrimitive() || ReflectionUtil.isWrapperOrString(field.getType())) {
-            return String.format("%s %s (%s): %s", modifiers, fieldName, fieldType, getFieldValue());
-        } else if (field.getType().isEnum()) {
-            return String.format("%s %s (%s): %s", modifiers, fieldName, fieldType, getFieldValue());
+            String componentType = field.getType().getComponentType().getSimpleName();
+            return String.format("%s[%d]: %s", componentType, index, getFieldValue());
+        } else if (field.getType().isPrimitive() || ReflectionUtil.isWrapperOrString(field.getType()) || field.getType().isEnum()) {
+            return String.format("%s %s {%s}: %s", modifiers, fieldName, fieldType, getFieldValue());
         } else {
-            return String.format("%s %s (%s) [%s]", modifiers, fieldName, fieldType, objectId);
+            return String.format("%s %s {%s} {%s%s}", modifiers, fieldName, fieldType, objectId, cyclicMarker);
         }
     }
+
+
+
 
     /**
      * Get the modifiers of the field as a string

@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.romiis.equallibtestapp.controllers.MainSceneController"
-            stylesheets="@styles.css">
+            stylesheets="@mainSceneStyles.css">
 
     <!-- Top Menu -->
     <top>

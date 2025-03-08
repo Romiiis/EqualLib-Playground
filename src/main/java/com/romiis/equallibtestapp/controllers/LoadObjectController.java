@@ -85,7 +85,6 @@ public class LoadObjectController {
         // Load the selected object and assign it to the tree view
         Object object = CacheUtil.getInstance().getObjectByName(objectListView.getSelectionModel().getSelectedItem(), true);
 
-
         assignedTreeView.setSelectedObject(object);
 
         // Take note that the tree view has been modified

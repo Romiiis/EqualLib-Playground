@@ -230,6 +230,22 @@ public class MyTreeView extends TreeView<ObjectReference> {
      * Opens a file selection dialog and loads the object into the TreeView.
      */
     public void load() {
+
+
+        if (modified) {
+            SaveResult result = handleUnsavedChanges();
+            if (result == SaveResult.SAVE) {
+                boolean saved = save();
+                if (!saved) {
+                    log.error("Error saving object");
+                    return;
+                }
+            } else if (result == SaveResult.CANCEL) {
+                return;
+            }
+        }
+
+
         // Get list of saved files.
         String[] files = FileManager.getSavedFiles();
         if (files.length == 0) {
@@ -242,7 +258,7 @@ public class MyTreeView extends TreeView<ObjectReference> {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(MainClass.class.getResource("LoadObjectScene.fxml"));
+            FXMLLoader loader = new FXMLLoader(MainClass.class.getResource(MainClass.LOAD_OBJECTS_SCENE_FXML));
             Parent root = loader.load();
 
             // Pass this TreeView to the controller.
@@ -259,6 +275,10 @@ public class MyTreeView extends TreeView<ObjectReference> {
         }
     }
 
+    public void refresh() {
+        handleSelectionChange(treatAsObjects);
+    }
+
     /**
      * Changes the selected object from the list view.
      * If unsaved changes exist, prompts the user to save or discard changes.
@@ -266,21 +286,31 @@ public class MyTreeView extends TreeView<ObjectReference> {
      * @param clazz The class to create an instance from.
      * @return True if the change was successful, false otherwise.
      */
-    public boolean changeFromListView(Class<?> clazz) {
+    public SaveResult changeFromListView(Class<?> clazz) {
+        SaveResult result;
         if (modified) {
-            return handleUnsavedChanges(clazz);
+
+            result = handleUnsavedChanges();
+            if (result == SaveResult.SAVE) {
+                boolean saved = save();
+                if (!saved) {
+                    log.error("Error saving object");
+                    return SaveResult.CANCEL;
+                }
+            } else if (result == SaveResult.CANCEL) {
+                return SaveResult.CANCEL;
+            }
         }
         setSelectedObject(clazz);
-        return true;
+        return SaveResult.SAVE;
     }
 
     /**
      * Handles unsaved changes by prompting the user.
      *
-     * @param clazz The class to create an instance from if changes are discarded/saved.
      * @return True if the change should proceed, false otherwise.
      */
-    private boolean handleUnsavedChanges(Class<?> clazz) {
+    private SaveResult handleUnsavedChanges() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation");
         alert.setHeaderText("Unsaved changes");
@@ -293,19 +323,17 @@ public class MyTreeView extends TreeView<ObjectReference> {
 
         Optional<ButtonType> result = alert.showAndWait();
 
+
         if (result.isPresent()) {
             ButtonType buttonType = result.get();
             if (buttonType == saveButton) {
-                boolean saved = save();
-                if (saved) {
-                    setSelectedObject(clazz);
-                    return true;
-                }
+                return SaveResult.SAVE;
             } else if (buttonType == discardButton) {
-                setSelectedObject(clazz);
-                return true;
+                return SaveResult.DISCARD;
+            } else {
+                return SaveResult.CANCEL;
             }
         }
-        return false;
+        return SaveResult.CANCEL;
     }
 }

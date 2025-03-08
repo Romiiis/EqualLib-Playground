@@ -7,9 +7,9 @@ module com.romiis.equallibtestapp {
     requires org.kordamp.ikonli.javafx;
     requires static lombok;
     requires org.slf4j;
-    requires java.compiler;
     requires com.fasterxml.jackson.databind;
     requires jdk.unsupported;
+    requires jdk.compiler;
 
 
     exports com.romiis.equallibtestapp.util;

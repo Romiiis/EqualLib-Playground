@@ -1,12 +1,15 @@
 package com.romiis.equallibtestapp.util;
 
 import com.romiis.equallibtestapp.components.common.ObjectReference;
+import com.sun.source.tree.Tree;
 import javafx.scene.control.TreeItem;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -32,12 +35,19 @@ public class ObjectTreeBuilder {
 
         // If we've already visited this object, add a cyclic reference leaf and return.
         if (visited.contains(obj)) {
-            parent.getChildren().add(new TreeItem<>(new ObjectReference(obj, null)));
+            parent.getChildren().add(new TreeItem<>(new ObjectReference(obj, null, true)));
             return parent;
         }
 
         visited.add(obj);
 
+
+
+        if (obj instanceof Collection || obj instanceof Map) {
+            TreeItem<ObjectReference> edit = new TreeItem<>(new ObjectReference(true, obj, parent.getValue().getField()));
+            parent.getChildren().add(edit);
+
+        }
 
         Field[] fields = ReflectionUtil.getAllFields(obj.getClass());
 
@@ -48,7 +58,8 @@ public class ObjectTreeBuilder {
                 Object fieldValue = field.get(finalObj);
 
                 if (fieldValue == null) {
-                    parent.getChildren().add(new TreeItem<>(new ObjectReference(finalObj, field)));
+                    boolean cyclic = visited.contains(finalObj);
+                    parent.getChildren().add(new TreeItem<>(new ObjectReference(finalObj, field, cyclic)));
                     return;
                 }
                 if (field.getType().isArray()) {
@@ -83,12 +94,15 @@ public class ObjectTreeBuilder {
         Object array = ReflectionUtil.getFieldValue(parentValue.getInObject(), parentValue.getField());
         int length = Array.getLength(array);
 
+        TreeItem<ObjectReference> edit = new TreeItem<>(new ObjectReference(true, array, parentValue.getField()));
+        parent.getChildren().add(edit);
+
         for (int i = 0; i < length; i++) {
             Object element = Array.get(array, i);
             TreeItem<ObjectReference> child = new TreeItem<>(new ObjectReference(array, parentValue.getField(), i));
 
             if (element != null && visited.contains(element)) {
-                child.getChildren().add(new TreeItem<>(new ObjectReference(element, null)));
+                child.getChildren().add(new TreeItem<>(new ObjectReference(element, null, true)));
             }
             if (element != null && !element.getClass().isPrimitive() && !ReflectionUtil.isWrapperOrString(element.getClass())) {
                 child = createTree(child, visited);

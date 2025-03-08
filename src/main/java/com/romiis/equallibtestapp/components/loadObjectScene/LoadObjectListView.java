@@ -6,11 +6,20 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import lombok.Setter;
 
+/**
+ * LoadObjectListView.java
+ * <p>
+ * Represents a ListView for the loaded objects. Used to display the loaded objects and select them.
+ */
 @Setter
 public class LoadObjectListView extends ListView<String> {
 
 
+    /**
+     * The assigned TreeView
+     */
     private MyTreeView assignedTreeView;
+
 
     /**
      * Create a new MyListView instance
@@ -33,6 +42,9 @@ public class LoadObjectListView extends ListView<String> {
     }
 
 
+    /**
+     * Initialize the click handler for the ListView
+     */
     private void initializeClickHandler() {
         this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             assignedTreeView.setSelectedObject(CacheUtil.getInstance().getObjectByName(newValue, false));
@@ -40,6 +52,11 @@ public class LoadObjectListView extends ListView<String> {
     }
 
 
+    /**
+     * Filter the ListView by the given class
+     *
+     * @param clazz The class to filter by
+     */
     public void filterByClass(Class<?> clazz) {
         getItems().clear();
         if (clazz == null) {

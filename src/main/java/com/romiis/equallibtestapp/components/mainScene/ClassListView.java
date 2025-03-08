@@ -1,7 +1,9 @@
 package com.romiis.equallibtestapp.components.mainScene;
 
 import com.romiis.equallibtestapp.components.common.MyTreeView;
-import javafx.scene.control.*;
+import com.romiis.equallibtestapp.components.common.SaveResult;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import lombok.Setter;
 
 /**
@@ -14,12 +16,15 @@ import lombok.Setter;
 @Setter
 public class ClassListView extends ListView<Class<?>> {
 
+    /**
+     * The assigned TreeView
+     */
     private MyTreeView assignedTreeView;
 
-
-    private final String SAVE_BUTTON_TEXT = "Save";
-    private final String DISCARD_BUTTON_TEXT = "Discard";
-    private final String CANCEL_BUTTON_TEXT = "Cancel";
+    /**
+     * Flag to ignore selection changes (when the tree view changes the selection)
+     */
+    private boolean ignoreSelectionChange = false;
 
 
     /**
@@ -42,29 +47,27 @@ public class ClassListView extends ListView<Class<?>> {
 
         initializeClickHandler();
     }
-    private boolean ignoreSelectionChange = false;
 
 
+    /**
+     * Initialize the click handler for the ListView
+     */
     private void initializeClickHandler() {
         this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (ignoreSelectionChange) {
                 return;
             }
 
-            boolean changed = assignedTreeView.changeFromListView(newValue);
-            if (!changed) {
+            SaveResult changed = assignedTreeView.changeFromListView(newValue);
+            if (changed == SaveResult.CANCEL) {
                 ignoreSelectionChange = true;
                 this.getSelectionModel().select(oldValue);
                 ignoreSelectionChange = false;
             }
+
+
         });
     }
-
-
-
-
-
-
 
 
 }

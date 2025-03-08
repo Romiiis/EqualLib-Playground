@@ -59,7 +59,7 @@ public class JsonUtil {
         /**
          * Recursively serializes an object into a structured Map representation.
          */
-        private static Object serializeObject (Object obj) throws Exception {
+        private static Object serializeObject(Object obj) throws Exception {
             if (obj == null) {
                 return null;
             }
@@ -67,6 +67,8 @@ public class JsonUtil {
             Class<?> clazz = obj.getClass();
             Map<String, Object> fieldMap = new HashMap<>();
             fieldMap.put("@class", clazz.getName());
+
+
 
             // Handle primitive types and Strings
             if (isPrimitiveOrWrapper(clazz) || clazz == String.class) {
@@ -76,8 +78,14 @@ public class JsonUtil {
 
             // Process fields of the object
             for (Field field : ReflectionUtil.getAllFields(clazz)) {
+
+                if (Modifier.isTransient(field.getModifiers())) {
+                    continue;
+                }
+
                 field.setAccessible(true);
                 Object value = field.get(obj);
+
 
                 if (isPrimitiveOrWrapper(field.getType()) || field.getType() == String.class) {
                     fieldMap.put(field.getName(), createSimpleField(field.getType(), value));

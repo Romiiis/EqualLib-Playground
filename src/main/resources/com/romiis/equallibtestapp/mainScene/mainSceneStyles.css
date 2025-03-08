@@ -1,0 +1,127 @@
+/* Root & Global Styles */
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-background-color: #FDFDFD;  /* nearly white */
+}
+
+/* MenuBar: White background with dark text */
+.menu-bar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 0 0 1 0;
+}
+.menu-bar .menu, .menu-bar .menu-item {
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+}
+
+/* Panel Labels */
+.panel-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50;  /* dark slate blue */
+    -fx-padding: 8 0 4 0;
+    -fx-border-color: transparent transparent #E0E0E0 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+/* Sub-labels */
+.sub-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #555555;
+}
+
+/* ListView & TreeView */
+.list-view, .tree-view {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 4;
+}
+
+/* Modern Flat Load Button */
+.load-button {
+    -fx-background-color: #5DADE2;  /* Soft blue */
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-padding: 8 16;
+    -fx-border-color: #515151;
+    -fx-border-width: 1;
+}
+.load-button:hover {
+    -fx-background-color: #3498DB;  /* Slightly deeper blue on hover */
+}
+
+/* Modern Flat Save Button */
+.save-button {
+    -fx-background-color: #3b6fa6;  /* Soft blue */
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-padding: 8 16;
+    -fx-border-color: #515151;
+    -fx-border-width: 1;
+}
+.save-button:hover {
+    -fx-background-color: #315e8c;  /* Soft blue */
+}
+
+
+
+/* TitledPane */
+.titled-pane {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+/* SplitPane Dividers */
+.split-pane:vertical > .split-pane-divider,
+.split-pane:horizontal > .split-pane-divider {
+    -fx-background-color: #E0E0E0;
+}
+
+/* VBox Divider (custom style for your empty VBox) */
+.split-pane-divider {
+    -fx-background-color: #B0BEC5;  /* medium blue-gray */
+    -fx-min-width: 3px;  /* slightly thicker */
+    -fx-max-width: 3px;
+}
+
+/* Bottom Column Box */
+.column-box {
+    -fx-padding: 10;
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+/* Additional Button Styling for Add/Remove/Compare */
+.add-field-button, .remove-field-button, .compare-button {
+    -fx-background-color: #3498DB;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 4;
+    -fx-padding: 8 16;
+    -fx-font-size: 14px;
+}
+.add-field-button:hover, .remove-field-button:hover, .compare-button:hover {
+    -fx-background-color: #2980B9;
+}
+
+/* TextField Styling */
+.text-field {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 6;
+}
