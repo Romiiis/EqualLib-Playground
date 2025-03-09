@@ -1,0 +1,60 @@
+{
+  "country" : {
+    "@class" : "Country",
+    "value" : "CZ"
+  },
+  "@class" : "City",
+  "name" : {
+    "@class" : "java.lang.String",
+    "value" : null
+  },
+  "population" : {
+    "@class" : "[I",
+    "value" : [ {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 1000
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Integer",
+      "value" : 47
+    } ]
+  }
+}

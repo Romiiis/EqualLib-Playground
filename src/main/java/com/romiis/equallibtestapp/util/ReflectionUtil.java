@@ -100,4 +100,122 @@ public class ReflectionUtil {
     public static boolean isModifiable(int modifier) {
         return !Modifier.isFinal(modifier) || !Modifier.isStatic(modifier);
     }
+
+
+    /**
+     * Converts a string value to its corresponding primitive type value.
+     *
+     * @param value         the string representation of the primitive value
+     * @param primitiveType the Class object representing the primitive type (e.g., int.class)
+     * @return the converted primitive value as an Object
+     * @throws IllegalArgumentException if the value cannot be converted or if the type is unsupported
+     */
+    public static Object convertStringToPrimitive(String value, Class<?> primitiveType) {
+        if (value == null) {
+            throw new IllegalArgumentException("Input value is null");
+        }
+        if (primitiveType == int.class || primitiveType == Integer.class) {
+            return Integer.parseInt(value);
+        } else if (primitiveType == long.class || primitiveType == Long.class) {
+            return Long.parseLong(value);
+        } else if (primitiveType == double.class || primitiveType == Double.class) {
+            return Double.parseDouble(value);
+        } else if (primitiveType == float.class || primitiveType == Float.class) {
+            return Float.parseFloat(value);
+        } else if (primitiveType == boolean.class || primitiveType == Boolean.class) {
+            return Boolean.parseBoolean(value);
+        } else if (primitiveType == byte.class || primitiveType == Byte.class) {
+            return Byte.parseByte(value);
+        } else if (primitiveType == short.class || primitiveType == Short.class) {
+            return Short.parseShort(value);
+        } else if (primitiveType == char.class || primitiveType == Character.class) {
+            if (value.length() != 1) {
+                throw new IllegalArgumentException("Cannot convert string \"" + value + "\" to char. Expected a single character.");
+            }
+            return value.charAt(0);
+        } else {
+            throw new IllegalArgumentException("Unsupported primitive type: " + primitiveType);
+        }
+    }
+
+    public static Object getDefaultValue(Class<?> type) {
+        if (type.equals(int.class)) {
+            return 0;
+        } else if (type.equals(long.class)) {
+            return 0L;
+        } else if (type.equals(double.class)) {
+            return 0.0;
+        } else if (type.equals(float.class)) {
+            return 0.0f;
+        } else if (type.equals(boolean.class)) {
+            return false;
+        } else if (type.equals(byte.class)) {
+            return (byte) 0;
+        } else if (type.equals(short.class)) {
+            return (short) 0;
+        } else if (type.equals(char.class)) {
+            return '\u0000';
+        } else {
+            return null;
+        }
+    }
+
+
+    public static boolean isCorrectFormat(Object value, Class<?> clazz) {
+        if (clazz.equals(int.class) || clazz.equals(Integer.class)) {
+            try {
+                Integer.parseInt(value.toString());
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        } else if (clazz.equals(long.class) || clazz.equals(Long.class)) {
+            try {
+                Long.parseLong(value.toString());
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        } else if (clazz.equals(double.class) || clazz.equals(Double.class)) {
+            try {
+                Double.parseDouble(value.toString());
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        } else if (clazz.equals(float.class) || clazz.equals(Float.class)) {
+            try {
+                Float.parseFloat(value.toString());
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        } else if (clazz.equals(boolean.class) || clazz.equals(Boolean.class)) {
+            String val = value.toString().toLowerCase();
+            return val.equals("true") || val.equals("false");
+        } else if (clazz.equals(byte.class) || clazz.equals(Byte.class)) {
+            try {
+                Byte.parseByte(value.toString());
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        } else if (clazz.equals(short.class) || clazz.equals(Short.class)) {
+            try {
+                Short.parseShort(value.toString());
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        } else if (clazz.equals(char.class) || clazz.equals(Character.class)) {
+            return value.toString().length() == 1;
+        } else {
+            // For any other types, assume the value is in a correct format.
+            return true;
+        }
+    }
+
+
 }
+
+

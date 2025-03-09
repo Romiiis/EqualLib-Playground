@@ -2,7 +2,6 @@ package com.romiis.equallibtestapp.components.common;
 
 import com.romiis.equallibtestapp.MainClass;
 import com.romiis.equallibtestapp.controllers.ArrayEditController;
-import com.romiis.equallibtestapp.controllers.LoadObjectController;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,12 +13,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class EditorsUtil {
@@ -106,7 +101,7 @@ public class EditorsUtil {
         this.treeView = tree;
 
         if (item.getValue().isEditContentItem()) {
-            decideContentEditor(item, objectReference, field);
+            decideContentEditor(item.getParent(), objectReference, field);
             return;
         }
 
@@ -121,39 +116,53 @@ public class EditorsUtil {
         }
     }
 
-
-    private void decideContentEditor(TreeItem<ObjectReference> item, ObjectReference objectReference, Field field) {
+    private void decideContentEditor(TreeItem<ObjectReference> parentItem, ObjectReference objectReference, Field field) {
         if (field.getType().isArray()) {
             log.debug("Array field detected: {}", field.getName());
-            startArrayEditor(objectReference);
+            startArrayEditor(objectReference, parentItem);
         } else if (Collection.class.isAssignableFrom(field.getType())) {
             log.debug("Collection field detected: {}", field.getName());
         } else if (Map.class.isAssignableFrom(field.getType())) {
             log.debug("Map field detected: {}", field.getName());
         }
-
-
     }
 
-    private void startArrayEditor(ObjectReference objectReference) {
+    private void startArrayEditor(ObjectReference objectReference, TreeItem<ObjectReference> parentItem) {
         try {
             FXMLLoader loader = new FXMLLoader(MainClass.class.getResource(MainClass.ARRAY_EDIT_SCENE_FXML));
             Parent root = loader.load();
 
             // Pass this TreeView to the controller.
             ArrayEditController controller = loader.getController();
-
-
             controller.setAssignedArray(objectReference);
 
             Stage stage = new Stage();
             stage.setTitle("Array editor");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.show();
+            stage.showAndWait();
+
+            log.info("Array editor closed");
+            parentItem.getValue().getInObject();
+            wireReference(parentItem, objectReference);
+            treeView.setModified(true);
+            treeView.refresh();
+
+
         } catch (Exception e) {
             log.error("Error loading object", e);
         }
+    }
+
+    private void wireReference(TreeItem<ObjectReference> parentItem, ObjectReference objectReference) {
+        Object parentReference = parentItem.getValue().getInObject();
+
+        try {
+            objectReference.getField().set(parentReference, objectReference.getInObject());
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     /**
@@ -197,6 +206,7 @@ public class EditorsUtil {
 
     /**
      * Updates the field value and refreshes the TreeItem with the new ObjectReference.
+     * Before updating, it checks whether the new value is in the correct format.
      *
      * @param item            The TreeItem representing the field.
      * @param objectReference The object reference containing the field.
@@ -204,6 +214,20 @@ public class EditorsUtil {
      * @param newValue        The new value to set.
      */
     private void updateField(TreeItem<ObjectReference> item, ObjectReference objectReference, Field field, Object newValue) {
+        // Check format if the field is a primitive, a wrapper, or a String.
+        if (newValue != null && (field.getType().isPrimitive() || ReflectionUtil.isWrapperOrString(field.getType()))) {
+            String newValueStr = newValue.toString();
+            if (!ReflectionUtil.isCorrectFormat(newValueStr, field.getType())) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Format");
+                alert.setHeaderText("Incorrect Format for field: " + field.getName());
+                alert.setContentText("The value \"" + newValueStr + "\" is not a valid " + field.getType().getSimpleName());
+                alert.showAndWait();
+                return;
+            }
+        }
+
+        // Proceed with update.
         objectReference.modifyFieldValue(newValue == null ? null : String.valueOf(newValue));
         item.setValue(new ObjectReference(objectReference.getInObject(), field));
         log.info("Updated value for field {}: {}", field.getName(), newValue);

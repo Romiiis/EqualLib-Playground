@@ -5,13 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.lang.reflect.*;
+import java.sql.Wrapper;
+import java.util.*;
+
+import static com.fasterxml.jackson.databind.type.LogicalType.Collection;
 
 /**
  * ObjectReference.java
@@ -92,50 +90,75 @@ public class ObjectReference {
      */
     public void modifyFieldValue(String newValue) {
         try {
-
+            // If the field is an array, update the element at the given index.
             if (field.getType().isArray()) {
                 if (index == null) {
                     return;
                 }
-
-                // Set the array value
-                Array.set(inObject, index, newValue);
+                Class<?> componentType = field.getType().getComponentType();
+                Object convertedValue;
+                // For primitives or wrappers/Strings, convert the newValue to the proper type.
+                if (componentType.isPrimitive() || ReflectionUtil.isWrapperOrString(componentType)) {
+                    convertedValue = ReflectionUtil.convertStringToPrimitive(newValue, componentType);
+                } else {
+                    // For non-primitive components, assume the newValue is acceptable as-is.
+                    convertedValue = newValue;
+                }
+                Array.set(inObject, index, convertedValue);
 
             } else if (field.getType().isPrimitive()) {
-                // Set the primitive value
+                // Convert the newValue to the correct primitive type.
+                Object convertedValue = ReflectionUtil.convertStringToPrimitive(newValue, field.getType());
+                // Use the appropriate setter method for each primitive type.
                 if (field.getType().equals(int.class)) {
-                    field.setInt(inObject, Integer.parseInt(newValue));
+                    field.setInt(inObject, (Integer) convertedValue);
                 } else if (field.getType().equals(double.class)) {
-                    field.setDouble(inObject, Double.parseDouble(newValue));
+                    field.setDouble(inObject, (Double) convertedValue);
                 } else if (field.getType().equals(float.class)) {
-                    field.setFloat(inObject, Float.parseFloat(newValue));
+                    field.setFloat(inObject, (Float) convertedValue);
                 } else if (field.getType().equals(long.class)) {
-                    field.setLong(inObject, Long.parseLong(newValue));
+                    field.setLong(inObject, (Long) convertedValue);
                 } else if (field.getType().equals(short.class)) {
-                    field.setShort(inObject, Short.parseShort(newValue));
+                    field.setShort(inObject, (Short) convertedValue);
                 } else if (field.getType().equals(byte.class)) {
-                    field.setByte(inObject, Byte.parseByte(newValue));
+                    field.setByte(inObject, (Byte) convertedValue);
                 } else if (field.getType().equals(boolean.class)) {
-                    field.setBoolean(inObject, Boolean.parseBoolean(newValue));
+                    field.setBoolean(inObject, (Boolean) convertedValue);
                 } else if (field.getType().equals(char.class)) {
-                    field.setChar(inObject, newValue.charAt(0));
+                    field.setChar(inObject, (Character) convertedValue);
                 }
+
             } else if (field.getType().isEnum()) {
-                // Set the enum value
+                // Convert the string to the appropriate enum constant.
                 Object enumValue = Arrays.stream(field.getType().getEnumConstants())
                         .filter(e -> e.toString().equals(newValue))
                         .findFirst()
                         .orElse(null);
+                if (enumValue != null) {
+                    field.set(inObject, enumValue);
+                } else {
+                    throw new IllegalArgumentException("Invalid enum value: " + newValue);
+                }
 
-                field.set(inObject, enumValue);
+            } else if (ReflectionUtil.isWrapperOrString(field.getType())) {
+                // For String types, just set the new value.
+                if (field.getType().equals(String.class)) {
+                    field.set(inObject, newValue);
+                } else {
+                    // For wrapper classes, convert using the helper method.
+                    Object convertedValue = ReflectionUtil.convertStringToPrimitive(newValue, field.getType());
+                    field.set(inObject, convertedValue);
+                }
+
             } else {
-                // Set the value for non-primitive fields
+                // For other object types, attempt to set the value directly.
                 field.set(inObject, newValue);
             }
         } catch (IllegalAccessException e) {
             log.error("Error setting field value", e);
         }
     }
+
 
 
     /**
@@ -214,7 +237,40 @@ public class ObjectReference {
             return String.format("%s[%d]: %s", componentType, index, getFieldValue());
         } else if (field.getType().isPrimitive() || ReflectionUtil.isWrapperOrString(field.getType()) || field.getType().isEnum()) {
             return String.format("%s %s {%s}: %s", modifiers, fieldName, fieldType, getFieldValue());
-        } else {
+        } else if (field.getType().isArray()) {
+            try {
+                Object array = field.get(inObject);
+                if (array == null) {
+                    return String.format("%s %s {%s} [%s]", modifiers, fieldName, fieldType, NULL);
+                }
+            return String.format("%s %s {%s} [%d]", modifiers, fieldName, fieldType, Array.getLength(field.get(inObject)));
+            } catch (IllegalAccessException e) {
+                log.error("Error getting field value", e);
+                return "";
+            }
+
+        } else if (Collection.class.isAssignableFrom(field.getType())) {
+            // Show what type of collection and content type
+            String genericType = field.getGenericType().getTypeName().getClass().getSimpleName();
+            return String.format("%s %s {%s<%s>} {%s%s}", modifiers, fieldName, fieldType, genericType, objectId, cyclicMarker);
+
+        } else if (Map.class.isAssignableFrom(field.getType())) {
+            String keyTypeStr = "Unknown";
+            String valueTypeStr = "Unknown";
+
+            if (field.getGenericType() instanceof ParameterizedType) {
+                ParameterizedType paramType = (ParameterizedType) field.getGenericType();
+                Type[] typeArgs = paramType.getActualTypeArguments();
+                if (typeArgs != null && typeArgs.length == 2) {
+                    keyTypeStr = typeArgs[0].getTypeName(); // e.g., "java.lang.String"
+                    valueTypeStr = typeArgs[1].getTypeName(); // e.g., "java.lang.Integer"
+                }
+            }
+
+            return String.format("%s %s {%s<%s, %s>} {%s%s}",
+                    modifiers, fieldName, fieldType, keyTypeStr, valueTypeStr, objectId, cyclicMarker);
+        }
+        else {
             return String.format("%s %s {%s} {%s%s}", modifiers, fieldName, fieldType, objectId, cyclicMarker);
         }
     }

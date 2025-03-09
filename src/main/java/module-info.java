@@ -10,6 +10,7 @@ module com.romiis.equallibtestapp {
     requires com.fasterxml.jackson.databind;
     requires jdk.unsupported;
     requires jdk.compiler;
+    requires java.sql;
 
 
     exports com.romiis.equallibtestapp.util;

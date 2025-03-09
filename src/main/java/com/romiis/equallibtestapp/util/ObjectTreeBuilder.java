@@ -20,7 +20,7 @@ public class ObjectTreeBuilder {
      *
      * @return The root TreeItem for the object
      */
-    public static TreeItem<ObjectReference> createTree(TreeItem<ObjectReference> parent, Set<Object> visited) {
+    public static TreeItem<ObjectReference> createTree(TreeItem<ObjectReference> parent, Set<Object> visited, boolean nestedInCollectionOrArray) {
 
         // Get the object instance from the parent TreeItem
         Object obj = parent.getValue().getInObject();
@@ -43,7 +43,7 @@ public class ObjectTreeBuilder {
 
 
 
-        if (obj instanceof Collection || obj instanceof Map) {
+        if ((obj instanceof Collection || obj instanceof Map) && !nestedInCollectionOrArray) {
             TreeItem<ObjectReference> edit = new TreeItem<>(new ObjectReference(true, obj, parent.getValue().getField()));
             parent.getChildren().add(edit);
 
@@ -57,19 +57,21 @@ public class ObjectTreeBuilder {
             try {
                 Object fieldValue = field.get(finalObj);
 
+                boolean nestedInCol = (finalObj instanceof Collection || finalObj instanceof Map) || nestedInCollectionOrArray;
+
                 if (fieldValue == null) {
                     boolean cyclic = visited.contains(finalObj);
                     parent.getChildren().add(new TreeItem<>(new ObjectReference(finalObj, field, cyclic)));
                     return;
                 }
                 if (field.getType().isArray()) {
-                    parent.getChildren().add(handleArray(new TreeItem<>(new ObjectReference(finalObj, field)), visited));
+                    parent.getChildren().add(handleArray(new TreeItem<>(new ObjectReference(finalObj, field)), visited,nestedInCol));
                 } else if (field.getType().isEnum()) {
                     parent.getChildren().add(new TreeItem<>(new ObjectReference(finalObj, field)));
                 }
                 // Recursively handle nested objects
                 else if (!field.getType().isPrimitive() && !ReflectionUtil.isWrapperOrString(field.getType())) {
-                    parent.getChildren().add(createTree(new TreeItem<>(new ObjectReference(fieldValue, field)), visited));
+                    parent.getChildren().add(createTree(new TreeItem<>(new ObjectReference(fieldValue, field)), visited, nestedInCol));
                 } else {
                     TreeItem<ObjectReference> childNode = new TreeItem<>(new ObjectReference(finalObj, field));
                     parent.getChildren().add(childNode);
@@ -89,13 +91,15 @@ public class ObjectTreeBuilder {
      *
      * @return The root TreeItem for the array object
      */
-    private static TreeItem<ObjectReference> handleArray(TreeItem<ObjectReference> parent, Set<Object> visited) {
+    private static TreeItem<ObjectReference> handleArray(TreeItem<ObjectReference> parent, Set<Object> visited, boolean nestedInCollectionOrArray) {
         ObjectReference parentValue = parent.getValue();
         Object array = ReflectionUtil.getFieldValue(parentValue.getInObject(), parentValue.getField());
         int length = Array.getLength(array);
 
-        TreeItem<ObjectReference> edit = new TreeItem<>(new ObjectReference(true, array, parentValue.getField()));
-        parent.getChildren().add(edit);
+        if (!nestedInCollectionOrArray) {
+            TreeItem<ObjectReference> edit = new TreeItem<>(new ObjectReference(true, array, parentValue.getField()));
+            parent.getChildren().add(edit);
+        }
 
         for (int i = 0; i < length; i++) {
             Object element = Array.get(array, i);
@@ -105,7 +109,7 @@ public class ObjectTreeBuilder {
                 child.getChildren().add(new TreeItem<>(new ObjectReference(element, null, true)));
             }
             if (element != null && !element.getClass().isPrimitive() && !ReflectionUtil.isWrapperOrString(element.getClass())) {
-                child = createTree(child, visited);
+                child = createTree(child, visited, nestedInCollectionOrArray);
             }
 
             parent.getChildren().add(child);

@@ -180,7 +180,7 @@ public class MyTreeView extends TreeView<ObjectReference> {
         Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
 
         // Build the tree structure.
-        rootItem = ObjectTreeBuilder.createTree(rootItem, visited);
+        rootItem = ObjectTreeBuilder.createTree(rootItem, visited, false);
 
         // Set the root item of the TreeView.
         this.setRoot(rootItem);
@@ -335,5 +335,11 @@ public class MyTreeView extends TreeView<ObjectReference> {
             }
         }
         return SaveResult.CANCEL;
+    }
+
+
+    public void updateObject(ObjectReference objectReference) {
+
+
     }
 }
