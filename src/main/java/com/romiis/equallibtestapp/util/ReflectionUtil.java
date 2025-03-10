@@ -133,7 +133,9 @@ public class ReflectionUtil {
                 throw new IllegalArgumentException("Cannot convert string \"" + value + "\" to char. Expected a single character.");
             }
             return value.charAt(0);
-        } else {
+        } else if (primitiveType == String.class) {
+            return value;
+        }else {
             throw new IllegalArgumentException("Unsupported primitive type: " + primitiveType);
         }
     }

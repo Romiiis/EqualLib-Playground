@@ -1,7 +1,8 @@
 package com.romiis.equallibtestapp;
 
-import com.romiis.DeepCopyUtil;
+
 import com.romiis.equallibtestapp.io.FileManager;
+import com.romiis.equallibtestapp.util.DeepCopyUtil;
 import com.romiis.equallibtestapp.util.DynamicCompiler;
 import com.romiis.equallibtestapp.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -146,21 +147,39 @@ public class CacheUtil {
      * @return the class
      */
     public Class<?> getClassByName(String name) {
+        // If the name is an array descriptor (starts with '['), handle it specially.
+        if (name.startsWith("[")) {
+            try {
+                return JsonUtil.determineFieldClass(name);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        // Try to match using the full class name first.
+        for (Class<?> clazz : loadedClassesPool) {
+            if (clazz.getName().equals(name)) {
+                return clazz;
+            }
+        }
+
+        // Then try matching by simple name.
         for (Class<?> clazz : loadedClassesPool) {
             if (clazz.getSimpleName().equals(name)) {
                 return clazz;
             }
         }
 
-        // Also try to load the class from the class loader
+        // Lastly, try to load it from the class loader.
         try {
             return classLoader.loadClass(name);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
         return null;
     }
+
 
     //endregion
 
@@ -186,7 +205,7 @@ public class CacheUtil {
                     loadedObjectsPool.put(objectName, obj);
                 }
             } catch (Exception e) {
-                log.error("Could not load object: {}", objectName);
+                log.error("Could not load object: {}, {}", objectName, e.getMessage());
             }
         }
 

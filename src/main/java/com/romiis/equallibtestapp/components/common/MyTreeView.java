@@ -63,6 +63,7 @@ public class MyTreeView extends TreeView<ObjectReference> {
      */
     public MyTreeView() {
         super();
+
         initializeClickHandler();
         setEditable(true);
 
@@ -337,9 +338,4 @@ public class MyTreeView extends TreeView<ObjectReference> {
         return SaveResult.CANCEL;
     }
 
-
-    public void updateObject(ObjectReference objectReference) {
-
-
-    }
 }

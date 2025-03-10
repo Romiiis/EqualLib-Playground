@@ -30,6 +30,9 @@ public class EditorsUtil {
      */
     private void startTextFieldEditor(TreeItem<ObjectReference> item, ObjectReference objectReference, Field field) {
         String currentValue = String.valueOf(objectReference.getFieldValue());
+        if (objectReference.getFieldValue() == null) {
+            currentValue = "";
+        }
         TextField textField = new TextField(currentValue);
         HBox editorBox = new HBox(textField);
         editorBox.setStyle("-fx-padding: 5;");
@@ -134,7 +137,7 @@ public class EditorsUtil {
 
             // Pass this TreeView to the controller.
             ArrayEditController controller = loader.getController();
-            controller.setAssignedArray(objectReference);
+            controller.setAssignedArray(objectReference.getInObject(), objectReference.getField().getName());
 
             Stage stage = new Stage();
             stage.setTitle("Array editor");
@@ -143,7 +146,9 @@ public class EditorsUtil {
             stage.showAndWait();
 
             log.info("Array editor closed");
-            parentItem.getValue().getInObject();
+
+            objectReference.setInObject(controller.getArray());
+
             wireReference(parentItem, objectReference);
             treeView.setModified(true);
             treeView.refresh();

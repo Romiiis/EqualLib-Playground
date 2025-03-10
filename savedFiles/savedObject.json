@@ -1,66 +1,199 @@
 {
-  "@class" : "Person",
-  "address" : {
-    "@class" : "Address",
-    "city" : {
-      "@class" : "[LCity;",
-      "value" : [ null, null, null, {
-        "country" : {
-          "@class" : "Country",
-          "value" : "CZ"
-        },
-        "@class" : "City",
-        "name" : {
-          "@class" : "java.lang.String",
-          "value" : null
-        },
-        "population" : {
-          "@class" : "[I",
-          "value" : [ {
-            "@class" : "java.lang.Integer",
-            "value" : 0
-          }, {
-            "@class" : "java.lang.Integer",
-            "value" : 0
-          }, {
-            "@class" : "java.lang.Integer",
-            "value" : 0
-          }, {
-            "@class" : "java.lang.Integer",
-            "value" : 1000
-          }, {
-            "@class" : "java.lang.Integer",
-            "value" : 0
-          }, {
-            "@class" : "java.lang.Integer",
-            "value" : 0
-          }, {
-            "@class" : "java.lang.Integer",
-            "value" : 0
-          }, {
-            "@class" : "java.lang.Integer",
-            "value" : 0
-          }, {
-            "@class" : "java.lang.Integer",
-            "value" : 0
-          }, {
-            "@class" : "java.lang.Integer",
-            "value" : 0
-          } ]
-        }
-      }, null, null, null, null, null, null ]
-    },
-    "street" : {
-      "@class" : "java.lang.String",
-      "value" : null
-    }
+  "@class" : "Pit",
+  "names" : {
+    "@class" : "[[Ljava.lang.String;",
+    "value" : [ {
+      "@class" : "[Ljava.lang.String;",
+      "value" : [ null, null, null, null, null, null, null, null ]
+    }, {
+      "@class" : "[Ljava.lang.String;",
+      "value" : [ null, null, null, null, null, null, null, null ]
+    }, {
+      "@class" : "[Ljava.lang.String;",
+      "value" : [ null, null, null, null, null, null, null, null ]
+    }, {
+      "@class" : "[Ljava.lang.String;",
+      "value" : [ null, null, null, null, null, null, null, null ]
+    }, {
+      "@class" : "[Ljava.lang.String;",
+      "value" : [ null, null, null, null, null, null, null, null ]
+    }, {
+      "@class" : "[Ljava.lang.String;",
+      "value" : [ null, null, null, null, null, null, null, null ]
+    } ]
   },
-  "name" : {
-    "@class" : "java.lang.String",
-    "value" : null
+  "bytes" : {
+    "@class" : "[B",
+    "value" : [ {
+      "@class" : "java.lang.Byte",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Byte",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Byte",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Byte",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Byte",
+      "value" : 0
+    }, {
+      "@class" : "java.lang.Byte",
+      "value" : 0
+    } ]
   },
-  "age" : {
-    "@class" : "int",
-    "value" : 440
+  "countries" : {
+    "@class" : "[LCountry;",
+    "value" : [ null, null, null, null, null, null ]
+  },
+  "holes" : {
+    "@class" : "[[Z",
+    "value" : [ {
+      "@class" : "[Z",
+      "value" : [ {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      } ]
+    }, {
+      "@class" : "[Z",
+      "value" : [ {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      } ]
+    }, {
+      "@class" : "[Z",
+      "value" : [ {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      } ]
+    }, {
+      "@class" : "[Z",
+      "value" : [ {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      } ]
+    }, {
+      "@class" : "[Z",
+      "value" : [ {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      } ]
+    }, {
+      "@class" : "[Z",
+      "value" : [ {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      }, {
+        "@class" : "java.lang.Boolean",
+        "value" : false
+      } ]
+    } ]
   }
 }

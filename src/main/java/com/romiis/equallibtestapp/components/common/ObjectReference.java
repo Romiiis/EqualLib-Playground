@@ -6,10 +6,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.*;
-import java.sql.Wrapper;
 import java.util.*;
-
-import static com.fasterxml.jackson.databind.type.LogicalType.Collection;
 
 /**
  * ObjectReference.java
@@ -32,7 +29,7 @@ public class ObjectReference {
     private final Integer index;
 
     // String representation of a null value
-    private final String NULL = "null";
+    public static final String NULL = "[NULL]";
 
     // Cycle detection flag
     private boolean cyclic = false;
@@ -168,19 +165,22 @@ public class ObjectReference {
      */
     public Object getFieldValue() {
         try {
+            if (field == null) {
+                return null;
+            }
             // Check if the field is an array type
             if (field.getType().isArray()) {
+
                 // Get the array value
                 if (index == null) {
-                    return NULL;
+                    return null;
                 }
-                Object val = Array.get(inObject, index);
-                return Objects.requireNonNullElse(val, NULL);
+                return Array.get(inObject, index);
 
             }
 
             // For non-array fields (primitives, Strings, etc.)
-            return Objects.requireNonNullElse(field.get(inObject), NULL);
+            return field.get(inObject);
 
         } catch (IllegalAccessException e) {
             log.error("Error getting field value", e);
@@ -210,70 +210,96 @@ public class ObjectReference {
         return isModifiable;
     }
 
-
     @Override
     public String toString() {
-
+        // If this is a special "edit content" item, return early.
         if (editContentItem) {
             return "(Edit content ...)";
         }
 
+        // Prepare common information for the inObject.
         String cyclicMarker = cyclic ? " (\uD83D\uDD01)" : "";
-        String fullClassName = inObject.getClass().getName();
+        Class<?> inObjClass = inObject.getClass();
+        String fullClassName = inObjClass.getName();
         String objectIdHex = Integer.toHexString(System.identityHashCode(inObject));
         String objectId = fullClassName + "@" + objectIdHex;
-        String simpleClassName = inObject.getClass().getSimpleName();
+        String simpleClassName = inObjClass.getSimpleName();
 
+        // If there is no associated field, use the object information.
         if (field == null) {
+            if (inObjClass.isEnum() && index != null) {
+                // If the object is an enum and an index is available, include it.
+                return String.format("%s[%d]: %s", simpleClassName, index, inObject);
+            }
             return String.format("%s {%s}%s", simpleClassName, objectId, cyclicMarker);
         }
 
+        // Retrieve field-specific information.
         String modifiers = getModifiers(field);
         String fieldName = field.getName();
-        String fieldType = field.getType().getSimpleName();
+        String fieldTypeName = field.getType().getSimpleName();
 
+        // Handle array fields that represent a single element (with an index).
         if (index != null && field.getType().isArray()) {
             String componentType = field.getType().getComponentType().getSimpleName();
-            return String.format("%s[%d]: %s", componentType, index, getFieldValue());
-        } else if (field.getType().isPrimitive() || ReflectionUtil.isWrapperOrString(field.getType()) || field.getType().isEnum()) {
-            return String.format("%s %s {%s}: %s", modifiers, fieldName, fieldType, getFieldValue());
-        } else if (field.getType().isArray()) {
+            String valueStr = Objects.toString(getFieldValue(), NULL);
+            return String.format("%s[%d]: %s", componentType, index, valueStr);
+        }
+
+        // Handle enum fields.
+        if (field.getType().isEnum()) {
+            String valueStr = Objects.toString(getFieldValue(), NULL);
+            return String.format("%s %s {%s} : %s", modifiers, fieldName, fieldTypeName, valueStr);
+        }
+
+        // Handle primitives, wrappers, or String fields.
+        if (field.getType().isPrimitive() || ReflectionUtil.isWrapperOrString(field.getType())) {
+            String valueStr = Objects.toString(getFieldValue(), NULL);
+            return String.format("%s %s {%s}: %s", modifiers, fieldName, fieldTypeName, valueStr);
+        }
+
+        // Handle array fields (non-indexed, i.e. the whole array).
+        if (field.getType().isArray()) {
             try {
-                Object array = field.get(inObject);
-                if (array == null) {
-                    return String.format("%s %s {%s} [%s]", modifiers, fieldName, fieldType, NULL);
+                Object arrayValue = field.get(inObject);
+                if (arrayValue == null) {
+                    return String.format("%s %s {%s} [%s]", modifiers, fieldName, fieldTypeName, NULL);
                 }
-            return String.format("%s %s {%s} [%d]", modifiers, fieldName, fieldType, Array.getLength(field.get(inObject)));
+                int arrayLength = Array.getLength(arrayValue);
+                return String.format("%s %s {%s} [%d]", modifiers, fieldName, fieldTypeName, arrayLength);
             } catch (IllegalAccessException e) {
                 log.error("Error getting field value", e);
                 return "";
             }
+        }
 
-        } else if (Collection.class.isAssignableFrom(field.getType())) {
-            // Show what type of collection and content type
+        // Handle Collection fields.
+        if (Collection.class.isAssignableFrom(field.getType())) {
+            // For now, we use the generic type's type name class name (which might be unhelpful).
             String genericType = field.getGenericType().getTypeName().getClass().getSimpleName();
-            return String.format("%s %s {%s<%s>} {%s%s}", modifiers, fieldName, fieldType, genericType, objectId, cyclicMarker);
+            return String.format("%s %s {%s<%s>} {%s%s}",
+                    modifiers, fieldName, fieldTypeName, genericType, objectId, cyclicMarker);
+        }
 
-        } else if (Map.class.isAssignableFrom(field.getType())) {
+        // Handle Map fields.
+        if (Map.class.isAssignableFrom(field.getType())) {
             String keyTypeStr = "Unknown";
             String valueTypeStr = "Unknown";
-
-            if (field.getGenericType() instanceof ParameterizedType) {
-                ParameterizedType paramType = (ParameterizedType) field.getGenericType();
+            if (field.getGenericType() instanceof ParameterizedType paramType) {
                 Type[] typeArgs = paramType.getActualTypeArguments();
                 if (typeArgs != null && typeArgs.length == 2) {
-                    keyTypeStr = typeArgs[0].getTypeName(); // e.g., "java.lang.String"
-                    valueTypeStr = typeArgs[1].getTypeName(); // e.g., "java.lang.Integer"
+                    keyTypeStr = typeArgs[0].getTypeName();
+                    valueTypeStr = typeArgs[1].getTypeName();
                 }
             }
-
             return String.format("%s %s {%s<%s, %s>} {%s%s}",
-                    modifiers, fieldName, fieldType, keyTypeStr, valueTypeStr, objectId, cyclicMarker);
+                    modifiers, fieldName, fieldTypeName, keyTypeStr, valueTypeStr, objectId, cyclicMarker);
         }
-        else {
-            return String.format("%s %s {%s} {%s%s}", modifiers, fieldName, fieldType, objectId, cyclicMarker);
-        }
+
+        // Default case for any other field types.
+        return String.format("%s %s {%s} {%s%s}", modifiers, fieldName, fieldTypeName, objectId, cyclicMarker);
     }
+
 
 
 
@@ -314,6 +340,7 @@ public class ObjectReference {
         // return the modifiers as a string
         return modifiers.isEmpty() ? "" : "[" + String.join(", ", modifiers) + "]";
     }
+
 
 
 }

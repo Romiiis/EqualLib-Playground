@@ -108,7 +108,11 @@ public class ObjectTreeBuilder {
             if (element != null && visited.contains(element)) {
                 child.getChildren().add(new TreeItem<>(new ObjectReference(element, null, true)));
             }
-            if (element != null && !element.getClass().isPrimitive() && !ReflectionUtil.isWrapperOrString(element.getClass())) {
+
+            if (element != null && element.getClass().isEnum()) {
+                child = new TreeItem<>(new ObjectReference(element, null, i));
+            }
+            else if (element != null && !element.getClass().isPrimitive() && !ReflectionUtil.isWrapperOrString(element.getClass())) {
                 child = createTree(child, visited, nestedInCollectionOrArray);
             }
 

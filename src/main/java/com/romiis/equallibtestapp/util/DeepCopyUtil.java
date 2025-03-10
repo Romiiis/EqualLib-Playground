@@ -1,4 +1,4 @@
-package com.romiis;
+package com.romiis.equallibtestapp.util;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -49,6 +49,20 @@ public class DeepCopyUtil {
         try {
             Class<?> clazz = object.getClass();
 
+            // If the object is an array (including multi-dimensional arrays), handle it specially.
+            if (clazz.isArray()) {
+                int length = Array.getLength(object);
+                Object arrayCopy = Array.newInstance(clazz.getComponentType(), length);
+                // Put the array copy into the cache before recursing to handle circular references.
+                copyCache.put(object, arrayCopy);
+                for (int i = 0; i < length; i++) {
+                    Object element = Array.get(object, i);
+                    Object elementCopy = deepCopy(element, copyCache);
+                    Array.set(arrayCopy, i, elementCopy);
+                }
+                return (T) arrayCopy;
+            }
+
             // Handle primitive and immutable types
             if (isImmutable(clazz)) return object;
 
@@ -57,7 +71,7 @@ public class DeepCopyUtil {
             // Put the new object into the cache before copying fields to handle circular references
             copyCache.put(object, newObject);
 
-            // Copy all fields (including inherited ones), without filtering out any lazy or cached fields.
+            // Copy all fields (including inherited ones)
             copyAllFields(object, newObject, copyCache);
 
             return newObject;
@@ -78,22 +92,18 @@ public class DeepCopyUtil {
     private static <T> T forceLazyInitialization(T object) {
         if (object == null) return object;
 
-        // If the object is one of the known collection types, call a method that forces initialization.
+        // If the object is one of the known collection types, force initialization.
         if (object instanceof Map) {
-            // For maps, call entrySet() and keySet()
             ((Map<?, ?>) object).entrySet();
             ((Map<?, ?>) object).keySet();
         } else if (object instanceof Set) {
-            // For sets, iterate through them.
             ((Set<?>) object).iterator().hasNext();
         } else if (object instanceof Collection) {
-            // For other collections, call size() and toArray()
             ((Collection<?>) object).size();
             ((Collection<?>) object).toArray();
         }
 
-        // For any object, try to invoke all public no-argument getters.
-        // WARNING: This might trigger side effects if getters perform actions beyond lazy initialization.
+        // Invoke all public no-argument getters (except getClass).
         for (Method method : object.getClass().getMethods()) {
             if (method.getParameterCount() == 0 &&
                     method.getName().startsWith("get") &&
@@ -130,8 +140,7 @@ public class DeepCopyUtil {
 
     /**
      * Copy all fields of an object to another object using the given cache.
-     * This version copies every field, including those that are normally considered
-     * lazy or cached.
+     * This version copies every field, including inherited ones.
      *
      * @param original  the original object
      * @param copy      the object to copy to
@@ -145,12 +154,11 @@ public class DeepCopyUtil {
             for (Field field : fields) {
                 field.setAccessible(true);
 
-                // Skip only static fields; we copy every non-static field.
+                // Skip static fields.
                 if (Modifier.isStatic(field.getModifiers())) continue;
 
                 Object fieldValue = field.get(original);
                 if (fieldValue != null && fieldValue.getClass().isArray()) {
-                    // Handle arrays separately.
                     int length = Array.getLength(fieldValue);
                     Object arrayCopy = Array.newInstance(fieldValue.getClass().getComponentType(), length);
                     for (int i = 0; i < length; i++) {
@@ -158,7 +166,6 @@ public class DeepCopyUtil {
                     }
                     field.set(copy, arrayCopy);
                 } else {
-                    // Deep copy the field value.
                     field.set(copy, deepCopy(fieldValue, copyCache));
                 }
             }
