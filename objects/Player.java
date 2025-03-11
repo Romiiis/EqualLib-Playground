@@ -23,9 +23,12 @@ public class Player {
     // Indexes of user Pits in order
     private final Set<Integer> pitIndexes; // Set for fast lookups
 
+    public static Set<Integer> staticSet = new HashSet<>();
+
 
 
     public Player() {
+
         this.pitIndexes = new HashSet<>();
         this.nickname = "Player";
         this.storeIndex = 0;

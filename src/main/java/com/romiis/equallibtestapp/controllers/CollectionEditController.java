@@ -1,0 +1,450 @@
+package com.romiis.equallibtestapp.controllers;
+
+import com.romiis.equallibtestapp.MainClass;
+import com.romiis.equallibtestapp.components.common.ObjectReference;
+import com.romiis.equallibtestapp.util.ReflectionUtil;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxListCell;
+import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.converter.DefaultStringConverter;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+@Slf4j
+public class CollectionEditController {
+
+    /**
+     * -- GETTER --
+     * Returns the updated collection after editing.
+     */
+    @Getter
+    private Collection<?> collection;
+    private String collectionName;
+    private Class<?> elementType;
+
+    // A backup copy to restore the original content if cancel is pressed.
+    private List<Object> backupCollection;
+
+    @FXML
+    private ListView<String> elementsList;
+    @FXML
+    private Label collectionNameLabel;
+    @FXML
+    private Button addButton;
+    @FXML
+    private Button removeButton;
+    @FXML
+    private Button saveButton;
+    @FXML
+    private Button cancelButton;
+
+    // Local copy of collection elements for editing.
+    private ObservableList<Object> observableElements;
+
+    /**
+     * Initializes the editor with a collection, a name, and the expected element type.
+     * The passed collection reference is preserved and will be updated on save.
+     */
+    public void setAssignedCollection(Collection<?> collection, String collectionName, Class<?> elementType) {
+        if (collection == null) {
+            throw new IllegalArgumentException("Provided collection is null.");
+        }
+        // Preserve the passed collection reference.
+        this.collection = collection;
+        // Make a backup copy of the original elements.
+        this.backupCollection = new ArrayList<>(collection);
+        this.collectionName = collectionName;
+        this.elementType = elementType;
+        init();
+    }
+
+    /**
+     * Initializes the editor: loads the collection elements, sets up the ListView,
+     * configures cell factories based on element type, and wires UI controls.
+     */
+    private void init() {
+        if (collectionNameLabel != null) {
+            collectionNameLabel.setText(collectionName);
+        }
+        loadCollectionIntoObservableElements();
+        // Set the ListView items using plain string conversion (the custom cells add index info).
+        elementsList.setItems(convertToStringList(observableElements));
+        elementsList.setEditable(true);
+
+        setupListViewEditor(elementType);
+
+        // Commit edit on cell update.
+        elementsList.setOnEditCommit(event -> {
+            int index = event.getIndex();
+            String newValue = event.getNewValue();
+            boolean isCorrectFormat = ReflectionUtil.isCorrectFormat(newValue, elementType);
+            if (!isCorrectFormat) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Format");
+                alert.setHeaderText("Incorrect Format for index: " + index);
+                alert.setContentText("The value \"" + newValue + "\" is not a valid " + elementType.getSimpleName());
+                alert.showAndWait();
+                return;
+            }
+            log.debug("Editing element at index {}: {}", index, newValue);
+            Object converted = convertStringToElement(newValue, elementType);
+            if (newValue.isEmpty()) {
+                converted = null;
+            }
+            observableElements.set(index, converted);
+            refreshListView();
+        });
+
+        addButton.setOnAction(e -> handleAddAction());
+        removeButton.setOnAction(e -> handleRemoveAction());
+        saveButton.setOnAction(e -> handleSaveAction());
+        cancelButton.setOnAction(e -> handleCancelAction());
+    }
+
+    /**
+     * Loads the current collection elements into the local observable list.
+     */
+    private void loadCollectionIntoObservableElements() {
+        // Use the actual collection contents.
+        observableElements = FXCollections.observableArrayList();
+        observableElements.addAll(collection);
+    }
+
+    /**
+     * Converts the local observableElements into a list of Strings for display.
+     */
+    private ObservableList<String> convertToStringList(ObservableList<Object> list) {
+        ObservableList<String> strings = FXCollections.observableArrayList();
+        for (Object o : list) {
+            strings.add(o != null ? o.toString() : ObjectReference.NULL);
+        }
+        return strings;
+    }
+
+    /**
+     * Refreshes the ListView display.
+     */
+    private void refreshListView() {
+        elementsList.setItems(convertToStringList(observableElements));
+    }
+
+    /*==================== ListView Editor Setup ====================*/
+
+    private void setupListViewEditor(Class<?> elementType) {
+        if (elementType.isEnum()) {
+            Object[] enumConstants = elementType.getEnumConstants();
+            String[] options = Arrays.stream(enumConstants)
+                    .map(Object::toString)
+                    .toArray(String[]::new);
+            elementsList.setCellFactory(lv -> {
+                IndexedComboBoxCell cell = new IndexedComboBoxCell(options);
+                setupDragAndDrop(cell);
+                cell.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2 && !cell.isEmpty()) {
+                        lv.edit(cell.getIndex());
+                    }
+                });
+                return cell;
+            });
+        } else if (elementType.equals(boolean.class) || elementType.equals(Boolean.class)) {
+            elementsList.setCellFactory(lv -> {
+                IndexedComboBoxCell cell = new IndexedComboBoxCell("true", "false");
+                setupDragAndDrop(cell);
+                cell.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2 && !cell.isEmpty()) {
+                        lv.edit(cell.getIndex());
+                    }
+                });
+                return cell;
+            });
+        } else if (elementType.isArray() || Collection.class.isAssignableFrom(elementType)) {
+            elementsList.setCellFactory(lv -> new IndexedListCell() {
+                {
+                    setEditable(false);
+                    setOnMouseClicked(event -> {
+                        if (event.getClickCount() == 2) {
+                            int selectedIndex = getIndex();
+                            if (selectedIndex < 0) return;
+                            Object nested = observableElements.get(selectedIndex);
+                            if (nested == null) {
+                                log.warn("Selected element is null, cannot open nested editor.");
+                                return;
+                            }
+                            try {
+                                if (nested.getClass().isArray()) {
+                                    FXMLLoader loader = new FXMLLoader(MainClass.class.getResource(MainClass.ARRAY_EDIT_SCENE_FXML));
+                                    Parent root = loader.load();
+                                    ArrayEditController controller = loader.getController();
+                                    controller.setAssignedArray(nested, collectionName + " [index " + selectedIndex + "]", null, -1);
+                                    Stage stage = new Stage();
+                                    stage.setTitle("Nested Array Editor");
+                                    stage.setScene(new Scene(root));
+                                    stage.initModality(Modality.APPLICATION_MODAL);
+                                    stage.showAndWait();
+                                    observableElements.set(selectedIndex, controller.getArray());
+                                    refreshListView();
+                                } else if (nested instanceof Collection) {
+                                    FXMLLoader loader = new FXMLLoader(MainClass.class.getResource(MainClass.COLLECTION_EDIT_SCENE_FXML));
+                                    Parent root = loader.load();
+                                    CollectionEditController controller = loader.getController();
+                                    controller.setAssignedCollection((Collection<?>) nested, collectionName + " [index " + selectedIndex + "]", Object.class);
+                                    Stage stage = new Stage();
+                                    stage.setTitle("Nested Collection Editor");
+                                    stage.setScene(new Scene(root));
+                                    stage.initModality(Modality.APPLICATION_MODAL);
+                                    stage.showAndWait();
+                                    observableElements.set(selectedIndex, controller.getCollection());
+                                    refreshListView();
+                                }
+                            } catch (Exception ex) {
+                                log.error("Error opening nested editor", ex);
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        String nestedType = elementType.isArray() ? "Array" : "Collection";
+                        setText(getIndex() + ": " + "[Nested " + nestedType + "]");
+                    }
+                }
+            });
+        } else if (ReflectionUtil.isWrapperOrString(elementType) || elementType.isPrimitive() || elementType.equals(String.class)) {
+            elementsList.setCellFactory(lv -> {
+                IndexedTextFieldCell cell = new IndexedTextFieldCell();
+                setupDragAndDrop(cell);
+                cell.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2 && !cell.isEmpty()) {
+                        lv.edit(cell.getIndex());
+                    }
+                });
+                return cell;
+            });
+        } else {
+            elementsList.setCellFactory(lv -> {
+                IndexedComboBoxCell cell = new IndexedComboBoxCell("Option1", "Option2", "Option3");
+                setupDragAndDrop(cell);
+                cell.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2 && !cell.isEmpty()) {
+                        lv.edit(cell.getIndex());
+                    }
+                });
+                return cell;
+            });
+        }
+    }
+
+    /**
+     * Sets up drag and drop on a cell to allow reordering.
+     */
+    private void setupDragAndDrop(ListCell<String> cell) {
+        cell.setOnDragDetected(event -> {
+            if (!cell.isEmpty()) {
+                Dragboard db = cell.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.putString(String.valueOf(cell.getIndex()));
+                db.setContent(content);
+                event.consume();
+            }
+        });
+        cell.setOnDragOver(event -> {
+            if (event.getGestureSource() != cell && event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
+            event.consume();
+        });
+        cell.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            if (db.hasString()) {
+                int draggedIndex = Integer.parseInt(db.getString());
+                int dropIndex = cell.getIndex();
+                if (draggedIndex != dropIndex) {
+                    Object draggedItem = observableElements.get(draggedIndex);
+                    observableElements.remove(draggedIndex);
+                    observableElements.add(dropIndex, draggedItem);
+                    refreshListView();
+                }
+                event.setDropCompleted(true);
+            }
+            event.consume();
+        });
+    }
+
+    /**
+     * Converts a String from the editor into an object of the correct type.
+     */
+    private Object convertStringToElement(String value, Class<?> elementType) {
+        if (elementType.isEnum()) {
+            Object[] enumConstants = elementType.getEnumConstants();
+            for (Object constant : enumConstants) {
+                if (constant.toString().equals(value))
+                    return constant;
+            }
+            return null;
+        } else if (elementType.equals(boolean.class) || elementType.equals(Boolean.class)) {
+            return Boolean.parseBoolean(value);
+        } else if (ReflectionUtil.isWrapperOrString(elementType) || elementType.isPrimitive() || elementType.equals(String.class)) {
+            return ReflectionUtil.convertStringToPrimitive(value, elementType);
+        }
+        return value;
+    }
+
+    /**
+     * Handles the Add action: appends a new element with a default value.
+     */
+    private void handleAddAction() {
+        Object defaultValue;
+        if (elementType.isArray()) {
+            defaultValue = Array.newInstance(elementType.getComponentType(), 0);
+        } else if (Collection.class.isAssignableFrom(elementType)) {
+            defaultValue = new ArrayList<>();
+        } else {
+            defaultValue = ReflectionUtil.getDefaultValue(elementType);
+        }
+        observableElements.add(defaultValue);
+        refreshListView();
+    }
+
+    /**
+     * Handles the Remove action: deletes the currently selected element.
+     */
+    private void handleRemoveAction() {
+        int selectedIndex = elementsList.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0) {
+            observableElements.remove(selectedIndex);
+            refreshListView();
+        }
+    }
+
+    /**
+     * Handles saving: updates the original collection with the modified elements.
+     */
+    @SuppressWarnings("unchecked")
+    private void handleSaveAction() {
+        // Modify the passed collection in place.
+        ((Collection<Object>) collection).clear();
+        ((Collection<Object>) collection).addAll(observableElements);
+        // Update the backup in case the editor is reopened.
+        backupCollection = new ArrayList<>(observableElements);
+        log.debug("Changes saved to collection.");
+        closeWindow();
+    }
+
+    /**
+     * Cancels editing and restores the original collection.
+     */
+    @SuppressWarnings("unchecked")
+    private void handleCancelAction() {
+        ((Collection<Object>) collection).clear();
+        ((Collection<Object>) collection).addAll(backupCollection);
+        loadCollectionIntoObservableElements();
+        refreshListView();
+        log.debug("Changes canceled; original collection reloaded.");
+        closeWindow();
+    }
+
+    /**
+     * Closes the current window.
+     */
+    private void closeWindow() {
+        Stage stage = (Stage) cancelButton.getScene().getWindow();
+        stage.close();
+    }
+
+    /*==================== Custom Cell Classes ====================*/
+
+    /**
+     * A ComboBox cell that displays its index before the item.
+     */
+    private class IndexedComboBoxCell extends ComboBoxListCell<String> {
+        public IndexedComboBoxCell(String... items) {
+            super(FXCollections.observableArrayList(items));
+        }
+
+        @Override
+        public void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+            } else {
+                setText(getIndex() + ": " + item);
+            }
+        }
+    }
+
+    /**
+     * A TextField cell that displays its index before the item.
+     */
+    private class IndexedTextFieldCell extends TextFieldListCell<String> {
+        public IndexedTextFieldCell() {
+            super(new DefaultStringConverter());
+        }
+
+        @Override
+        public void startEdit() {
+            super.startEdit();
+            int index = getIndex();
+            if (index < 0) return;
+            Object currentValue = observableElements.get(index);
+            String initialText;
+            if (currentValue != null) {
+                initialText = currentValue.toString();
+            } else if (ReflectionUtil.isWrapperOrString(elementType) || elementType.isPrimitive() || elementType.equals(String.class)) {
+                Object defaultValue = ReflectionUtil.getDefaultValue(elementType);
+                initialText = defaultValue != null ? defaultValue.toString() : "";
+            } else {
+                initialText = "";
+            }
+            TextField textField = new TextField(initialText);
+            textField.setOnAction(event -> commitEdit(textField.getText()));
+            setGraphic(textField);
+        }
+
+        @Override
+        public void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+            } else {
+                setText(getIndex() + ": " + item);
+            }
+        }
+    }
+
+    /**
+     * A generic ListCell that displays its index before the item.
+     */
+    private class IndexedListCell extends ListCell<String> {
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+            } else {
+                setText(getIndex() + ": " + item);
+            }
+        }
+    }
+}

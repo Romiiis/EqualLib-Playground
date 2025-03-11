@@ -1,199 +1,127 @@
 {
-  "@class" : "Pit",
-  "names" : {
-    "@class" : "[[Ljava.lang.String;",
-    "value" : [ {
-      "@class" : "[Ljava.lang.String;",
-      "value" : [ null, null, null, null, null, null, null, null ]
-    }, {
-      "@class" : "[Ljava.lang.String;",
-      "value" : [ null, null, null, null, null, null, null, null ]
-    }, {
-      "@class" : "[Ljava.lang.String;",
-      "value" : [ null, null, null, null, null, null, null, null ]
-    }, {
-      "@class" : "[Ljava.lang.String;",
-      "value" : [ null, null, null, null, null, null, null, null ]
-    }, {
-      "@class" : "[Ljava.lang.String;",
-      "value" : [ null, null, null, null, null, null, null, null ]
-    }, {
-      "@class" : "[Ljava.lang.String;",
-      "value" : [ null, null, null, null, null, null, null, null ]
-    } ]
+  "@class" : "Player",
+  "nickname" : {
+    "@class" : "java.lang.String",
+    "value" : "Player"
   },
-  "bytes" : {
-    "@class" : "[B",
-    "value" : [ {
-      "@class" : "java.lang.Byte",
-      "value" : 0
-    }, {
-      "@class" : "java.lang.Byte",
-      "value" : 0
-    }, {
-      "@class" : "java.lang.Byte",
-      "value" : 0
-    }, {
-      "@class" : "java.lang.Byte",
-      "value" : 0
-    }, {
-      "@class" : "java.lang.Byte",
-      "value" : 0
-    }, {
-      "@class" : "java.lang.Byte",
-      "value" : 0
-    } ]
+  "@id" : 1,
+  "storeIndex" : {
+    "@class" : "int",
+    "value" : 0
   },
-  "countries" : {
-    "@class" : "[LCountry;",
-    "value" : [ null, null, null, null, null, null ]
+  "pitIndexes" : {
+    "serialVersionUID" : {
+      "@class" : "long",
+      "value" : -5024744406713321676
+    },
+    "@class" : "java.util.HashSet",
+    "PRESENT" : {
+      "@class" : "java.lang.Object",
+      "@id" : 5
+    },
+    "@id" : 2,
+    "map" : {
+      "UNTREEIFY_THRESHOLD" : {
+        "@class" : "int",
+        "value" : 6
+      },
+      "@class" : "java.util.HashMap",
+      "TREEIFY_THRESHOLD" : {
+        "@class" : "int",
+        "value" : 8
+      },
+      "entrySet" : null,
+      "values" : null,
+      "DEFAULT_LOAD_FACTOR" : {
+        "@class" : "float",
+        "value" : 0.75
+      },
+      "threshold" : {
+        "@class" : "int",
+        "value" : 12
+      },
+      "DEFAULT_INITIAL_CAPACITY" : {
+        "@class" : "int",
+        "value" : 16
+      },
+      "serialVersionUID" : {
+        "@class" : "long",
+        "value" : 362498820763181265
+      },
+      "loadFactor" : {
+        "@class" : "float",
+        "value" : 0.75
+      },
+      "@id" : 3,
+      "MAXIMUM_CAPACITY" : {
+        "@class" : "int",
+        "value" : 1073741824
+      },
+      "keySet" : {
+        "@class" : "java.util.HashMap$KeySet",
+        "this$0" : {
+          "@ref" : 3
+        },
+        "@id" : 4
+      },
+      "MIN_TREEIFY_CAPACITY" : {
+        "@class" : "int",
+        "value" : 64
+      }
+    }
   },
-  "holes" : {
-    "@class" : "[[Z",
-    "value" : [ {
-      "@class" : "[Z",
-      "value" : [ {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      } ]
-    }, {
-      "@class" : "[Z",
-      "value" : [ {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      } ]
-    }, {
-      "@class" : "[Z",
-      "value" : [ {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      } ]
-    }, {
-      "@class" : "[Z",
-      "value" : [ {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      } ]
-    }, {
-      "@class" : "[Z",
-      "value" : [ {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      } ]
-    }, {
-      "@class" : "[Z",
-      "value" : [ {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      }, {
-        "@class" : "java.lang.Boolean",
-        "value" : false
-      } ]
-    } ]
+  "staticSet" : {
+    "serialVersionUID" : {
+      "@class" : "long",
+      "value" : -5024744406713321676
+    },
+    "@class" : "java.util.HashSet",
+    "PRESENT" : {
+      "@ref" : 5
+    },
+    "@id" : 6,
+    "map" : {
+      "UNTREEIFY_THRESHOLD" : {
+        "@class" : "int",
+        "value" : 6
+      },
+      "@class" : "java.util.HashMap",
+      "TREEIFY_THRESHOLD" : {
+        "@class" : "int",
+        "value" : 8
+      },
+      "entrySet" : null,
+      "values" : null,
+      "DEFAULT_LOAD_FACTOR" : {
+        "@class" : "float",
+        "value" : 0.75
+      },
+      "threshold" : {
+        "@class" : "int",
+        "value" : 0
+      },
+      "DEFAULT_INITIAL_CAPACITY" : {
+        "@class" : "int",
+        "value" : 16
+      },
+      "serialVersionUID" : {
+        "@class" : "long",
+        "value" : 362498820763181265
+      },
+      "loadFactor" : {
+        "@class" : "float",
+        "value" : 0.75
+      },
+      "@id" : 7,
+      "MAXIMUM_CAPACITY" : {
+        "@class" : "int",
+        "value" : 1073741824
+      },
+      "keySet" : null,
+      "MIN_TREEIFY_CAPACITY" : {
+        "@class" : "int",
+        "value" : 64
+      }
+    }
   }
 }

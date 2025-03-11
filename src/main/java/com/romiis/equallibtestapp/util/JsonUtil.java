@@ -22,7 +22,9 @@ public class JsonUtil {
     public static String serialize(Object obj) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(serializeObject(obj));
+            // Create a new visited map for cycle detection.
+            Map<Object, Integer> visited = new IdentityHashMap<>();
+            return mapper.writeValueAsString(serializeObject(obj, visited));
         } catch (Exception e) {
             log.error("Failed to serialize object: {}", e.getMessage());
             return null;
@@ -48,20 +50,23 @@ public class JsonUtil {
 
     /**
      * Recursively serializes an object into a structured Map representation.
-     * It handles arrays (including multi-dimensional arrays) by delegating to serializeArray.
+     * Uses cycle detection to avoid infinite recursion.
      */
-    private static Object serializeObject(Object obj) throws Exception {
+    private static Object serializeObject(Object obj, Map<Object, Integer> visited) throws Exception {
         if (obj == null) {
             return null;
         }
-        Class<?> clazz = obj.getClass();
 
-        // If the object is an array (including multi-dimensional), handle it here.
-        if (clazz.isArray()) {
-            return serializeArray(clazz, obj);
+        // If we've already serialized this object, return a reference marker.
+        if (visited.containsKey(obj)) {
+            Map<String, Object> refMap = new HashMap<>();
+            refMap.put("@ref", visited.get(obj));
+            return refMap;
         }
 
-        // Handle primitives and String directly.
+        Class<?> clazz = obj.getClass();
+
+        // For primitives, wrappers and String, just return a simple map.
         if (isPrimitiveOrWrapper(clazz) || clazz == String.class) {
             Map<String, Object> simpleMap = new HashMap<>();
             simpleMap.put("@class", clazz.getName());
@@ -69,11 +74,24 @@ public class JsonUtil {
             return simpleMap;
         }
 
-        // Otherwise, process each field recursively.
+        // If the object is an array, delegate to serializeArray.
+        if (clazz.isArray()) {
+            return serializeArray(clazz, obj, visited);
+        }
+
+        // Mark the current object as visited with a unique ID.
+        int currentId = visited.size() + 1;
+        visited.put(obj, currentId);
+
         Map<String, Object> fieldMap = new HashMap<>();
         fieldMap.put("@class", clazz.getName());
+        fieldMap.put("@id", currentId);
+
         for (Field field : ReflectionUtil.getAllFields(clazz)) {
-            if (Modifier.isTransient(field.getModifiers())) {
+            // Skip transient fields unless they are collections or maps.
+            if (Modifier.isTransient(field.getModifiers())
+                    && !Collection.class.isAssignableFrom(field.getType())
+                    && !Map.class.isAssignableFrom(field.getType())) {
                 continue;
             }
             field.setAccessible(true);
@@ -81,11 +99,11 @@ public class JsonUtil {
             if (isPrimitiveOrWrapper(field.getType()) || field.getType() == String.class) {
                 fieldMap.put(field.getName(), createSimpleField(field.getType(), value));
             } else if (field.getType().isArray()) {
-                fieldMap.put(field.getName(), serializeArray(field.getType(), value));
+                fieldMap.put(field.getName(), serializeArray(field.getType(), value, visited));
             } else if (field.getType().isEnum()) {
                 fieldMap.put(field.getName(), createEnumField(field.getType(), value));
             } else {
-                fieldMap.put(field.getName(), serializeObject(value));
+                fieldMap.put(field.getName(), serializeObject(value, visited));
             }
         }
         return fieldMap;
@@ -102,10 +120,9 @@ public class JsonUtil {
     }
 
     /**
-     * Serializes an array field.
-     * This method handles one-dimensional as well as multi-dimensional arrays.
+     * Serializes an array field with cycle detection.
      */
-    private static Map<String, Object> serializeArray(Class<?> type, Object value) throws Exception {
+    private static Map<String, Object> serializeArray(Class<?> type, Object value, Map<Object, Integer> visited) throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("@class", type.getName());
         if (value == null) {
@@ -116,7 +133,7 @@ public class JsonUtil {
         List<Object> serializedArray = new ArrayList<>();
         for (int i = 0; i < length; i++) {
             Object element = Array.get(value, i);
-            serializedArray.add(serializeObject(element));
+            serializedArray.add(serializeObject(element, visited));
         }
         map.put("value", serializedArray);
         return map;

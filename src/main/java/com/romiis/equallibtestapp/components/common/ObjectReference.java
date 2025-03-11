@@ -275,10 +275,15 @@ public class ObjectReference {
 
         // Handle Collection fields.
         if (Collection.class.isAssignableFrom(field.getType())) {
-            // For now, we use the generic type's type name class name (which might be unhelpful).
-            String genericType = field.getGenericType().getTypeName().getClass().getSimpleName();
+            String genericTypeName = "Object";
+            if (field.getGenericType() instanceof ParameterizedType pt) {
+                Type[] typeArguments = pt.getActualTypeArguments();
+                if (typeArguments != null && typeArguments.length > 0) {
+                    genericTypeName = typeArguments[0].getTypeName();
+                }
+            }
             return String.format("%s %s {%s<%s>} {%s%s}",
-                    modifiers, fieldName, fieldTypeName, genericType, objectId, cyclicMarker);
+                    modifiers, fieldName, fieldTypeName, genericTypeName, objectId, cyclicMarker);
         }
 
         // Handle Map fields.

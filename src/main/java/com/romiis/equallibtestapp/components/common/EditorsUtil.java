@@ -2,6 +2,8 @@ package com.romiis.equallibtestapp.components.common;
 
 import com.romiis.equallibtestapp.MainClass;
 import com.romiis.equallibtestapp.controllers.ArrayEditController;
+import com.romiis.equallibtestapp.controllers.CollectionEditController;
+import com.romiis.equallibtestapp.util.FinalFieldUpdater;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,6 +16,9 @@ import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 
 @Slf4j
@@ -125,6 +130,7 @@ public class EditorsUtil {
             startArrayEditor(objectReference, parentItem);
         } else if (Collection.class.isAssignableFrom(field.getType())) {
             log.debug("Collection field detected: {}", field.getName());
+            startCollectionEditor(objectReference, parentItem);
         } else if (Map.class.isAssignableFrom(field.getType())) {
             log.debug("Map field detected: {}", field.getName());
         }
@@ -159,16 +165,72 @@ public class EditorsUtil {
         }
     }
 
+
+    private void startCollectionEditor(ObjectReference objectReference, TreeItem<ObjectReference> parentItem) {
+        try {
+            FXMLLoader loader = new FXMLLoader(MainClass.class.getResource(MainClass.COLLECTION_EDIT_SCENE_FXML));
+            Parent root = loader.load();
+
+            // Pass this TreeView to the controller.
+            CollectionEditController controller = loader.getController();
+            controller.setAssignedCollection((Collection<?>) objectReference.getInObject(), objectReference.getField().getName(), getCollectionElementType(objectReference.getField()));
+
+            Stage stage = new Stage();
+            stage.setTitle("Array editor");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            log.info("Array editor closed");
+
+//            objectReference.setInObject(controller.getCollection());
+//
+//            wireReference(parentItem.getParent(), objectReference);
+            treeView.setModified(true);
+            treeView.refresh();
+
+
+        } catch (Exception e) {
+            log.error("Error loading object", e);
+        }
+    }
+
+    private Class<?> getCollectionElementType(Field field) {
+        Type genericType = field.getGenericType();
+        if (genericType instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) genericType;
+            Type[] typeArgs = pt.getActualTypeArguments();
+            if (typeArgs != null && typeArgs.length > 0) {
+                Type typeArg = typeArgs[0];
+                if (typeArg instanceof Class<?>) {
+                    return (Class<?>) typeArg;
+                }
+            }
+        }
+        // Fallback to Object if no generic type is available.
+        return Object.class;
+    }
+
+
     private void wireReference(TreeItem<ObjectReference> parentItem, ObjectReference objectReference) {
         Object parentReference = parentItem.getValue().getInObject();
-
         try {
-            objectReference.getField().set(parentReference, objectReference.getInObject());
+            Field field = objectReference.getField();
+            if (Modifier.isStatic(field.getModifiers())) {
+                // For static fields, pass null as the target.
+                FinalFieldUpdater.setFinalField(null, field, objectReference.getInObject());
+            } else if (Modifier.isFinal(field.getModifiers())) {
+                FinalFieldUpdater.setFinalField(parentReference, field, objectReference.getInObject());
+            } else {
+                field.set(parentReference, objectReference.getInObject());
+            }
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-
     }
+
+
+
 
     /**
      * Finishes editing by clearing the editor control.

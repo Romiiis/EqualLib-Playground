@@ -141,21 +141,21 @@ public class ReflectionUtil {
     }
 
     public static Object getDefaultValue(Class<?> type) {
-        if (type.equals(int.class)) {
+        if (type.equals(int.class) || type.equals(Integer.class)) {
             return 0;
-        } else if (type.equals(long.class)) {
+        } else if (type.equals(long.class) || type.equals(Long.class)) {
             return 0L;
-        } else if (type.equals(double.class)) {
+        } else if (type.equals(double.class) || type.equals(Double.class)) {
             return 0.0;
-        } else if (type.equals(float.class)) {
+        } else if (type.equals(float.class) || type.equals(Float.class)) {
             return 0.0f;
-        } else if (type.equals(boolean.class)) {
+        } else if (type.equals(boolean.class) || type.equals(Boolean.class)) {
             return false;
-        } else if (type.equals(byte.class)) {
+        } else if (type.equals(byte.class) || type.equals(Byte.class)) {
             return (byte) 0;
-        } else if (type.equals(short.class)) {
+        } else if (type.equals(short.class) || type.equals(Short.class)) {
             return (short) 0;
-        } else if (type.equals(char.class)) {
+        } else if (type.equals(char.class) || type.equals(Character.class)) {
             return '\u0000';
         } else {
             return null;
