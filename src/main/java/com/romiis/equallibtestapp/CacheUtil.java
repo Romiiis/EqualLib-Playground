@@ -280,4 +280,17 @@ public class CacheUtil {
     }
 
 
+
+    public List<?> getObjectsFit(Class<?> clazz) {
+        List<Object> objects = new ArrayList<>();
+        for (Object obj : loadedObjectsPool.values()) {
+            if (clazz.isInstance(obj)) {
+                objects.add(obj);
+            }
+        }
+        return objects;
+
+    }
+
+
 }

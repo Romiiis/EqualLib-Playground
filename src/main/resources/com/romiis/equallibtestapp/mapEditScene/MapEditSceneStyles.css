@@ -1,0 +1,86 @@
+/* Root & Global Styles */
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-background-color: #FDFDFD;  /* nearly white */
+}
+
+/* Title Label */
+.title-label {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50;  /* dark slate blue */
+    -fx-padding: 10px 0 5px 0;
+    -fx-border-color: transparent transparent #E0E0E0 transparent;
+    -fx-border-width: 0 0 2px 0;
+    -fx-alignment: center-left;
+}
+
+/* TableView */
+.table-view {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-padding: 4px;
+}
+
+/* Add Button */
+.add-field-button {
+    -fx-background-color: #3498DB;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-border-color: #515151;
+    -fx-border-width: 1px;
+}
+.add-field-button:hover {
+    -fx-background-color: #2980B9;
+}
+
+/* Remove Button */
+.remove-field-button {
+    -fx-background-color: #E74C3C;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-border-color: #515151;
+    -fx-border-width: 1px;
+}
+.remove-field-button:hover {
+    -fx-background-color: #C0392B;
+}
+
+/* Save Button */
+.save-button {
+    -fx-background-color: #3B6FA6;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-border-color: #515151;
+    -fx-border-width: 1px;
+}
+.save-button:hover {
+    -fx-background-color: #315E8C;
+}
+
+/* Cancel Button */
+.compare-button {
+    -fx-background-color: #F39C12;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-border-color: #515151;
+    -fx-border-width: 1px;
+}
+.compare-button:hover {
+    -fx-background-color: #D68910;
+}

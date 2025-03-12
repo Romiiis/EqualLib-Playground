@@ -272,6 +272,11 @@ public class ArrayEditController {
                         if (event.getClickCount() == 2) {
                             int selectedIndex = getIndex();
                             if (selectedIndex < 0) return;
+                            if (selectedIndex >= observableElements.size()) {
+                                log.warn("Selected index is out of bounds.");
+                                return;
+                            }
+
                             Object nestedArray = observableElements.get(selectedIndex);
                             if (nestedArray == null || !nestedArray.getClass().isArray()) {
                                 log.warn("Selected element is not a nested array.");

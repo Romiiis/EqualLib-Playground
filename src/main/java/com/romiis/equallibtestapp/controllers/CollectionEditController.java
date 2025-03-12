@@ -45,7 +45,7 @@ public class CollectionEditController {
     @FXML
     private ListView<String> elementsList;
     @FXML
-    private Label collectionNameLabel;
+    private Label collectionTitleLabel;
     @FXML
     private Button addButton;
     @FXML
@@ -80,8 +80,9 @@ public class CollectionEditController {
      * configures cell factories based on element type, and wires UI controls.
      */
     private void init() {
-        if (collectionNameLabel != null) {
-            collectionNameLabel.setText(collectionName);
+        if (collectionName != null) {
+            String title = String.format("%s<%s> %s", collection.getClass().getSimpleName(), elementType.getSimpleName(), collectionName);
+            collectionTitleLabel.setText(title);
         }
         loadCollectionIntoObservableElements();
         // Set the ListView items using plain string conversion (the custom cells add index info).

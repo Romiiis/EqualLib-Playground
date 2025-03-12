@@ -3,6 +3,7 @@ package com.romiis.equallibtestapp.components.common;
 import com.romiis.equallibtestapp.MainClass;
 import com.romiis.equallibtestapp.controllers.ArrayEditController;
 import com.romiis.equallibtestapp.controllers.CollectionEditController;
+import com.romiis.equallibtestapp.controllers.MapEditorController;
 import com.romiis.equallibtestapp.util.FinalFieldUpdater;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.fxml.FXMLLoader;
@@ -133,8 +134,67 @@ public class EditorsUtil {
             startCollectionEditor(objectReference, parentItem);
         } else if (Map.class.isAssignableFrom(field.getType())) {
             log.debug("Map field detected: {}", field.getName());
+            startMapEditor(objectReference, parentItem);
+
         }
     }
+
+    private void startMapEditor(ObjectReference objectReference, TreeItem<ObjectReference> parentItem) {
+        try {
+            FXMLLoader loader = new FXMLLoader(MainClass.class.getResource(MainClass.MAP_EDIT_SCENE_FXML));
+            Parent root = loader.load();
+
+            // Pass the ObjectReference to the map editor controller.
+            MapEditorController controller = loader.getController();
+            controller.setAssignedMap(
+                    (Map<?, ?>) objectReference.getInObject(),
+                    objectReference.getField().getName(),
+                    getMapKeyType(objectReference.getField()),
+                    getMapValueType(objectReference.getField())
+            );
+
+            Stage stage = new Stage();
+            stage.setTitle("Map Editor");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            log.info("Map editor closed");
+
+            // Optionally update the object reference after editing:
+            // objectReference.setInObject(controller.getMap());
+
+            treeView.setModified(true);
+            treeView.refresh();
+
+        } catch (Exception e) {
+            log.error("Error loading map object", e);
+        }
+    }
+
+
+    private Class<?> getMapKeyType(Field field) {
+        Type genericType = field.getGenericType();
+        if (genericType instanceof ParameterizedType) {
+            Type[] typeArguments = ((ParameterizedType) genericType).getActualTypeArguments();
+            if (typeArguments.length == 2 && typeArguments[0] instanceof Class<?>) {
+                return (Class<?>) typeArguments[0];
+            }
+        }
+        return Object.class; // fallback if not parameterized
+    }
+
+    private Class<?> getMapValueType(Field field) {
+        Type genericType = field.getGenericType();
+        if (genericType instanceof ParameterizedType) {
+            Type[] typeArguments = ((ParameterizedType) genericType).getActualTypeArguments();
+            if (typeArguments.length == 2 && typeArguments[1] instanceof Class<?>) {
+                return (Class<?>) typeArguments[1];
+            }
+        }
+        return Object.class; // fallback if not parameterized
+    }
+
 
     private void startArrayEditor(ObjectReference objectReference, TreeItem<ObjectReference> parentItem) {
         try {
@@ -197,10 +257,9 @@ public class EditorsUtil {
 
     private Class<?> getCollectionElementType(Field field) {
         Type genericType = field.getGenericType();
-        if (genericType instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType) genericType;
+        if (genericType instanceof ParameterizedType pt) {
             Type[] typeArgs = pt.getActualTypeArguments();
-            if (typeArgs != null && typeArgs.length > 0) {
+            if (typeArgs.length > 0) {
                 Type typeArg = typeArgs[0];
                 if (typeArg instanceof Class<?>) {
                     return (Class<?>) typeArg;
