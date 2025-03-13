@@ -1,5 +1,6 @@
 package com.romiis.equallibtestapp.controllers;
 
+import com.romiis.equallibtestapp.CacheUtil;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -183,7 +184,7 @@ public class MapEditorController {
             // Fallback option.
             column.setCellFactory(col -> {
                 ComboBoxTableCell<Map.Entry<Object, Object>, String> cell =
-                        new ComboBoxTableCell<>(FXCollections.observableArrayList("Option1", "Option2", "Option3"));
+                        new ComboBoxTableCell<>(FXCollections.observableArrayList(CacheUtil.getInstance().getObjectsFitNames(type)));
                 cell.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2 && !cell.isEmpty()) {
                         entriesTable.edit(cell.getIndex(), column);
@@ -241,7 +242,7 @@ public class MapEditorController {
         } else if (ReflectionUtil.isWrapperOrString(type) || type.isPrimitive() || type.equals(String.class)) {
             return ReflectionUtil.convertStringToPrimitive(value, type);
         }
-        return value;
+        return CacheUtil.getInstance().getObjectByName(value, true);
     }
 
     private void refreshTableView() {

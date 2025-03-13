@@ -281,15 +281,15 @@ public class CacheUtil {
 
 
 
-    public List<?> getObjectsFit(Class<?> clazz) {
-        List<Object> objects = new ArrayList<>();
-        for (Object obj : loadedObjectsPool.values()) {
+    public List<String> getObjectsFitNames(Class<?> clazz) {
+        List<String> names = new ArrayList<>();
+        for (String name : loadedObjectsPool.keySet()) {
+            Object obj = loadedObjectsPool.get(name);
             if (clazz.isInstance(obj)) {
-                objects.add(obj);
+                names.add(name);
             }
         }
-        return objects;
-
+        return names;
     }
 
 

@@ -1,7 +1,9 @@
 package com.romiis.equallibtestapp.controllers;
 
+import com.romiis.equallibtestapp.CacheUtil;
 import com.romiis.equallibtestapp.MainClass;
 import com.romiis.equallibtestapp.components.common.ObjectReference;
+import com.romiis.equallibtestapp.util.DeepCopyUtil;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -245,7 +247,7 @@ public class CollectionEditController {
             });
         } else {
             elementsList.setCellFactory(lv -> {
-                IndexedComboBoxCell cell = new IndexedComboBoxCell("Option1", "Option2", "Option3");
+                IndexedComboBoxCell cell = new IndexedComboBoxCell(CacheUtil.getInstance().getObjectsFitNames(elementType).toArray(new String[0]));
                 setupDragAndDrop(cell);
                 cell.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2 && !cell.isEmpty()) {
@@ -309,7 +311,7 @@ public class CollectionEditController {
         } else if (ReflectionUtil.isWrapperOrString(elementType) || elementType.isPrimitive() || elementType.equals(String.class)) {
             return ReflectionUtil.convertStringToPrimitive(value, elementType);
         }
-        return value;
+        return CacheUtil.getInstance().getObjectByName(value, true);
     }
 
     /**
@@ -345,7 +347,7 @@ public class CollectionEditController {
     @SuppressWarnings("unchecked")
     private void handleSaveAction() {
         // Modify the passed collection in place.
-        ((Collection<Object>) collection).clear();
+        collection.clear();
         ((Collection<Object>) collection).addAll(observableElements);
         // Update the backup in case the editor is reopened.
         backupCollection = new ArrayList<>(observableElements);

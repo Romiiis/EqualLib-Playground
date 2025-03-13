@@ -1,5 +1,6 @@
 package com.romiis.equallibtestapp.controllers;
 
+import com.romiis.equallibtestapp.CacheUtil;
 import com.romiis.equallibtestapp.MainClass;
 import com.romiis.equallibtestapp.components.common.ObjectReference;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 public class ArrayEditController {
@@ -164,8 +166,8 @@ public class ArrayEditController {
      * A ComboBox cell that displays its index before the item.
      */
     private class IndexedComboBoxCell extends ComboBoxListCell<String> {
-        public IndexedComboBoxCell(String... items) {
-            super(FXCollections.observableArrayList(items));
+        public IndexedComboBoxCell(String ... options) {
+            super(FXCollections.observableArrayList(options));
         }
 
         @Override
@@ -326,7 +328,7 @@ public class ArrayEditController {
         } else {
             // For generic Objects, use an IndexedComboBoxCell with default options.
             elementsList.setCellFactory(lv -> {
-                IndexedComboBoxCell cell = new IndexedComboBoxCell("Option1", "Option2", "Option3");
+                IndexedComboBoxCell cell = new IndexedComboBoxCell(CacheUtil.getInstance().getObjectsFitNames(elementType).toArray(new String[0]));
                 cell.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2 && !cell.isEmpty()) {
                         lv.edit(cell.getIndex());
@@ -356,7 +358,7 @@ public class ArrayEditController {
         } else if (ReflectionUtil.isWrapperOrString(elementType) || elementType.isPrimitive() || elementType.equals(String.class)) {
             return ReflectionUtil.convertStringToPrimitive(value, elementType);
         }
-        return value;
+        return CacheUtil.getInstance().getObjectByName(value, true);
     }
 
     /**
@@ -369,7 +371,7 @@ public class ArrayEditController {
         for (int i = 0; i < len; i++) {
             Object value = observableElements.get(i);
             if (!elementType.isArray()) {
-                if (value != null) {
+                if (value != null && !value.getClass().equals(elementType)) {
                     value = convertStringToElement(value.toString() ,elementType);
                 }
 
