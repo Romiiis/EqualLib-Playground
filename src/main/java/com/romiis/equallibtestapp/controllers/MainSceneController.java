@@ -6,6 +6,7 @@ import com.romiis.equallibtestapp.CacheUtil;
 import com.romiis.equallibtestapp.components.mainScene.ClassListView;
 import com.romiis.equallibtestapp.components.common.MyTreeView;
 import com.romiis.equallibtestapp.util.ObjectFillerUtil;
+import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -161,8 +162,8 @@ public class MainSceneController {
     // --- Comparison ---
     @FXML
     public void onCompareButtonClick() {
-        EqualLibConfig config = new EqualLibConfig();
-        config.setDebugMode(true);
+        EqualLibConfig config = createConfig();
+
 
         // Measure start time.
         long start = System.nanoTime();
@@ -192,6 +193,24 @@ public class MainSceneController {
             double seconds = elapsed / 1_000_000_000.0;
             return String.format("Comparison time: %.2f s", seconds);
         }
+    }
+
+
+    @FXML
+    private CheckBox useEqualsAfterMaxDepth;
+
+    @FXML
+    private CheckBox equivalenceByInheritance;
+
+    @FXML
+    private CheckBox compareByElementsAndKeys;
+    private EqualLibConfig createConfig() {
+        EqualLibConfig config = new EqualLibConfig();
+        config.setMaxDepth(maxDepthSpinner.getValue(), useEqualsAfterMaxDepth.isSelected())
+                .setCompareByElementsAndKeys(compareByElementsAndKeys.isSelected())
+                .equivalenceByInheritance(equivalenceByInheritance.isSelected())
+                .setIgnoredFields(ignoredFieldsList.getItems().toArray(new String[0]));
+        return config;
     }
 
 

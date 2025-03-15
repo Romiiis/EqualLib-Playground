@@ -321,7 +321,7 @@ public class ObjectFillerUtil {
             field.setAccessible(true);
             try {
                 Object value = field.get(source);
-                field.xset(target, value);
+                field.set(target, value);
             } catch (Exception e) {
                 e.printStackTrace();
             }

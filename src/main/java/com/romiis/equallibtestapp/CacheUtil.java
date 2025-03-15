@@ -59,6 +59,7 @@ public class CacheUtil {
         loadedObjectsPool = new HashMap<>();
         try {
             classLoader = DynamicCompiler.compile(OBJECTS_PATH);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
