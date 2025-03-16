@@ -36,6 +36,11 @@ public class ObjectReference {
 
     private boolean editContentItem = false;
 
+    private String text = null;
+
+    private boolean isNull = false;
+
+
 
     /**
      * Create a new ObjectReference instance
@@ -50,12 +55,34 @@ public class ObjectReference {
 
     }
 
+    public ObjectReference(Object reference, Field fieldName, Object nullValue) {
+        this.inObject = reference;
+        this.field = fieldName;
+        if (nullValue == null) {
+            isNull = true;
+        }
+        index = null;
+
+
+    }
+
+
     public ObjectReference(boolean editContentItem, Object reference, Field fieldName) {
         this.inObject = reference;
         this.field = fieldName;
         index = null;
         this.editContentItem = editContentItem;
 
+    }
+
+
+    public ObjectReference(String text) {
+        this.text = text;
+
+        this.field = null;
+        index = null;
+        this.inObject = null;
+        this.editContentItem = false;
     }
 
 
@@ -216,6 +243,9 @@ public class ObjectReference {
         if (editContentItem) {
             return "(Edit content ...)";
         }
+        if (text != null) {
+            return text;
+        }
 
         // Prepare common information for the inObject.
         String cyclicMarker = cyclic ? " (\uD83D\uDD01)" : "";
@@ -224,6 +254,7 @@ public class ObjectReference {
         String objectIdHex = Integer.toHexString(System.identityHashCode(inObject));
         String objectId = fullClassName + "@" + objectIdHex;
         String simpleClassName = inObjClass.getSimpleName();
+
 
         // If there is no associated field, use the object information.
         if (field == null) {
@@ -301,6 +332,9 @@ public class ObjectReference {
                     modifiers, fieldName, fieldTypeName, keyTypeStr, valueTypeStr, objectId, cyclicMarker);
         }
 
+        if (isNull) {
+            return String.format("%s %s {%s} %s", modifiers, fieldName, fieldTypeName, NULL);
+        }
         // Default case for any other field types.
         return String.format("%s %s {%s} {%s%s}", modifiers, fieldName, fieldTypeName, objectId, cyclicMarker);
     }

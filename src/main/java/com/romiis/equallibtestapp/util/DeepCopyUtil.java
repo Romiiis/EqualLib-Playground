@@ -6,7 +6,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.IdentityHashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 public class DeepCopyUtil {
@@ -22,71 +24,183 @@ public class DeepCopyUtil {
     public static <T> T deepCopy(T object) {
         // Create a new cache for each deep copy operation
         Map<Object, Object> copyCache = new IdentityHashMap<>();
-        return deepCopy(object, copyCache);
+        return deepCopyNonRecursive(object, copyCache);
     }
 
     /**
-     * Internal recursive deep copy that uses a provided cache to handle circular references.
+     * Replaces the recursive deepCopy(...) with an iterative approach.
      *
-     * @param object    the object to copy
-     * @param copyCache the cache for already copied objects
-     * @param <T>       the type of the object
-     * @return the deep copy of the object, including every internal field
+     * 1) If the object is null/immutable/already in cache, return immediately.
+     * 2) Otherwise, create its copy and place (original, copy) into a queue.
+     * 3) While the queue is not empty, remove (orig, cpy):
+     *    - If orig is an array, copy each element (recursively via queue).
+     *    - Else, copy all fields. For each non-null field, force-lazy-init
+     *      and either fetch from cache or create a new instance and enqueue it.
      */
     @SuppressWarnings("unchecked")
-    private static <T> T deepCopy(T object, Map<Object, Object> copyCache) {
-        // Handle null
-        if (object == null) return null;
-
-        // Force lazy initialization on the object by invoking its public no-arg getters
-        object = forceLazyInitialization(object);
-
-        // Check if the object was already copied to prevent circular references
-        if (copyCache.containsKey(object)) {
-            return (T) copyCache.get(object);
+    private static <T> T deepCopyNonRecursive(T rootObject, Map<Object, Object> copyCache) {
+        if (rootObject == null) {
+            return null;
         }
 
-        try {
-            Class<?> clazz = object.getClass();
+        // Force lazy initialization on the *root* object
+        rootObject = forceLazyInitialization(rootObject);
 
-            // If the object is an array (including multi-dimensional arrays), handle it specially.
+        // If the object is immutable, no need to copy
+        if (isImmutable(rootObject.getClass())) {
+            return rootObject;
+        }
+
+        // If already in cache, return cached
+        if (copyCache.containsKey(rootObject)) {
+            return (T) copyCache.get(rootObject);
+        }
+
+        // Allocate the copy (array or regular object)
+        T rootCopy = allocateAndCache(rootObject, copyCache);
+
+        // Process everything iteratively
+        Queue<Pair> queue = new LinkedList<>();
+        queue.offer(new Pair(rootObject, rootCopy));
+
+        while (!queue.isEmpty()) {
+            Pair pair = queue.poll();
+            Object original = pair.original;
+            Object copy = pair.copy;
+
+            Class<?> clazz = original.getClass();
             if (clazz.isArray()) {
-                int length = Array.getLength(object);
+                // Copy array elements
+                copyArrayElements(original, copy, copyCache, queue);
+            } else {
+                // Copy all fields (including inherited)
+                copyAllFields(original, copy, copyCache, queue);
+            }
+        }
+
+        return rootCopy;
+    }
+
+    /**
+     * Allocate a new instance or array, store in cache, then return it.
+     * We do NOT copy fields/elements here; that happens in the loop.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> T allocateAndCache(T original, Map<Object, Object> copyCache) {
+        try {
+            Class<?> clazz = original.getClass();
+            if (clazz.isArray()) {
+                int length = Array.getLength(original);
                 Object arrayCopy = Array.newInstance(clazz.getComponentType(), length);
-                // Put the array copy into the cache before recursing to handle circular references.
-                copyCache.put(object, arrayCopy);
-                for (int i = 0; i < length; i++) {
-                    Object element = Array.get(object, i);
-                    Object elementCopy = deepCopy(element, copyCache);
-                    Array.set(arrayCopy, i, elementCopy);
-                }
+                copyCache.put(original, arrayCopy);
                 return (T) arrayCopy;
             }
 
-            // Handle primitive and immutable types
-            if (isImmutable(clazz)) return object;
-
-            // Create a new instance without calling any constructors
+            // It's not an array => allocate an instance
             T newObject = (T) allocateInstance(clazz);
-            // Put the new object into the cache before copying fields to handle circular references
-            copyCache.put(object, newObject);
-
-            // Copy all fields (including inherited ones)
-            copyAllFields(object, newObject, copyCache);
-
+            copyCache.put(original, newObject);
             return newObject;
         } catch (Exception e) {
-            throw new RuntimeException("Error during deep copy", e);
+            throw new RuntimeException("Error allocating copy", e);
         }
+    }
+
+    /**
+     * Copy array elements. For each element, we do the same logic:
+     * - If null, skip
+     * - Force lazy init
+     * - If immutable, store as is
+     * - Else if in cache, re-use
+     * - Else allocate, cache, and enqueue
+     */
+    private static void copyArrayElements(Object originalArray,
+                                          Object copyArray,
+                                          Map<Object, Object> copyCache,
+                                          Queue<Pair> queue) {
+
+        int length = Array.getLength(originalArray);
+        for (int i = 0; i < length; i++) {
+            Object element = Array.get(originalArray, i);
+            Object elementCopy = resolveSubObject(element, copyCache, queue);
+            Array.set(copyArray, i, elementCopy);
+        }
+    }
+
+    /**
+     * Copy all fields (including inherited ones) from original to copy, using the same iterative approach.
+     */
+    private static void copyAllFields(Object original,
+                                      Object copy,
+                                      Map<Object, Object> copyCache,
+                                      Queue<Pair> queue) {
+
+        Class<?> clazz = original.getClass();
+        while (clazz != null) {
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+
+                // Skip static fields.
+                if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
+
+                try {
+                    Object fieldValue = field.get(original);
+                    Object fieldCopy;
+                    if (fieldValue != null && fieldValue.getClass().isArray()) {
+                        // We handle arrays separately
+                        fieldCopy = resolveSubObject(fieldValue, copyCache, queue);
+                    } else {
+                        fieldCopy = resolveSubObject(fieldValue, copyCache, queue);
+                    }
+                    field.set(copy, fieldCopy);
+                } catch (Exception e) {
+                    throw new RuntimeException("Error copying fields", e);
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+    }
+
+    /**
+     * "Resolves" a sub-object by performing the same lazy-init + caching logic
+     * in a non-recursive way. Returns the copy to be set in the parent's field/array index.
+     */
+    private static Object resolveSubObject(Object subObject,
+                                           Map<Object, Object> copyCache,
+                                           Queue<Pair> queue) {
+
+        if (subObject == null) {
+            return null;
+        }
+
+        // Force lazy initialization
+        subObject = forceLazyInitialization(subObject);
+
+        // If immutable, return as is
+        if (isImmutable(subObject.getClass())) {
+            return subObject;
+        }
+
+        // If we've seen this object, reuse the copy
+        if (copyCache.containsKey(subObject)) {
+            return copyCache.get(subObject);
+        }
+
+        // Not in cache => allocate & store
+        Object subCopy = allocateAndCache(subObject, copyCache);
+
+        // Enqueue (subObject, subCopy) to process fields/elements
+        queue.offer(new Pair(subObject, subCopy));
+        return subCopy;
     }
 
     /**
      * Force lazy initialization on an object by invoking all public no-argument getters.
-     * This will (hopefully) trigger the computation of any lazy fields.
+     * Also triggers size() or toArray() calls for Collections/Maps/Sets.
      *
-     * @param object the object to force lazy initialization on
-     * @param <T>    the type of the object
-     * @return the object with (hopefully) all lazy fields initialized
+     * This is the same as your original method, unchanged.
      */
     @SuppressWarnings("unchecked")
     private static <T> T forceLazyInitialization(T object) {
@@ -103,7 +217,7 @@ public class DeepCopyUtil {
             ((Collection<?>) object).toArray();
         }
 
-        // Invoke all public no-argument getters (except getClass).
+        // Invoke all public no-arg getters (except getClass).
         for (Method method : object.getClass().getMethods()) {
             if (method.getParameterCount() == 0 &&
                     method.getName().startsWith("get") &&
@@ -119,10 +233,7 @@ public class DeepCopyUtil {
     }
 
     /**
-     * Check if a class is immutable.
-     *
-     * @param clazz the class to check
-     * @return true if the class is immutable, false otherwise
+     * Check if a class is immutable (same as original).
      */
     private static boolean isImmutable(Class<?> clazz) {
         return clazz.isPrimitive() ||
@@ -139,46 +250,7 @@ public class DeepCopyUtil {
     }
 
     /**
-     * Copy all fields of an object to another object using the given cache.
-     * This version copies every field, including inherited ones.
-     *
-     * @param original  the original object
-     * @param copy      the object to copy to
-     * @param copyCache the cache of already copied objects
-     * @throws Exception if an error occurs during copying
-     */
-    private static void copyAllFields(Object original, Object copy, Map<Object, Object> copyCache) throws Exception {
-        Class<?> clazz = original.getClass();
-        while (clazz != null) {
-            Field[] fields = clazz.getDeclaredFields();
-            for (Field field : fields) {
-                field.setAccessible(true);
-
-                // Skip static fields.
-                if (Modifier.isStatic(field.getModifiers())) continue;
-
-                Object fieldValue = field.get(original);
-                if (fieldValue != null && fieldValue.getClass().isArray()) {
-                    int length = Array.getLength(fieldValue);
-                    Object arrayCopy = Array.newInstance(fieldValue.getClass().getComponentType(), length);
-                    for (int i = 0; i < length; i++) {
-                        Array.set(arrayCopy, i, deepCopy(Array.get(fieldValue, i), copyCache));
-                    }
-                    field.set(copy, arrayCopy);
-                } else {
-                    field.set(copy, deepCopy(fieldValue, copyCache));
-                }
-            }
-            clazz = clazz.getSuperclass();
-        }
-    }
-
-    /**
-     * Allocate a new instance of a class without calling its constructors.
-     *
-     * @param clazz the class to instantiate
-     * @return the new instance of the class
-     * @throws Exception if instance allocation fails
+     * Allocate a new instance of a class without calling its constructors (same as original).
      */
     private static Object allocateInstance(Class<?> clazz) throws Exception {
         Method unsafeConstructor = UnsafeHolder.UNSAFE.getClass().getDeclaredMethod("allocateInstance", Class.class);
@@ -186,11 +258,10 @@ public class DeepCopyUtil {
     }
 
     /**
-     * Holder for the Unsafe instance.
+     * Holder for the Unsafe instance (same as original).
      */
     private static class UnsafeHolder {
         private static final sun.misc.Unsafe UNSAFE;
-
         static {
             try {
                 Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
@@ -199,6 +270,18 @@ public class DeepCopyUtil {
             } catch (Exception e) {
                 throw new RuntimeException("Could not access Unsafe", e);
             }
+        }
+    }
+
+    /**
+     * Simple struct to hold (original, copy) pairs we need to process.
+     */
+    private static class Pair {
+        final Object original;
+        final Object copy;
+        Pair(Object original, Object copy) {
+            this.original = original;
+            this.copy = copy;
         }
     }
 }

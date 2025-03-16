@@ -1,7 +1,7 @@
 /* Root & Global Styles */
 .root {
     -fx-font-family: "Segoe UI", sans-serif;
-    -fx-background-color: #FDFDFD;  /* nearly white */
+    -fx-background-color: #FDFDFD; /* nearly white */
 }
 
 /* MenuBar: White background with dark text */
@@ -41,7 +41,7 @@
     -fx-padding: 4;
 }
 
-/* Modern Flat Load Button */
+/* Unified Button Style for Load, Save, Add Field, Remove Field, Compare */
 .load-button {
     -fx-background-color: #5DADE2;  /* Soft blue */
     -fx-text-fill: #FFFFFF;
@@ -56,22 +56,26 @@
     -fx-background-color: #3498DB;  /* Slightly deeper blue on hover */
 }
 
-/* Modern Flat Save Button */
-.save-button {
-    -fx-background-color: #3b6fa6;  /* Soft blue */
+.save-button,
+.add-field-button,
+.remove-field-button,
+.compare-button {
+    -fx-background-color: #3498DB; /* Vibrant blue */
     -fx-text-fill: #FFFFFF;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
     -fx-background-radius: 4;
     -fx-padding: 8 16;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
     -fx-border-color: #515151;
     -fx-border-width: 1;
 }
-.save-button:hover {
-    -fx-background-color: #315e8c;  /* Soft blue */
+
+.save-button:hover,
+.add-field-button:hover,
+.remove-field-button:hover,
+.compare-button:hover {
+    -fx-background-color: #2980B9; /* Darker blue on hover */
 }
-
-
 
 /* TitledPane */
 .titled-pane {
@@ -90,7 +94,7 @@
 
 /* VBox Divider (custom style for your empty VBox) */
 .split-pane-divider {
-    -fx-background-color: #B0BEC5;  /* medium blue-gray */
+    -fx-background-color: #B0BEC5; /* medium blue-gray */
     -fx-min-width: 3px;  /* slightly thicker */
     -fx-max-width: 3px;
 }
@@ -103,18 +107,6 @@
     -fx-border-width: 1;
     -fx-background-radius: 4;
     -fx-border-radius: 4;
-}
-
-/* Additional Button Styling for Add/Remove/Compare */
-.add-field-button, .remove-field-button, .compare-button {
-    -fx-background-color: #3498DB;
-    -fx-text-fill: #FFFFFF;
-    -fx-background-radius: 4;
-    -fx-padding: 8 16;
-    -fx-font-size: 14px;
-}
-.add-field-button:hover, .remove-field-button:hover, .compare-button:hover {
-    -fx-background-color: #2980B9;
 }
 
 /* TextField Styling */

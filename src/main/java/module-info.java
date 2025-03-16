@@ -11,6 +11,7 @@ module com.romiis.equallibtestapp {
     requires jdk.unsupported;
     requires jdk.compiler;
     requires java.sql;
+    requires java.desktop;
 
 
     exports com.romiis.equallibtestapp.util;

@@ -8,21 +8,6 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.romiis.equallibtestapp.controllers.MainSceneController"
             stylesheets="@mainSceneStyles.css">
-
-    <!-- Top Menu -->
-    <top>
-        <MenuBar>
-            <Menu text="File">
-                <MenuItem text="Open"/>
-                <MenuItem text="Save"/>
-                <MenuItem text="Exit"/>
-            </Menu>
-            <Menu text="Help">
-                <MenuItem text="About"/>
-            </Menu>
-        </MenuBar>
-    </top>
-
     <!-- Center Content: GridPane with 4 columns (20% 30% 30% 20%) -->
     <center>
         <GridPane vgap="5" alignment="CENTER" GridPane.vgrow="ALWAYS"
@@ -50,12 +35,8 @@
                         <Insets top="5" right="5" bottom="5" left="5"/>
                     </padding>
 
-                    <Label text="Objects List" styleClass="panel-label" maxWidth="Infinity" alignment="CENTER"/>
+                    <Label text="Class List" styleClass="panel-label" maxWidth="Infinity" alignment="CENTER"/>
                     <ClassListView fx:id="objectListView1" styleClass="list-view" VBox.vgrow="ALWAYS"/>
-                    <HBox spacing="5" alignment="CENTER">
-                        <Label text="Setting:" styleClass="sub-label"/>
-                        <TextField fx:id="listSetting1" promptText="Enter setting" prefWidth="100"/>
-                    </HBox>
                 </VBox>
 
                 <!-- Column 1: First Hierarchy Panel -->
@@ -126,12 +107,8 @@
                         <Insets top="5" right="5" bottom="5" left="5"/>
                     </padding>
 
-                    <Label text="Objects List" styleClass="panel-label" maxWidth="Infinity" alignment="CENTER"/>
+                    <Label text="Class List" styleClass="panel-label" maxWidth="Infinity" alignment="CENTER"/>
                     <ClassListView fx:id="objectListView2" styleClass="list-view" VBox.vgrow="ALWAYS"/>
-                    <HBox spacing="5" alignment="CENTER">
-                        <Label text="Setting:" styleClass="sub-label"/>
-                        <TextField fx:id="listSetting2" promptText="Enter setting" prefWidth="100"/>
-                    </HBox>
                 </VBox>
             </SplitPane>
         </GridPane>
@@ -139,7 +116,7 @@
 
     <!-- Bottom Panel -->
     <bottom>
-        <VBox alignment="CENTER" spacing="10">
+        <VBox alignment="CENTER" spacing="0">
             <TitledPane text="Comparison Settings" expanded="false">
                 <content>
                     <SplitPane dividerPositions="0.25" styleClass="split-pane">
@@ -186,29 +163,32 @@
                                 <ColumnConstraints halignment="RIGHT" percentWidth="40"/>
                                 <ColumnConstraints percentWidth="60"/>
                             </columnConstraints>
+
                             <!-- Array Size: Combined Slider and Spinner -->
                             <Label text="Array Size:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="sub-label"/>
                             <HBox spacing="10" alignment="CENTER_LEFT" GridPane.rowIndex="0" GridPane.columnIndex="1">
                                 <Slider fx:id="arraySizeSlider" min="1" max="10000" value="3"
-                                        blockIncrement="1" majorTickUnit="1" minorTickCount="0" snapToTicks="true" />
+                                        blockIncrement="1" majorTickUnit="1" minorTickCount="0" snapToTicks="true"/>
                                 <Spinner fx:id="arraySizeSpinner" editable="true">
                                     <valueFactory>
                                         <SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="10000" initialValue="3"/>
                                     </valueFactory>
                                 </Spinner>
                             </HBox>
+
                             <!-- Collection Size: Combined Slider and Spinner -->
                             <Label text="Collection Size:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="sub-label"/>
                             <HBox spacing="10" alignment="CENTER_LEFT" GridPane.rowIndex="1" GridPane.columnIndex="1">
                                 <Slider fx:id="collectionSizeSlider" min="1" max="1000" value="3"
-                                        blockIncrement="1" majorTickUnit="1" minorTickCount="0" snapToTicks="true" />
+                                        blockIncrement="1" majorTickUnit="1" minorTickCount="0" snapToTicks="true"/>
                                 <Spinner fx:id="collectionSizeSpinner" editable="true">
                                     <valueFactory>
                                         <SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="1000" initialValue="3"/>
                                     </valueFactory>
                                 </Spinner>
                             </HBox>
-                            <!-- Fill Similarity -->
+
+                            <!-- Fill with Similar Values -->
                             <Label text="Fill with similar values:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="sub-label"/>
                             <HBox spacing="10" alignment="CENTER_LEFT" GridPane.rowIndex="2" GridPane.columnIndex="1">
                                 <RadioButton fx:id="similarRadio" text="Yes">
@@ -218,12 +198,30 @@
                                 </RadioButton>
                                 <RadioButton fx:id="differentRadio" text="No" toggleGroup="$fillToggleGroup"/>
                             </HBox>
+
+                            <!-- Max Depth: Combined Slider and Spinner -->
+                            <Label text="Max Depth:" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="sub-label">
+                                <tooltip>
+                                    <Tooltip text="Set how deep the fill logic goes (-1 for unlimited)."/>
+                                </tooltip>
+                            </Label>
+                            <HBox spacing="10" alignment="CENTER_LEFT" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                                <Slider fx:id="maxDepthSliderFill" min="1" max="1000000" value="3"
+                                        blockIncrement="1" majorTickUnit="1" minorTickCount="0" snapToTicks="true"/>
+                                <Spinner fx:id="maxDepthSpinnerFill" editable="true">
+                                    <valueFactory>
+                                        <SpinnerValueFactory.IntegerSpinnerValueFactory min="-1" max="1000000" initialValue="3"/>
+                                    </valueFactory>
+                                </Spinner>
+                            </HBox>
                         </GridPane>
+
                         <!-- Fill Button -->
                         <Button text="Fill" onAction="#onFillButtonClick" maxWidth="Infinity" styleClass="compare-button"/>
                     </VBox>
                 </content>
             </TitledPane>
+
 
 
 

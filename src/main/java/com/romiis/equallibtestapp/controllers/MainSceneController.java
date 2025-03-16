@@ -22,7 +22,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
+
+@Slf4j
 public class MainSceneController {
 
     // --- Existing UI Components ---
@@ -66,6 +70,15 @@ public class MainSceneController {
     private RadioButton differentRadio;
     @FXML
     private ToggleGroup fillToggleGroup;
+
+    @FXML
+    private Slider maxDepthSliderFill;
+
+    @FXML
+    private Spinner<Integer> maxDepthSpinnerFill;
+
+
+
 
     // --- Initialization ---
     @FXML
@@ -124,6 +137,14 @@ public class MainSceneController {
             }
         });
 
+        maxDepthSpinnerFill.valueProperty().addListener((obs, oldVal, newVal) -> {
+            maxDepthSliderFill.setValue(newVal.doubleValue());
+        });
+        maxDepthSliderFill.valueProperty().addListener((obs, oldVal, newVal) -> {
+            maxDepthSpinnerFill.getValueFactory().setValue(newVal.intValue());
+        });
+
+
         // Set default selection for the radio buttons.
         similarRadio.setSelected(true);
     }
@@ -160,40 +181,90 @@ public class MainSceneController {
     }
 
     // --- Comparison ---
+
+
     @FXML
-    public void onCompareButtonClick() {
+    private void onCompareButtonClick() {
+        // Create your config and get the two objects to compare
         EqualLibConfig config = createConfig();
+        Object object1 = treeView1.getSelectedObject();
+        Object object2 = treeView2.getSelectedObject();
 
+        // Prepare a background Task that returns (areEqual, elapsedNanos)
+        Task<javafx.util.Pair<Boolean, Long>> compareTask = new Task<>() {
+            @Override
+            protected javafx.util.Pair<Boolean, Long> call() {
+                long start = System.nanoTime();
+                boolean result = EqualLib.areEqual(object1, object2, config);
+                long end = System.nanoTime();
+                return new javafx.util.Pair<>(result, end - start);
+            }
+        };
 
-        // Measure start time.
-        long start = System.nanoTime();
-        boolean areEqual = EqualLib.areEqual(
-                treeView1.getSelectedObject(),
-                treeView2.getSelectedObject(),
-                config);
-        long end = System.nanoTime();
-        long elapsed = end - start;
+        // --- ANIMATION: A little "dot" animation while comparing. ---
+        // We'll cycle the label text: "Comparing", "Comparing.", "Comparing..", "Comparing..."
+        comparisonResult.setText("Comparing");
 
-        comparisonResult.setText(areEqual ? "Objects are equal" : "Objects are not equal");
-        comparisonTime.setText(calculateComparisonTime(start, end));
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(0.5), e -> comparisonResult.setText("Comparing.")),
+                new KeyFrame(Duration.seconds(1.0), e -> comparisonResult.setText("Comparing..")),
+                new KeyFrame(Duration.seconds(1.5), e -> comparisonResult.setText("Comparing...")),
+                new KeyFrame(Duration.seconds(2.0), e -> comparisonResult.setText("Comparing"))
+        );
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+
+        // When the task finishes successfully:
+        compareTask.setOnSucceeded(evt -> {
+            // Stop the animation
+            timeline.stop();
+
+            // Retrieve the (areEqual, elapsedNanos) from the Task
+            javafx.util.Pair<Boolean, Long> resultPair = compareTask.getValue();
+            boolean areEqual = resultPair.getKey();
+            long nanos = resultPair.getValue();
+
+            // Update the label with the result and time
+            comparisonResult.setText(
+                    "Comparison result: " + areEqual + "\n" + calculateComparisonTime(nanos)
+            );
+        });
+
+        // If something goes wrong (e.g., an exception)...
+        compareTask.setOnFailed(evt -> {
+            timeline.stop();
+            Throwable ex = compareTask.getException();
+            comparisonResult.setText("Comparison failed: " + ex.getMessage());
+        });
+
+        // Run the task in a background thread
+        Thread bgThread = new Thread(compareTask, "ComparisonThread");
+        bgThread.setDaemon(true);
+        bgThread.start();
     }
 
-
-    private String calculateComparisonTime(long start, long end) {
-        long elapsed = end - start;
-        if (elapsed < 1_000) {
-            return "Comparison time: " + elapsed + " ns";
-        } else if (elapsed < 1_000_000) {
-            double micros = elapsed / 1_000.0;
+    /**
+     * Formats elapsed time in nanoseconds as ns, µs, ms, or s,
+     * depending on magnitude.
+     */
+    private String calculateComparisonTime(long nanos) {
+        if (nanos < 1_000) {
+            return "Comparison time: " + nanos + " ns";
+        } else if (nanos < 1_000_000) {
+            double micros = nanos / 1_000.0;
             return String.format("Comparison time: %.2f µs", micros);
-        } else if (elapsed < 1_000_000_000) {
-            double millis = elapsed / 1_000_000.0;
+        } else if (nanos < 1_000_000_000) {
+            double millis = nanos / 1_000_000.0;
             return String.format("Comparison time: %.2f ms", millis);
         } else {
-            double seconds = elapsed / 1_000_000_000.0;
+            double seconds = nanos / 1_000_000_000.0;
             return String.format("Comparison time: %.2f s", seconds);
         }
     }
+
+
+
+
 
 
     @FXML
@@ -264,7 +335,7 @@ public class MainSceneController {
             protected Void call() throws Exception {
                 long startTime = System.currentTimeMillis();
                 // Run the fill operation (this may take time)
-                ObjectFillerUtil.fillObjects(obj1, obj2, fillSimilar, arraySize, collectionSize);
+                ObjectFillerUtil.fillObjects(obj1, obj2, fillSimilar, arraySize, collectionSize, maxDepthSpinnerFill.getValue());
                 long elapsed = System.currentTimeMillis() - startTime;
                 updateMessage("Completed in " + (elapsed / 1000.0) + " seconds.");
                 updateProgress(1, 1);
@@ -306,12 +377,14 @@ public class MainSceneController {
         fillTask.setOnSucceeded(e -> {
             timeline.stop();
             progressStage.close();
+            log.info("Fill operation completed.");
             treeView1.refresh();
             treeView2.refresh();
         });
 
         fillTask.setOnFailed(e -> {
             timeline.stop();
+            fillTask.getException().printStackTrace();
             progressStage.close();
             Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Fill operation failed: " +
                     fillTask.getException().getMessage(), ButtonType.OK);
