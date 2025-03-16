@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.romiis.equallibtestapp.CacheUtil;
-import com.romiis.equallibtestapp.util.JsonUtil;
-import javafx.scene.control.Alert;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -19,14 +17,15 @@ import java.io.IOException;
 @Slf4j
 public class FileManager {
 
-    // File extension
+    /**
+     * File extension
+     */
     private static final String EXTENSION = ".json";
 
-    // Folder to save files
+    /**
+     * Folder where the files are saved
+     */
     private static final String SAVE_FOLDER = "savedFiles";
-
-    private static final String DEFAULT_FILE_NAME = "savedObject";
-
 
 
     /**
@@ -49,13 +48,6 @@ public class FileManager {
 
         return fileNames;
     }
-
-
-    private static boolean fileExists(String fileName) {
-        File file = new File(SAVE_FOLDER + File.separator + fileName + EXTENSION);
-        return file.exists();
-    }
-
 
     /**
      * Save a file with the given name and content

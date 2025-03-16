@@ -41,6 +41,9 @@ public class ObjectReference {
     private boolean isNull = false;
 
 
+    public void setNull(boolean isNull) {
+        this.isNull = isNull;
+    }
 
     /**
      * Create a new ObjectReference instance

@@ -109,6 +109,12 @@
     -fx-border-radius: 4;
 }
 
+.loading-overlay {
+    -fx-background-color: rgba(0,0,0,0.2);
+    -fx-alignment: center;
+    -fx-padding: 20;
+}
+
 /* TextField Styling */
 .text-field {
     -fx-background-color: #FFFFFF;

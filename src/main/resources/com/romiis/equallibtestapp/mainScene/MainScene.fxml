@@ -113,6 +113,10 @@
             </SplitPane>
         </GridPane>
     </center>
+    <StackPane fx:id="loadingOverlay" visible="false" styleClass="loading-overlay">
+        <ProgressIndicator fx:id="progressIndicator" />
+    </StackPane>
+
 
     <!-- Bottom Panel -->
     <bottom>
@@ -216,11 +220,16 @@
                             </HBox>
                         </GridPane>
 
+                        <!-- HUGE Warning Message -->
+                        <Label text="WARNING: Use extreme caution! Incorrect settings (e.g., extremely high depth) can crash the application."
+                               style="-fx-text-fill: red; -fx-font-weight: bold; -fx-wrap-text: true;" />
+
                         <!-- Fill Button -->
                         <Button text="Fill" onAction="#onFillButtonClick" maxWidth="Infinity" styleClass="compare-button"/>
                     </VBox>
                 </content>
             </TitledPane>
+
 
 
 

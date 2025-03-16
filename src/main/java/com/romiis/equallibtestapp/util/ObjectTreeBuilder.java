@@ -16,7 +16,7 @@ public class ObjectTreeBuilder {
 
     /**
      * Create a tree structure for the given object, but lazily.
-     *
+     * <p>
      * Instead of immediately populating children, we create a LazyTreeItem.
      * That item will load its children on first expansion.
      */
@@ -30,7 +30,7 @@ public class ObjectTreeBuilder {
 
     /**
      * Handle an array object.
-     *
+     * <p>
      * (Identical to your original logic except that 'parent' here should be a LazyTreeItem.)
      */
     public static TreeItem<ObjectReference> handleArray(TreeItem<ObjectReference> parent,
@@ -82,7 +82,7 @@ public class ObjectTreeBuilder {
 
     /**
      * Expand all items in the TreeView (root and all children).
-     *
+     * <p>
      * (Unchanged – when you expand, lazy nodes will load children.)
      */
     public static void expandAll(TreeItem<?> item) {
@@ -135,7 +135,12 @@ public class ObjectTreeBuilder {
 
             // If we've already visited, add a cycle leaf and stop
             if (visited.contains(obj)) {
-                getChildren().add(new TreeItem<>(new ObjectReference(obj, null, true)));
+                if (!getValue().getField().getType().isArray()){
+                    getChildren().add(
+                            new TreeItem<>(new ObjectReference(obj, null, true))
+                    );
+            }
+
                 return;
             }
 

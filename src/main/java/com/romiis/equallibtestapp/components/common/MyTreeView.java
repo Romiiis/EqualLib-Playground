@@ -7,14 +7,19 @@ import com.romiis.equallibtestapp.io.FileManager;
 import com.romiis.equallibtestapp.util.JsonUtil;
 import com.romiis.equallibtestapp.util.ObjectTreeBuilder;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
+import javafx.animation.FadeTransition;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -190,11 +195,7 @@ public class MyTreeView extends TreeView<ObjectReference> {
         ObjectTreeBuilder.expandAll(rootItem);
     }
 
-    /**
-     * Saves the current selected object.
-     *
-     * @return True if the save was successful, false otherwise.
-     */
+
     public boolean save() {
         TextInputDialog dialog = new TextInputDialog("savedObject");
         dialog.setTitle("Save File");
@@ -204,18 +205,74 @@ public class MyTreeView extends TreeView<ObjectReference> {
         Optional<String> result = dialog.showAndWait();
 
         if (result.isPresent() && !result.get().trim().isEmpty()) {
-            try {
-                String content = JsonUtil.serialize(this.getSelectedObject());
-                log.info("Serialized object: {}", content);
-                FileManager.saveFile(result.get(), content);
-                this.setModified(false);
-            } catch (Exception e) {
-                return false;
-            }
+            // Create an overlay stage to show the loading animation.
+            Stage overlayStage = new Stage(StageStyle.TRANSPARENT);
+            overlayStage.initModality(Modality.APPLICATION_MODAL);
+            // Create a StackPane as root with a semi-transparent background.
+            StackPane overlayRoot = new StackPane();
+            overlayRoot.setStyle("-fx-background-color: rgba(0, 0, 0, 0.3);");
+            // Create and add a ProgressIndicator.
+            ProgressIndicator indicator = new ProgressIndicator();
+            overlayRoot.getChildren().add(indicator);
+            Scene overlayScene = new Scene(overlayRoot, 100, 100);
+            overlayScene.setFill(null);
+            overlayStage.setScene(overlayScene);
+
+            // Fade in the overlay.
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(200), overlayRoot);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            fadeIn.setOnFinished(e -> overlayStage.show());
+            fadeIn.play();
+
+            // Create a background task to execute the save operation.
+            Task<Boolean> saveTask = new Task<>() {
+                @Override
+                protected Boolean call() {
+                    try {
+                        String content = JsonUtil.serialize(getSelectedObject());
+                        log.info("Serialized object: {}", content);
+                        FileManager.saveFile(result.get(), content);
+                        setModified(false);
+                        return true;
+                    } catch (Exception e) {
+                        log.error("Error during save operation", e);
+                        return false;
+                    }
+                }
+            };
+
+            // When the task finishes (successfully or not), fade out the overlay.
+            saveTask.setOnSucceeded(event -> {
+                fadeOutAndClose(overlayStage, overlayRoot);
+                if (!saveTask.getValue()) {
+                    // Optionally, show an error alert if save failed.
+                    // new Alert(Alert.AlertType.ERROR, "Save operation failed.", ButtonType.OK).showAndWait();
+                }
+            });
+            saveTask.setOnFailed(event -> {
+                fadeOutAndClose(overlayStage, overlayRoot);
+                // Optionally, show an error alert.
+                // new Alert(Alert.AlertType.ERROR, "Save operation failed.", ButtonType.OK).showAndWait();
+            });
+
+            new Thread(saveTask).start();
             return true;
         }
         return false;
     }
+
+    /**
+     * Fades out the given overlay and closes its stage when finished.
+     */
+    private void fadeOutAndClose(Stage overlayStage, StackPane overlayRoot) {
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(200), overlayRoot);
+        fadeOut.setFromValue(overlayRoot.getOpacity());
+        fadeOut.setToValue(0);
+        fadeOut.setOnFinished(e -> overlayStage.close());
+        fadeOut.play();
+    }
+
 
     /**
      * Gets the currently selected object.

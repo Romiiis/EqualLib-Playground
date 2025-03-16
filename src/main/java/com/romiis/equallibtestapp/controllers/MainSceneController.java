@@ -18,6 +18,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -34,6 +35,9 @@ public class MainSceneController {
     private MyTreeView treeView1;
     @FXML
     private MyTreeView treeView2;
+
+    @FXML private StackPane loadingOverlay;
+
 
     @FXML
     private ClassListView objectListView1;
@@ -286,29 +290,38 @@ public class MainSceneController {
 
 
 
+
     @FXML
     public void onSaveAsButton1Click() throws Exception {
+        if (maxDepthSpinnerFill.getValue() >= 1000) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Max depth cannot exceed 999.", ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }
         treeView1.save();
     }
 
+
+
+
     @FXML
     public void onSaveAsButton2Click() throws Exception {
+        if (maxDepthSpinnerFill.getValue() >= 1000) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Max depth cannot exceed 999.", ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }
         treeView2.save();
     }
 
     @FXML
-    public void onLoadButton1Click() {
+    public void onLoadButtonClick() {
         treeView1.load();
     }
 
     @FXML
     public void onLoadButton2Click() {
         treeView2.load();
-    }
-
-    @FXML
-    public void onLoadButtonClick() {
-        treeView1.load();
     }
 
     // --- Fill Button Handler ---
