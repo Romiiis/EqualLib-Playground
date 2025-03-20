@@ -19,8 +19,8 @@ module com.romiis.equallibtestapp {
     exports com.romiis.equallibtestapp;
     exports com.romiis.equallibtestapp.controllers;
     opens com.romiis.equallibtestapp.controllers to javafx.fxml;
-    exports com.romiis.equallibtestapp.components.common;
-    exports com.romiis.equallibtestapp.components.mainScene;
-    exports com.romiis.equallibtestapp.components.loadObjectScene;
+    exports com.romiis.equallibtestapp.components;
+    exports com.romiis.equallibtestapp.components.treeView;
+    exports com.romiis.equallibtestapp.components.listView;
 
 }

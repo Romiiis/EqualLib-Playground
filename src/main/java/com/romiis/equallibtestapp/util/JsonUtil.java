@@ -1,5 +1,3 @@
-
-
 package com.romiis.equallibtestapp.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,9 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.romiis.equallibtestapp.CacheUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.*;
 
+
+/**
+ * Utility class for serializing and deserializing objects to and from JSON.
+ */
 @Slf4j
 public class JsonUtil {
 
@@ -39,9 +44,11 @@ public class JsonUtil {
         }
         String className = node.get("@class").asText();
         Class<?> clazz = CacheUtil.getInstance().getClassByName(className);
-        // Create an instance (using a no-argument constructor) and then populate it.
+        // Create an instance using a no-argument constructor.
         Object instance = ReflectionUtil.createInstance(clazz);
-        return deserializeObject(instance, node);
+        // Create a context map for cycle detection.
+        Map<Integer, Object> context = new HashMap<>();
+        return deserializeObject(instance, node, context);
     }
 
     //region ----------Serialization methods----------
@@ -54,16 +61,13 @@ public class JsonUtil {
         if (obj == null) {
             return null;
         }
-
         // If we've already serialized this object, return a reference marker.
         if (visited.containsKey(obj)) {
             Map<String, Object> refMap = new HashMap<>();
             refMap.put("@ref", visited.get(obj));
             return refMap;
         }
-
         Class<?> clazz = obj.getClass();
-
         // For primitives, wrappers and String, just return a simple map.
         if (isPrimitiveOrWrapper(clazz) || clazz == String.class) {
             Map<String, Object> simpleMap = new HashMap<>();
@@ -71,28 +75,24 @@ public class JsonUtil {
             simpleMap.put("value", obj);
             return simpleMap;
         }
-
         // If the object is an array, delegate to serializeArray.
         if (clazz.isArray()) {
             return serializeArray(clazz, obj, visited);
         }
-        // New: if it is a Collection, use serializeCollection.
+        // Handle collections.
         if (Collection.class.isAssignableFrom(clazz)) {
             return serializeCollection((Collection<?>) obj, visited);
         }
-        // New: if it is a Map, use serializeMap.
+        // Handle maps.
         if (Map.class.isAssignableFrom(clazz)) {
             return serializeMap((Map<?, ?>) obj, visited);
         }
-
         // Mark the current object as visited with a unique ID.
         int currentId = visited.size() + 1;
         visited.put(obj, currentId);
-
         Map<String, Object> fieldMap = new HashMap<>();
         fieldMap.put("@class", clazz.getName());
         fieldMap.put("@id", currentId);
-
         for (Field field : ReflectionUtil.getAllFields(clazz)) {
             // Skip transient fields unless they are collections or maps.
             if (Modifier.isTransient(field.getModifiers())
@@ -111,11 +111,11 @@ public class JsonUtil {
             } else if (field.getType().isArray()) {
                 fieldMap.put(field.getName(), serializeArray(field.getType(), value, visited));
             }
-            // New: Handle collections
+            // Handle collections.
             else if (Collection.class.isAssignableFrom(field.getType())) {
                 fieldMap.put(field.getName(), serializeCollection((Collection<?>) value, visited));
             }
-            // New: Handle maps
+            // Handle maps.
             else if (Map.class.isAssignableFrom(field.getType())) {
                 fieldMap.put(field.getName(), serializeMap((Map<?, ?>) value, visited));
             } else if (field.getType().isEnum()) {
@@ -215,31 +215,41 @@ public class JsonUtil {
         map.put("value", serializedEntries);
         return map;
     }
-
     //endregion
 
     //region ----------Deserialization methods----------
 
     /**
-     * Recursively deserializes an object from a JSON node.
+     * Recursively deserializes an object from a JSON node using the provided context.
      */
-    private static Object deserializeObject(Object obj, JsonNode node) throws Exception {
+    private static Object deserializeObject(Object obj, JsonNode node, Map<Integer, Object> context) throws Exception {
         if (obj == null || node == null) {
             return null;
         }
-
         // Handle the case where the root object is a Collection or Map.
         if (obj instanceof Collection) {
-            return deserializeCollection(node, obj.getClass(), null);
+            return deserializeCollection(node, obj.getClass(), null, context);
         } else if (obj instanceof Map) {
-            return deserializeMap(node, obj.getClass(), null);
+            return deserializeMap(node, obj.getClass(), null, context);
         }
-
         // If the node's "value" is an array and obj is an array, deserialize as an array.
         if (node.has("value") && node.get("value").isArray() && obj.getClass().isArray()) {
-            return deserializeArray(node.get("value"), obj.getClass().getComponentType());
+            return deserializeArray(node.get("value"), obj.getClass().getComponentType(), context);
         }
-
+        // Handle reference nodes.
+        if (node.has("@ref")) {
+            int refId = node.get("@ref").asInt();
+            Object refObj = context.get(refId);
+            if (refObj == null) {
+                throw new IllegalStateException("Reference id " + refId + " not found in context.");
+            }
+            return refObj;
+        }
+        // Store this object in context if it has an ID.
+        if (node.has("@id")) {
+            int currentId = node.get("@id").asInt();
+            context.put(currentId, obj);
+        }
         String className = node.get("@class").asText();
         Class<?> clazz = CacheUtil.getInstance().getClassByName(className);
         for (Field field : ReflectionUtil.getAllFields(clazz)) {
@@ -252,66 +262,83 @@ public class JsonUtil {
             if (Modifier.isFinal(field.getModifiers()) && Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
-            Class<?> fieldClazz = determineFieldClass(fieldNode.get("@class").asText());
+            // If the field node is a reference marker, retrieve and set the referenced object.
+            if (fieldNode.has("@ref")) {
+                int refId = fieldNode.get("@ref").asInt();
+                Object refValue = context.get(refId);
+                if (refValue == null) {
+                    throw new IllegalStateException("Reference id " + refId + " not found in context for field " + field.getName());
+                }
+                field.set(obj, refValue);
+                continue;
+            }
+            // Check for the "@class" node in the field.
+            JsonNode classNode = fieldNode.get("@class");
+            if (classNode == null || classNode.isNull()) {
+                log.warn("Field {} has no @class info, skipping.", field.getName());
+                continue;
+            }
+            Class<?> fieldClazz = determineFieldClass(classNode.asText());
+            Object fieldValue;
             if (fieldClazz.isArray()) {
-                field.set(obj, deserializeArray(fieldNode.get("value"), fieldClazz.getComponentType()));
+                fieldValue = deserializeArray(fieldNode.get("value"), fieldClazz.getComponentType(), context);
             }
-            // New: Handle collections.
+            // Handle collections.
             else if (Collection.class.isAssignableFrom(fieldClazz)) {
-                field.set(obj, deserializeCollection(fieldNode, field.getType(), field.getGenericType()));
+                fieldValue = deserializeCollection(fieldNode, field.getType(), field.getGenericType(), context);
             }
-            // New: Handle maps.
+            // Handle maps.
             else if (Map.class.isAssignableFrom(fieldClazz)) {
-                field.set(obj, deserializeMap(fieldNode, field.getType(), field.getGenericType()));
+                fieldValue = deserializeMap(fieldNode, field.getType(), field.getGenericType(), context);
             } else if (fieldClazz.isEnum()) {
-                field.set(obj, Enum.valueOf((Class<Enum>) fieldClazz, fieldNode.get("value").asText()));
+                fieldValue = Enum.valueOf((Class<Enum>) fieldClazz, fieldNode.get("value").asText());
             }
             // Special-case String fields.
             else if (fieldClazz == String.class) {
                 JsonNode valueNode = fieldNode.get("value");
-                field.set(obj, (valueNode == null || valueNode.isNull()) ? null : valueNode.asText());
+                fieldValue = (valueNode == null || valueNode.isNull()) ? null : valueNode.asText();
             } else if (isPrimitiveOrWrapper(fieldClazz)) {
-                field.set(obj, deserializeObjectWithType(fieldNode));
+                fieldValue = deserializeObjectWithType(fieldNode, context);
             } else {
                 Object fieldInstance = ReflectionUtil.createInstance(fieldClazz);
-                field.set(obj, deserializeObject(fieldInstance, fieldNode));
+                fieldValue = deserializeObject(fieldInstance, fieldNode, context);
             }
+            field.set(obj, fieldValue);
         }
         return obj;
     }
 
     /**
-     * Deserializes an array from a JSON node.
+     * Deserializes an array from a JSON node using the provided context.
      */
-    private static Object deserializeArray(JsonNode node, Class<?> componentType) throws Exception {
+    private static Object deserializeArray(JsonNode node, Class<?> componentType, Map<Integer, Object> context) throws Exception {
         if (node == null || node.isNull() || !node.isArray()) {
             return null;
         }
         int length = node.size();
         Object array = Array.newInstance(componentType, length);
         for (int i = 0; i < length; i++) {
-            Array.set(array, i, deserializeObjectWithType(node.get(i)));
+            Array.set(array, i, deserializeObjectWithType(node.get(i), context));
         }
         return array;
     }
 
-    private static Object deserializeCollection(JsonNode node, Class<?> collectionClass, Type genericType) throws Exception {
+    private static Object deserializeCollection(JsonNode node, Class<?> collectionClass, Type genericType, Map<Integer, Object> context) throws Exception {
         if (node == null || node.isNull() || !node.has("value") || node.get("value").isNull()) {
             return null;
         }
         Collection<Object> collection = createCollectionInstance(collectionClass);
-        // Optionally, you can determine elementType from genericType if needed.
         for (JsonNode elementNode : node.get("value")) {
-            Object deserializedElement = deserializeElement(elementNode);
+            Object deserializedElement = deserializeElement(elementNode, context);
             collection.add(deserializedElement);
         }
         return collection;
     }
 
     /**
-     * Deserializes a Map from a JSON node.
+     * Deserializes a Map from a JSON node using the provided context.
      */
-    private static Object deserializeMap(JsonNode node, Class<?> mapClass, Type genericType) throws Exception {
+    private static Object deserializeMap(JsonNode node, Class<?> mapClass, Type genericType, Map<Integer, Object> context) throws Exception {
         if (node == null || node.isNull() || !node.has("value") || node.get("value").isNull()) {
             return null;
         }
@@ -319,41 +346,95 @@ public class JsonUtil {
         for (JsonNode entryNode : node.get("value")) {
             JsonNode keyNode = entryNode.get("key");
             JsonNode valueNode = entryNode.get("value");
-            Object key = deserializeElement(keyNode);
-            Object value = deserializeElement(valueNode);
+            Object key = deserializeElement(keyNode, context);
+            Object value = deserializeElement(valueNode, context);
             map.put(key, value);
         }
         return map;
     }
 
-
     /**
-     * Helper method that inspects a JSON node and deserializes it appropriately.
+     * Helper method that inspects a JSON node and deserializes it appropriately using the provided context.
      */
-    private static Object deserializeElement(JsonNode node) throws Exception {
+    private static Object deserializeElement(JsonNode node, Map<Integer, Object> context) throws Exception {
         if (node == null || node.isNull()) {
             return null;
         }
-        // If node is simply a text node, return its text.
+        // If the node is a reference, return the referenced object.
+        if (node.has("@ref")) {
+            int refId = node.get("@ref").asInt();
+            Object refObj = context.get(refId);
+            if (refObj == null) {
+                throw new IllegalStateException("Reference id " + refId + " not found in context.");
+            }
+            return refObj;
+        }
         if (node.isTextual()) {
             return node.asText();
         }
         // If node is a simple structure with only "@class" and "value", use the simple deserialization.
         if (node.has("@class") && node.has("value") && node.size() == 2) {
-            return deserializeObjectWithType(node);
+            return deserializeObjectWithType(node, context);
         }
-        // Otherwise, treat it as a complex object.
         String className = node.get("@class").asText();
         Class<?> clazz = CacheUtil.getInstance().getClassByName(className);
         Object instance = ReflectionUtil.createInstance(clazz);
-        return deserializeObject(instance, node);
+        return deserializeObject(instance, node, context);
     }
+
+    /**
+     * Deserializes a primitive, wrapper, or string value using the provided context.
+     */
+    private static Object deserializeObjectWithType(JsonNode node, Map<Integer, Object> context) throws Exception {
+        if (node == null || node.isNull()) {
+            return null;
+        }
+        String className = node.get("@class").asText();
+        JsonNode valueNode = node.get("value");
+
+        return switch (className) {
+            case "int" -> valueNode.asInt();
+            case "long" -> valueNode.asLong();
+            case "double" -> valueNode.asDouble();
+            case "float" -> valueNode.floatValue();
+            case "boolean" -> valueNode.asBoolean();
+            case "byte" -> (byte) valueNode.asInt();
+            case "short" -> (short) valueNode.asInt();
+            case "char" -> valueNode.asText().charAt(0);
+            case "java.lang.String" -> valueNode.isNull() ? null : valueNode.asText();
+            case "java.lang.Integer" -> Integer.valueOf(valueNode.asInt());
+            case "java.lang.Long" -> Long.valueOf(valueNode.asLong());
+            case "java.lang.Double" -> Double.valueOf(valueNode.asDouble());
+            case "java.lang.Float" -> Float.valueOf(valueNode.floatValue());
+            case "java.lang.Boolean" -> Boolean.valueOf(valueNode.asBoolean());
+            case "java.lang.Byte" -> Byte.valueOf((byte) valueNode.asInt());
+            case "java.lang.Short" -> Short.valueOf((short) valueNode.asInt());
+            case "java.lang.Character" -> valueNode.asText().charAt(0);
+            default -> {
+                Class<?> clazz = CacheUtil.getInstance().getClassByName(className);
+                if (clazz.isArray()) {
+                    if (valueNode != null && valueNode.isArray()) {
+                        yield deserializeArray(valueNode, clazz.getComponentType(), context);
+                    } else {
+                        yield Array.newInstance(clazz.getComponentType(), 0);
+                    }
+                } else {
+                    yield clazz.getDeclaredConstructor().newInstance();
+                }
+            }
+        };
+    }
+
+    // Overloaded version for backward compatibility.
+    private static Object deserializeObjectWithType(JsonNode node) throws Exception {
+        return deserializeObjectWithType(node, new HashMap<>());
+    }
+    //endregion
 
 
     /**
      * Creates an instance for a Collection.
      */
-    @SuppressWarnings("unchecked")
     private static Collection<Object> createCollectionInstance(Class<?> collectionClass) throws Exception {
         if (!collectionClass.isInterface() && !Modifier.isAbstract(collectionClass.getModifiers())) {
             return (Collection<Object>) collectionClass.getDeclaredConstructor().newInstance();
@@ -370,7 +451,6 @@ public class JsonUtil {
     /**
      * Creates an instance for a Map.
      */
-    @SuppressWarnings("unchecked")
     private static Map<Object, Object> createMapInstance(Class<?> mapClass) throws Exception {
         if (!mapClass.isInterface() && !Modifier.isAbstract(mapClass.getModifiers())) {
             return (Map<Object, Object>) mapClass.getDeclaredConstructor().newInstance();
@@ -426,52 +506,4 @@ public class JsonUtil {
         };
     }
 
-    /**
-     * Deserializes a primitive, wrapper, or string value.
-     */
-    private static Object deserializeObjectWithType(JsonNode node) throws Exception {
-        if (node == null || node.isNull()) {
-            return null;
-        }
-        String className = node.get("@class").asText();
-        JsonNode valueNode = node.get("value");
-
-        return switch (className) {
-            case "int" -> valueNode.asInt();
-            case "long" -> valueNode.asLong();
-            case "double" -> valueNode.asDouble();
-            case "float" -> valueNode.floatValue();
-            case "boolean" -> valueNode.asBoolean();
-            case "byte" -> (byte) valueNode.asInt();
-            case "short" -> (short) valueNode.asInt();
-            case "char" -> valueNode.asText().charAt(0);
-            case "java.lang.String" -> valueNode.isNull() ? null : valueNode.asText();
-
-            // Handle wrapper types explicitly.
-            case "java.lang.Integer" -> Integer.valueOf(valueNode.asInt());
-            case "java.lang.Long" -> Long.valueOf(valueNode.asLong());
-            case "java.lang.Double" -> Double.valueOf(valueNode.asDouble());
-            case "java.lang.Float" -> Float.valueOf(valueNode.floatValue());
-            case "java.lang.Boolean" -> Boolean.valueOf(valueNode.asBoolean());
-            case "java.lang.Byte" -> Byte.valueOf((byte) valueNode.asInt());
-            case "java.lang.Short" -> Short.valueOf((short) valueNode.asInt());
-            case "java.lang.Character" -> valueNode.asText().charAt(0);
-
-            // Default case: dynamically load class and instantiate.
-            default -> {
-                Class<?> clazz = CacheUtil.getInstance().getClassByName(className);
-                if (clazz.isArray()) {
-                    if (valueNode != null && valueNode.isArray()) {
-                        yield deserializeArray(valueNode, clazz.getComponentType());
-                    } else {
-                        yield Array.newInstance(clazz.getComponentType(), 0);
-                    }
-                } else {
-                    yield clazz.getDeclaredConstructor().newInstance();
-                }
-            }
-        };
-    }
-
-    //endregion
 }

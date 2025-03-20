@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.romiis.equallibtestapp.components.common.MyTreeView?>
-<?import com.romiis.equallibtestapp.components.mainScene.ClassListView?>
+<?import com.romiis.equallibtestapp.components.treeView.MyTreeView?>
+<?import com.romiis.equallibtestapp.components.listView.ClassListView?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>

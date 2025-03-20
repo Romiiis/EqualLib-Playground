@@ -4,12 +4,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 public class DeepCopyUtil {
 
@@ -29,13 +24,13 @@ public class DeepCopyUtil {
 
     /**
      * Replaces the recursive deepCopy(...) with an iterative approach.
-     *
+     * <p>
      * 1) If the object is null/immutable/already in cache, return immediately.
      * 2) Otherwise, create its copy and place (original, copy) into a queue.
      * 3) While the queue is not empty, remove (orig, cpy):
-     *    - If orig is an array, copy each element (recursively via queue).
-     *    - Else, copy all fields. For each non-null field, force-lazy-init
-     *      and either fetch from cache or create a new instance and enqueue it.
+     * - If orig is an array, copy each element (recursively via queue).
+     * - Else, copy all fields. For each non-null field, force-lazy-init
+     * and either fetch from cache or create a new instance and enqueue it.
      */
     @SuppressWarnings("unchecked")
     private static <T> T deepCopyNonRecursive(T rootObject, Map<Object, Object> copyCache) {
@@ -199,7 +194,7 @@ public class DeepCopyUtil {
     /**
      * Force lazy initialization on an object by invoking all public no-argument getters.
      * Also triggers size() or toArray() calls for Collections/Maps/Sets.
-     *
+     * <p>
      * This is the same as your original method, unchanged.
      */
     @SuppressWarnings("unchecked")
@@ -262,6 +257,7 @@ public class DeepCopyUtil {
      */
     private static class UnsafeHolder {
         private static final sun.misc.Unsafe UNSAFE;
+
         static {
             try {
                 Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
@@ -279,6 +275,7 @@ public class DeepCopyUtil {
     private static class Pair {
         final Object original;
         final Object copy;
+
         Pair(Object original, Object copy) {
             this.original = original;
             this.copy = copy;

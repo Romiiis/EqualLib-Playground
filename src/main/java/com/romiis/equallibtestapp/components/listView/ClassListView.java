@@ -1,7 +1,6 @@
-package com.romiis.equallibtestapp.components.mainScene;
+package com.romiis.equallibtestapp.components.listView;
 
-import com.romiis.equallibtestapp.components.common.MyTreeView;
-import com.romiis.equallibtestapp.components.common.SaveResult;
+import com.romiis.equallibtestapp.components.treeView.MyTreeView;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import lombok.Setter;

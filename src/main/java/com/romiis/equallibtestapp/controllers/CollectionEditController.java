@@ -2,7 +2,6 @@ package com.romiis.equallibtestapp.controllers;
 
 import com.romiis.equallibtestapp.CacheUtil;
 import com.romiis.equallibtestapp.MainClass;
-import com.romiis.equallibtestapp.components.common.ObjectReference;
 import com.romiis.equallibtestapp.util.DeepCopyUtil;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.collections.FXCollections;
@@ -17,6 +16,7 @@ import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.converter.DefaultStringConverter;
@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,16 +33,12 @@ import java.util.List;
 @Slf4j
 public class CollectionEditController {
 
-    /**
-     * -- GETTER --
-     * Returns the updated collection after editing.
-     */
     @Getter
     private Collection<?> collection;
     private String collectionName;
     private Class<?> elementType;
 
-    // A backup copy to restore the original content if cancel is pressed.
+    // Backup copy to restore original content on cancel.
     private List<Object> backupCollection;
 
     @FXML
@@ -60,22 +57,26 @@ public class CollectionEditController {
     // Local copy of collection elements for editing.
     private ObservableList<Object> observableElements;
 
+    /*==================== Initialization ====================*/
+
     /**
-     * Initializes the editor with a collection, a name, and the expected element type.
-     * The passed collection reference is preserved and will be updated on save.
+     * Sets up the editor with a collection, its name, and the expected element type.
+     * The provided collection is preserved and updated upon saving.
      */
-    public void setAssignedCollection(Collection<?> collection, String collectionName, Class<?> elementType) {
+    public void setAssignedCollection(Collection<?> collection, String collectionName, Type elementType) {
         if (collection == null) {
             throw new IllegalArgumentException("Provided collection is null.");
         }
-        // Preserve the passed collection reference.
         this.collection = collection;
-        // Make a backup copy of the original elements.
+        // Backup the original collection.
         this.backupCollection = new ArrayList<>(collection);
         this.collectionName = collectionName;
-        this.elementType = elementType;
+        this.elementType = ReflectionUtil.getClassFromType(elementType);
+
         init();
     }
+
+
 
     /**
      * Initializes the editor: loads the collection elements, sets up the ListView,
@@ -83,17 +84,18 @@ public class CollectionEditController {
      */
     private void init() {
         if (collectionName != null) {
-            String title = String.format("%s<%s> %s", collection.getClass().getSimpleName(), elementType.getSimpleName(), collectionName);
+            String title = String.format("%s<%s> %s",
+                    collection.getClass().getSimpleName(),
+                    elementType.getSimpleName(),
+                    collectionName);
             collectionTitleLabel.setText(title);
         }
         loadCollectionIntoObservableElements();
-        // Set the ListView items using plain string conversion (the custom cells add index info).
         elementsList.setItems(convertToStringList(observableElements));
         elementsList.setEditable(true);
 
         setupListViewEditor(elementType);
 
-        // Commit edit on cell update.
         elementsList.setOnEditCommit(event -> {
             int index = event.getIndex();
             String newValue = event.getNewValue();
@@ -122,21 +124,20 @@ public class CollectionEditController {
     }
 
     /**
-     * Loads the current collection elements into the local observable list.
+     * Loads the collection's elements into a local observable list.
      */
     private void loadCollectionIntoObservableElements() {
-        // Use the actual collection contents.
         observableElements = FXCollections.observableArrayList();
         observableElements.addAll(collection);
     }
 
     /**
-     * Converts the local observableElements into a list of Strings for display.
+     * Converts the observable elements into a String list for display.
      */
     private ObservableList<String> convertToStringList(ObservableList<Object> list) {
         ObservableList<String> strings = FXCollections.observableArrayList();
         for (Object o : list) {
-            strings.add(o != null ? o.toString() : ObjectReference.NULL);
+            strings.add(o != null ? o.toString() : "null");
         }
         return strings;
     }
@@ -148,8 +149,11 @@ public class CollectionEditController {
         elementsList.setItems(convertToStringList(observableElements));
     }
 
-    /*==================== ListView Editor Setup ====================*/
+    /*==================== Cell Factory Setup ====================*/
 
+    /**
+     * Configures the ListView cell factory based on the element type.
+     */
     private void setupListViewEditor(Class<?> elementType) {
         if (elementType.isEnum()) {
             Object[] enumConstants = elementType.getEnumConstants();
@@ -178,16 +182,17 @@ public class CollectionEditController {
                 return cell;
             });
         } else if (elementType.isArray() || Collection.class.isAssignableFrom(elementType)) {
+            // For nested arrays or collections, use a non-editable cell.
             elementsList.setCellFactory(lv -> new IndexedListCell() {
                 {
                     setEditable(false);
                     setOnMouseClicked(event -> {
                         if (event.getClickCount() == 2) {
                             int selectedIndex = getIndex();
-                            if (selectedIndex < 0) return;
+                            if (selectedIndex < 0 || selectedIndex >= observableElements.size()) return;
                             Object nested = observableElements.get(selectedIndex);
                             if (nested == null) {
-                                log.warn("Selected element is null, cannot open nested editor.");
+                                log.warn("Selected element is null; cannot open nested editor.");
                                 return;
                             }
                             try {
@@ -195,7 +200,7 @@ public class CollectionEditController {
                                     FXMLLoader loader = new FXMLLoader(MainClass.class.getResource(MainClass.ARRAY_EDIT_SCENE_FXML));
                                     Parent root = loader.load();
                                     ArrayEditController controller = loader.getController();
-                                    controller.setAssignedArray(nested, collectionName + " [index " + selectedIndex + "]", null, -1);
+                                    controller.setAssignedArray(nested, collectionName + " [index " + selectedIndex + "]", collection, selectedIndex);
                                     Stage stage = new Stage();
                                     stage.setTitle("Nested Array Editor");
                                     stage.setScene(new Scene(root));
@@ -247,7 +252,8 @@ public class CollectionEditController {
             });
         } else {
             elementsList.setCellFactory(lv -> {
-                IndexedComboBoxCell cell = new IndexedComboBoxCell(CacheUtil.getInstance().getObjectsFitNames(elementType).toArray(new String[0]));
+                IndexedComboBoxCell cell = new IndexedComboBoxCell(CacheUtil.getInstance().getObjectsFitNames(elementType)
+                        .toArray(new String[0]));
                 setupDragAndDrop(cell);
                 cell.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2 && !cell.isEmpty()) {
@@ -294,6 +300,8 @@ public class CollectionEditController {
             event.consume();
         });
     }
+
+    /*==================== Conversion and Save ====================*/
 
     /**
      * Converts a String from the editor into an object of the correct type.
@@ -346,10 +354,8 @@ public class CollectionEditController {
      */
     @SuppressWarnings("unchecked")
     private void handleSaveAction() {
-        // Modify the passed collection in place.
         collection.clear();
         ((Collection<Object>) collection).addAll(observableElements);
-        // Update the backup in case the editor is reopened.
         backupCollection = new ArrayList<>(observableElements);
         log.debug("Changes saved to collection.");
         closeWindow();
@@ -367,6 +373,7 @@ public class CollectionEditController {
         log.debug("Changes canceled; original collection reloaded.");
         closeWindow();
     }
+
 
     /**
      * Closes the current window.
@@ -410,17 +417,9 @@ public class CollectionEditController {
             super.startEdit();
             int index = getIndex();
             if (index < 0) return;
-            Object currentValue = observableElements.get(index);
-            String initialText;
-            if (currentValue != null) {
-                initialText = currentValue.toString();
-            } else if (ReflectionUtil.isWrapperOrString(elementType) || elementType.isPrimitive() || elementType.equals(String.class)) {
-                Object defaultValue = ReflectionUtil.getDefaultValue(elementType);
-                initialText = defaultValue != null ? defaultValue.toString() : "";
-            } else {
-                initialText = "";
-            }
-            TextField textField = new TextField(initialText);
+            TextField textField = new TextField(
+                    observableElements.get(index) != null ? observableElements.get(index).toString() : ""
+            );
             textField.setOnAction(event -> commitEdit(textField.getText()));
             setGraphic(textField);
         }

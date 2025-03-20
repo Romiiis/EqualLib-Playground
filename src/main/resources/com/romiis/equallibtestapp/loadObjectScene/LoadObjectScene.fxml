@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.romiis.equallibtestapp.components.common.MyTreeView?>
+<?import com.romiis.equallibtestapp.components.treeView.MyTreeView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import com.romiis.equallibtestapp.components.mainScene.ClassListView?>
-<?import com.romiis.equallibtestapp.components.loadObjectScene.LoadObjectListView?>
-<?import com.romiis.equallibtestapp.components.loadObjectScene.ClassComboBox?>
+<?import com.romiis.equallibtestapp.components.listView.ClassListView?>
+<?import com.romiis.equallibtestapp.components.listView.LoadObjectListView?>
+<?import com.romiis.equallibtestapp.components.ClassComboBox?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.romiis.equallibtestapp.controllers.LoadObjectController"
             prefHeight="400.0" prefWidth="600.0"

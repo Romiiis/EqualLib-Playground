@@ -6,24 +6,20 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxListCell;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
+import javafx.util.converter.DefaultStringConverter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
+/**
+ * Controller for editing a Map object.
+ */
 @Slf4j
 public class MapEditorController {
 
@@ -64,6 +60,7 @@ public class MapEditorController {
             throw new IllegalArgumentException("Provided map is null.");
         }
         this.map = map;
+        // Create a backup copy of the original entries.
         this.backupEntries = copyEntries(map);
         this.mapName = mapName;
         this.keyType = keyType;
@@ -71,10 +68,16 @@ public class MapEditorController {
         init();
     }
 
+    /**
+     * Initializes the editor with the given map and expected key/value types.
+     */
     private void init() {
         if (mapName != null) {
-            String title = String.format("%s<%s, %s> %s", map.getClass().getSimpleName(),
-                    keyType.getSimpleName(), valueType.getSimpleName(), mapName);
+            String title = String.format("%s<%s, %s> %s",
+                    map.getClass().getSimpleName(),
+                    keyType.getSimpleName(),
+                    valueType.getSimpleName(),
+                    mapName);
             mapTitleLabel.setText(title);
         }
         loadMapIntoObservableEntries();
@@ -93,27 +96,32 @@ public class MapEditorController {
         return entries;
     }
 
+    /**
+     * Loads the map entries into an observable list for the TableView.
+     */
     private void loadMapIntoObservableEntries() {
         observableEntries = FXCollections.observableArrayList(copyEntries(map));
         entriesTable.setItems(observableEntries);
     }
 
     /**
-     * Sets up the TableView columns and assigns a custom editor based on the type.
+     * Sets up the TableView columns and assigns custom editors based on the key/value types.
      */
     private void setupTableView() {
         keyColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getKey() != null ? cellData.getValue().getKey().toString() : "null"));
+                new SimpleStringProperty(cellData.getValue().getKey() != null ?
+                        cellData.getValue().getKey().toString() : "null"));
         valueColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getValue() != null ? cellData.getValue().getValue().toString() : "null"));
+                new SimpleStringProperty(cellData.getValue().getValue() != null ?
+                        cellData.getValue().getValue().toString() : "null"));
 
         entriesTable.setEditable(true);
 
-        // Set custom cell editors for key and value columns.
+        // Configure cell editors for both key and value columns.
         setupColumnEditor(keyColumn, keyType);
         setupColumnEditor(valueColumn, valueType);
 
-        // Commit handlers for converting string input to proper type.
+        // Commit handlers for converting string input to the proper type.
         keyColumn.setOnEditCommit(event -> {
             int rowIndex = event.getTablePosition().getRow();
             String newKeyStr = event.getNewValue();
@@ -179,12 +187,14 @@ public class MapEditorController {
                 return cell;
             });
         } else if (ReflectionUtil.isWrapperOrString(type) || type.isPrimitive() || type.equals(String.class)) {
-            column.setCellFactory(TextFieldTableCell.forTableColumn());
+            column.setCellFactory(TextFieldTableCell.forTableColumn(new DefaultStringConverter()));
         } else {
-            // Fallback option.
+            // Fallback: use a ComboBox with default options from CacheUtil.
             column.setCellFactory(col -> {
                 ComboBoxTableCell<Map.Entry<Object, Object>, String> cell =
-                        new ComboBoxTableCell<>(FXCollections.observableArrayList(CacheUtil.getInstance().getObjectsFitNames(type)));
+                        new ComboBoxTableCell<>(FXCollections.observableArrayList(
+                                CacheUtil.getInstance().getObjectsFitNames(type).toArray(new String[0])
+                        ));
                 cell.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2 && !cell.isEmpty()) {
                         entriesTable.edit(cell.getIndex(), column);
@@ -195,7 +205,11 @@ public class MapEditorController {
         }
     }
 
+    /**
+     * Wires the buttons to their respective actions.
+     */
     private void wireButtons() {
+        // Disable add and remove buttons because we do not allow changing map length.
         addButton.setOnAction(e -> handleAddAction());
         removeButton.setOnAction(e -> handleRemoveAction());
         saveButton.setOnAction(e -> handleSaveAction());
@@ -218,7 +232,7 @@ public class MapEditorController {
     }
 
     /**
-     * Replaces the entry at the given index with a new entry having the updated key.
+     * Replaces the entry at the given index with an updated key.
      */
     private void updateEntryKey(int rowIndex, Object newKey) {
         Map.Entry<Object, Object> oldEntry = observableEntries.get(rowIndex);
@@ -264,6 +278,9 @@ public class MapEditorController {
         }
     }
 
+    /**
+     * Handles saving: updates the original map with the modified entries.
+     */
     @SuppressWarnings("unchecked")
     private void handleSaveAction() {
         ((Map<Object, Object>) map).clear();
@@ -275,6 +292,9 @@ public class MapEditorController {
         closeWindow();
     }
 
+    /**
+     * Cancels editing and restores the original map.
+     */
     @SuppressWarnings("unchecked")
     private void handleCancelAction() {
         ((Map<Object, Object>) map).clear();
@@ -301,5 +321,35 @@ public class MapEditorController {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    /*==================== Custom Cell Classes ====================*/
+
+    /**
+     * A ComboBox cell that displays its index before the item.
+     */
+    private class IndexedComboBoxCell extends ComboBoxListCell<String> {
+        public IndexedComboBoxCell(String... items) {
+            super(FXCollections.observableArrayList(items));
+        }
+
+        @Override
+        public void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+            } else {
+                setText(getIndex() + ": " + item);
+            }
+        }
+    }
+
+    /**
+     * A TextField cell that displays its index before the item.
+     */
+    private class IndexedTextFieldCell extends TextFieldTableCell<Map.Entry<Object, Object>, String> {
+        public IndexedTextFieldCell() {
+            super(new DefaultStringConverter());
+        }
     }
 }

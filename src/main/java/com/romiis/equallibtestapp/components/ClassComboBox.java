@@ -1,5 +1,6 @@
-package com.romiis.equallibtestapp.components.loadObjectScene;
+package com.romiis.equallibtestapp.components;
 
+import com.romiis.equallibtestapp.components.listView.LoadObjectListView;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;

@@ -2,7 +2,6 @@ package com.romiis.equallibtestapp.controllers;
 
 import com.romiis.equallibtestapp.CacheUtil;
 import com.romiis.equallibtestapp.MainClass;
-import com.romiis.equallibtestapp.components.common.ObjectReference;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,23 +21,21 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+
 
 @Slf4j
 public class ArrayEditController {
 
-    /**
-     * -- GETTER --
-     * Returns the updated array after editing.
-     */
-    // The array to edit and its name.
     @Getter
     private Object array;
     private String arrayName;
 
-    // For nested arrays, these hold the reference to the parent array and the index where this array is stored.
+    // For nested arrays: holds the reference to the parent array and the index where this array is stored.
     private Object parentArray;
-    private Integer parentIndex;
+    private int parentIndex = -1;
 
     @FXML
     private ListView<String> elementsList;
@@ -53,7 +50,7 @@ public class ArrayEditController {
     @FXML
     private Button cancelButton;
 
-    // Local copy of array elements (as Object so that nested arrays and non-string types are preserved)
+    // Local copy of array elements (to preserve types, nested arrays, etc.)
     private ObservableList<Object> observableElements;
 
     /*==================== Initialization ====================*/
@@ -85,21 +82,21 @@ public class ArrayEditController {
     }
 
     /**
-     * Initializes the editor: loads the array elements, sets up the ListView,
-     * configures cell factories based on element type, and wires UI controls.
+     * Initializes the editor: loads the array elements, configures the ListView, and wires UI controls.
      */
     private void init() {
         if (arrayNameLabel != null) {
             arrayNameLabel.setText(arrayName);
         }
         loadArrayIntoObservableElements();
-        // Set the ListView items using plain string conversion (the custom cells add index info).
         elementsList.setItems(convertToStringList(observableElements));
         elementsList.setEditable(true);
 
+        // Set up cell factory based on the element type.
         Class<?> elementType = array.getClass().getComponentType();
         setupListViewEditor(elementType);
 
+        // Commit edit on changes.
         elementsList.setOnEditCommit(event -> {
             int index = event.getIndex();
             String newValue = event.getNewValue();
@@ -114,7 +111,8 @@ public class ArrayEditController {
             }
             log.debug("Editing element at index {}: {}", index, newValue);
             Object converted = convertStringToElement(newValue, elementType);
-            if (newValue.isEmpty()) {
+            // Interpret an empty string as null for String fields.
+            if (newValue.isEmpty() && elementType.equals(String.class)) {
                 converted = null;
             }
             observableElements.set(index, converted);
@@ -122,12 +120,10 @@ public class ArrayEditController {
         });
 
         lengthField.setText(String.valueOf(observableElements.size()));
-
         saveButton.setOnAction(e -> handleSaveAction());
         cancelButton.setOnAction(e -> handleCancelAction());
         changeLengthButton.setOnAction(e -> handleChangeLength());
     }
-
 
     /**
      * Loads the current array elements into the local observable list.
@@ -143,12 +139,15 @@ public class ArrayEditController {
 
     /**
      * Converts the local observableElements into a list of Strings for display.
-     * (This conversion does not include index info; the custom cell classes add that.)
      */
     private ObservableList<String> convertToStringList(ObservableList<Object> list) {
         ObservableList<String> strings = FXCollections.observableArrayList();
         for (Object o : list) {
-            strings.add(o != null ? o.toString() : ObjectReference.NULL);
+            if (o != null && (Map.class.isAssignableFrom(o.getClass()) || Collection.class.isAssignableFrom(o.getClass()))) {
+                strings.add(o.getClass().toString());
+                continue;
+            }
+            strings.add(o != null ? o.toString() : "null");
         }
         return strings;
     }
@@ -166,7 +165,7 @@ public class ArrayEditController {
      * A ComboBox cell that displays its index before the item.
      */
     private class IndexedComboBoxCell extends ComboBoxListCell<String> {
-        public IndexedComboBoxCell(String ... options) {
+        public IndexedComboBoxCell(String... options) {
             super(FXCollections.observableArrayList(options));
         }
 
@@ -192,13 +191,10 @@ public class ArrayEditController {
         @Override
         public void startEdit() {
             super.startEdit();
-            // Get index of the item being edited.
             int index = getIndex();
             if (index < 0) return;
             TextField textField = new TextField(observableElements.get(index) != null ? observableElements.get(index).toString() : "");
-            textField.setOnAction(event -> {
-                commitEdit(textField.getText());
-            });
+            textField.setOnAction(event -> commitEdit(textField.getText()));
             setGraphic(textField);
         }
 
@@ -215,7 +211,7 @@ public class ArrayEditController {
 
     /**
      * A generic ListCell that displays its index before the item.
-     * Used for nested arrays (where editing is disabled).
+     * Used for nested arrays (editing disabled).
      */
     private class IndexedListCell extends ListCell<String> {
         @Override
@@ -233,10 +229,6 @@ public class ArrayEditController {
 
     /**
      * Configures the ListView cell factory based on the element type.
-     * - For enums and booleans: uses an IndexedComboBoxCell.
-     * - For nested arrays: uses an IndexedListCell with editing disabled (double-click opens nested editor).
-     * - For primitives, wrappers, and Strings: uses an IndexedTextFieldCell.
-     * - For generic Objects: uses an IndexedComboBoxCell with default options.
      */
     private void setupListViewEditor(Class<?> elementType) {
         if (elementType.isEnum()) {
@@ -246,7 +238,6 @@ public class ArrayEditController {
                     .toArray(String[]::new);
             elementsList.setCellFactory(lv -> {
                 IndexedComboBoxCell cell = new IndexedComboBoxCell(options);
-                // Start editing on single-click.
                 cell.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2 && !cell.isEmpty()) {
                         lv.edit(cell.getIndex());
@@ -265,20 +256,14 @@ public class ArrayEditController {
                 return cell;
             });
         } else if (elementType.isArray()) {
-            // For nested arrays, we use an IndexedListCell that is not editable.
+            // For nested arrays, use a non-editable cell. Double-click launches nested editor.
             elementsList.setCellFactory(lv -> new IndexedListCell() {
                 {
-                    // Disable editing on single-click.
                     setEditable(false);
                     setOnMouseClicked(event -> {
                         if (event.getClickCount() == 2) {
                             int selectedIndex = getIndex();
-                            if (selectedIndex < 0) return;
-                            if (selectedIndex >= observableElements.size()) {
-                                log.warn("Selected index is out of bounds.");
-                                return;
-                            }
-
+                            if (selectedIndex < 0 || selectedIndex >= observableElements.size()) return;
                             Object nestedArray = observableElements.get(selectedIndex);
                             if (nestedArray == null || !nestedArray.getClass().isArray()) {
                                 log.warn("Selected element is not a nested array.");
@@ -288,18 +273,16 @@ public class ArrayEditController {
                                 FXMLLoader loader = new FXMLLoader(MainClass.class.getResource(MainClass.ARRAY_EDIT_SCENE_FXML));
                                 Parent root = loader.load();
                                 ArrayEditController controller = loader.getController();
-                                // Pass the nested array along with its name and parent info.
                                 controller.setAssignedArray(nestedArray, arrayName + " [index " + selectedIndex + "]", array, selectedIndex);
                                 Stage stage = new Stage();
                                 stage.setTitle("Nested Array Editor");
                                 stage.setScene(new Scene(root));
                                 stage.initModality(Modality.APPLICATION_MODAL);
                                 stage.showAndWait();
-                                // After the nested editor is closed, update the local copy.
                                 observableElements.set(selectedIndex, controller.getArray());
                                 refreshListView();
                             } catch (Exception ex) {
-                                ex.printStackTrace();
+                                log.error("Error launching nested array editor", ex);
                             }
                         }
                     });
@@ -325,10 +308,24 @@ public class ArrayEditController {
                 });
                 return cell;
             });
-        } else {
-            // For generic Objects, use an IndexedComboBoxCell with default options.
+        } else if (Map.class.isAssignableFrom(elementType) || Collection.class.isAssignableFrom(elementType)) {
+            // For Maps and Collections, use a TextField cell with editing disabled.
+            elementsList.setCellFactory(lv -> new IndexedListCell() {
+                {
+                    // Set the text to the simple class name.
+                    setText(elementType.getClass().getSimpleName());
+
+                    setEditable(false);
+                }
+            });
+        }
+
+
+        else {
+            // For generic Objects, use a ComboBox cell with default options.
             elementsList.setCellFactory(lv -> {
-                IndexedComboBoxCell cell = new IndexedComboBoxCell(CacheUtil.getInstance().getObjectsFitNames(elementType).toArray(new String[0]));
+                IndexedComboBoxCell cell = new IndexedComboBoxCell(CacheUtil.getInstance().getObjectsFitNames(elementType)
+                        .toArray(new String[0]));
                 cell.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2 && !cell.isEmpty()) {
                         lv.edit(cell.getIndex());
@@ -343,7 +340,6 @@ public class ArrayEditController {
 
     /**
      * Converts a String from the editor into an object of the correct type.
-     * For enums, booleans, primitives, or wrappers, uses ReflectionUtil; otherwise, returns the String.
      */
     private Object convertStringToElement(String value, Class<?> elementType) {
         if (elementType.isEnum()) {
@@ -362,7 +358,7 @@ public class ArrayEditController {
     }
 
     /**
-     * Handles saving: builds a new array from the local copy and, if nested, updates the parent's array.
+     * Handles saving: builds a new array from the local copy and updates the parent's array if needed.
      */
     private void handleSaveAction() {
         int len = observableElements.size();
@@ -372,20 +368,18 @@ public class ArrayEditController {
             Object value = observableElements.get(i);
             if (!elementType.isArray()) {
                 if (value != null && !value.getClass().equals(elementType)) {
-                    value = convertStringToElement(value.toString() ,elementType);
+                    value = convertStringToElement(value.toString(), elementType);
                 }
-
             }
             Array.set(newArray, i, value);
         }
-        // Update our array reference.
+        // Update the array reference.
         this.array = newArray;
         log.debug("Changes saved to array.");
-
-        // If this is a nested array editor, update the parent's array at the correct index.
-        if (parentArray != null && parentIndex != null && parentIndex >= 0) {
+        // If this is a nested array, update the parent's array.
+        if (parentArray != null && parentIndex >= 0) {
             Array.set(parentArray, parentIndex, newArray);
-            log.debug("Nested array rewired into parent array at index {}.", parentIndex);
+            log.debug("Nested array updated in parent array at index {}.", parentIndex);
         }
         closeWindow();
     }
@@ -419,42 +413,28 @@ public class ArrayEditController {
         ButtonType cancelButtonType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
         alert.getButtonTypes().setAll(okButton, cancelButtonType);
 
-        alert.showAndWait().ifPresent(response -> {
-            if (response == okButton) {
-                changeLength(newLength);
-                refreshListView();
-            }
-        });
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == okButton) {
+            changeLength(newLength);
+            refreshListView();
+        }
     }
 
     /**
      * Adjusts the local copy's length. When increasing, new entries get default values.
      */
     private void changeLength(int newLength) {
-        int currentLength = observableElements.size();
         Class<?> elementType = array.getClass().getComponentType();
-
-        if (newLength == currentLength) return;
-
-        if (newLength < 0) {
-            log.warn("Invalid length: {}", newLength);
-            return;
-        }
-
         observableElements.clear();
-
         for (int i = 0; i < newLength; i++) {
             Object defaultValue;
-            if (array.getClass().getComponentType().isArray()) {
+            if (elementType.isArray()) {
                 defaultValue = Array.newInstance(elementType.getComponentType(), 0);
             } else {
                 defaultValue = ReflectionUtil.getDefaultValue(elementType);
             }
             observableElements.add(defaultValue);
         }
-
-
-
     }
 
     /**
@@ -464,4 +444,5 @@ public class ArrayEditController {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
         stage.close();
     }
+
 }

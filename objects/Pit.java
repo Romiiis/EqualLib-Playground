@@ -7,7 +7,7 @@
  * @version 1.0
  * @see Hole
  */
-public class Pit {
+public class Pit extends Hole {
 
     private boolean[][] holes;
     private String[][] names;

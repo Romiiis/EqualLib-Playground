@@ -2,7 +2,6 @@ package com.romiis.equallibtestapp.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import javax.tools.Diagnostic;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
@@ -20,7 +19,7 @@ import java.util.Set;
 
 /**
  * DynamicCompiler.java
- *
+ * <p>
  * This class compiles .java files at runtime using only the built-in Java Compiler.
  * It attempts to compile files individually in multiple passes—using the output of previous passes
  * as part of the classpath—so that interdependent classes compile in order.

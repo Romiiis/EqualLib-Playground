@@ -1,9 +1,9 @@
 package com.romiis.equallibtestapp.controllers;
 
 import com.romiis.equallibtestapp.CacheUtil;
-import com.romiis.equallibtestapp.components.common.MyTreeView;
-import com.romiis.equallibtestapp.components.loadObjectScene.ClassComboBox;
-import com.romiis.equallibtestapp.components.loadObjectScene.LoadObjectListView;
+import com.romiis.equallibtestapp.components.treeView.MyTreeView;
+import com.romiis.equallibtestapp.components.ClassComboBox;
+import com.romiis.equallibtestapp.components.listView.LoadObjectListView;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
