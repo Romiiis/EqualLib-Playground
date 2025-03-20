@@ -1,9 +1,11 @@
-package com.romiis.equallibtestapp.components.common;
+package com.romiis.equallibtestapp.components.treeView;
 
 import com.romiis.equallibtestapp.MainClass;
-import com.romiis.equallibtestapp.components.mainScene.ClassListView;
+import com.romiis.equallibtestapp.components.listView.ClassListView;
+import com.romiis.equallibtestapp.components.listView.SaveResult;
 import com.romiis.equallibtestapp.controllers.LoadObjectController;
 import com.romiis.equallibtestapp.io.FileManager;
+import com.romiis.equallibtestapp.util.EditorsUtil;
 import com.romiis.equallibtestapp.util.JsonUtil;
 import com.romiis.equallibtestapp.util.ObjectTreeBuilder;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
@@ -24,11 +26,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * MyTreeView.java
@@ -38,12 +36,15 @@ import java.util.Set;
  * </p>
  */
 @Slf4j
-public class MyTreeView extends TreeView<ObjectReference> {
+public class MyTreeView extends TreeView<FieldNode> {
 
     /**
      * The object instance that is currently selected in the ListView.
      */
     private final ObjectProperty<Object> selectedObject = new SimpleObjectProperty<>();
+
+
+    private ObjectTreeBuilder objectTreeBuilder = null;
 
     /**
      * Reference to the class list view.
@@ -51,10 +52,6 @@ public class MyTreeView extends TreeView<ObjectReference> {
     @Setter
     private ClassListView classListView;
 
-    /**
-     * Flag indicating whether to treat fields as objects or display as simple values.
-     */
-    private boolean treatAsObjects = true;
 
     /**
      * Flag to indicate if the object has been modified (dirty flag).
@@ -73,10 +70,6 @@ public class MyTreeView extends TreeView<ObjectReference> {
         setEditable(true);
 
         // Listener for changes to the selected object.
-        selectedObject.addListener((obs, oldVal, newVal) -> {
-            System.out.println("Selected object changed: " + newVal);
-            // Additional UI updates can be added here.
-        });
     }
 
     /**
@@ -84,59 +77,19 @@ public class MyTreeView extends TreeView<ObjectReference> {
      * Sets up selection change listeners and double-click behavior for editing fields.
      */
     private void initializeClickHandler() {
-        // Listen for selection changes.
-        this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                ObjectReference objectReference = newValue.getValue();
-                if (objectReference.getField() != null && objectReference.isModifiable()) {
-                    log.info("Field: {}", objectReference);
-                }
-            }
-        });
-
-        // Handle mouse double-click events.
+        // Listen for double-clicks on the TreeView
         this.setOnMouseClicked(event -> {
-            if (!isEditable()) return;
             if (event.getClickCount() == 2) {
-                TreeItem<ObjectReference> selectedItem = this.getSelectionModel().getSelectedItem();
-                if (selectedItem == null) {
-                    return;
-                }
-                // If the selected item has children, do not start editing.
-                if (!selectedItem.getChildren().isEmpty()) {
-                    return;
-                }
-                // If the field is modifiable, start editing.
-                if (selectedItem.getValue().isModifiable()) {
-                    startEdit(selectedItem);
-                } else {
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Warning");
-                    alert.setHeaderText("Field is not modifiable");
-                    alert.setContentText("The selected field is not modifiable");
-                    alert.showAndWait();
+                LazyTreeItem selectedItem = (LazyTreeItem) getSelectionModel().getSelectedItem();
+                if (selectedItem != null && selectedItem.getValue() != null) {
+                    // Call the editor for the selected node.
+                    // EditorsUtil.decideEditor() will choose the proper editor based on the FieldNode's type.
+                    new EditorsUtil().decideEditor(this, selectedItem, selectedItem.getValue());
                 }
             }
         });
     }
 
-    /**
-     * Starts editing the selected field.
-     *
-     * @param item The TreeItem that should be edited.
-     */
-    private void startEdit(TreeItem<ObjectReference> item) {
-        ObjectReference objectReference = item.getValue();
-        Field field = objectReference.getField();
-
-        // Only proceed if the field is non-null and modifiable.
-        if (field == null || !objectReference.isModifiable()) {
-            return;
-        }
-
-        EditorsUtil editors = new EditorsUtil();
-        editors.decideEditor(this, item, objectReference, field);
-    }
 
     /**
      * Sets the selected object instance based on a Class.
@@ -156,7 +109,7 @@ public class MyTreeView extends TreeView<ObjectReference> {
     public void setSelectedObject(Object selectedObject) {
         this.selectedObject.set(selectedObject);
         modified = false;
-        handleSelectionChange(treatAsObjects);
+        handleSelectionChange();
     }
 
     /**
@@ -170,29 +123,23 @@ public class MyTreeView extends TreeView<ObjectReference> {
     /**
      * Handles changes in selection from the ListView.
      * Delegates tree creation to ObjectTreeBuilder and expands the resulting tree.
-     *
-     * @param treatAsObjects Whether to treat fields as objects or print simple values.
      */
-    public void handleSelectionChange(boolean treatAsObjects) {
+    public void handleSelectionChange() {
         if (selectedObject.get() == null) {
             return;
         }
-        this.treatAsObjects = treatAsObjects;
 
-        // Create the root TreeItem for the selected object.
-        TreeItem<ObjectReference> rootItem = new TreeItem<>(new ObjectReference(selectedObject.get(), null));
 
-        // Create a set to track visited objects to prevent cyclic recursion.
-        Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
-
+        objectTreeBuilder = new ObjectTreeBuilder();
         // Build the tree structure.
-        rootItem = ObjectTreeBuilder.createTree(rootItem, visited, false);
+        FieldNode rootItem = objectTreeBuilder.buildTree(selectedObject.get(), 3);
 
-        // Set the root item of the TreeView.
-        this.setRoot(rootItem);
+        // Wrap the FieldNode in a TreeItem and set it as the root of the TreeView.
+        LazyTreeItem rootTreeItem = new LazyTreeItem(rootItem);
+        rootTreeItem.setExpanded(true);
+        this.setRoot(rootTreeItem);
 
-        // Expand all nodes in the tree.
-        ObjectTreeBuilder.expandAll(rootItem);
+
     }
 
 
@@ -334,7 +281,7 @@ public class MyTreeView extends TreeView<ObjectReference> {
     }
 
     public void refresh() {
-        handleSelectionChange(treatAsObjects);
+        handleSelectionChange();
     }
 
     /**

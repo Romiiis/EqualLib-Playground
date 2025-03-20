@@ -1,0 +1,38 @@
+{
+  "@class" : "Dog",
+  "names" : {
+    "@class" : "java.util.ArrayList",
+    "value" : [ {
+      "@class" : "java.lang.String",
+      "value" : "Rex"
+    } ]
+  },
+  "color" : null,
+  "names2" : {
+    "@class" : "java.util.HashSet",
+    "value" : [ ]
+  },
+  "final_field" : {
+    "@class" : "int",
+    "value" : 4
+  },
+  "static_final_field" : {
+    "@class" : "int",
+    "value" : 0
+  },
+  "name" : null,
+  "static_field" : {
+    "@class" : "int",
+    "value" : 0
+  },
+  "@id" : 1,
+  "MAX_AGE" : {
+    "@class" : "int",
+    "value" : 100
+  },
+  "breed" : null,
+  "age" : {
+    "@class" : "int",
+    "value" : 0
+  }
+}

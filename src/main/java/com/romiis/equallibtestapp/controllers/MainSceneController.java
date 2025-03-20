@@ -3,14 +3,13 @@ package com.romiis.equallibtestapp.controllers;
 import com.romiis.core.EqualLib;
 import com.romiis.core.EqualLibConfig;
 import com.romiis.equallibtestapp.CacheUtil;
-import com.romiis.equallibtestapp.components.mainScene.ClassListView;
-import com.romiis.equallibtestapp.components.common.MyTreeView;
+import com.romiis.equallibtestapp.components.listView.ClassListView;
+import com.romiis.equallibtestapp.components.treeView.MyTreeView;
 import com.romiis.equallibtestapp.util.ObjectFillerUtil;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,8 +23,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Arrays;
 
 @Slf4j
 public class MainSceneController {
@@ -342,8 +339,17 @@ public class MainSceneController {
             return;
         }
 
+        // check if both objects have at least super class
+        if (!ReflectionUtil.hasCommonSuperclass(obj1.getClass(), obj2.getClass())) {
+            Alert alert = new Alert(Alert.AlertType.ERROR,
+                    "Objects must have a common superclass to fill", ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }
+
+
         // Create a Task to perform the fill operation.
-        Task<Void> fillTask = new Task<Void>() {
+        Task<Void> fillTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
                 long startTime = System.currentTimeMillis();

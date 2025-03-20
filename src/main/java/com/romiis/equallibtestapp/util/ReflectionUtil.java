@@ -1,16 +1,22 @@
 package com.romiis.equallibtestapp.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Utility class for reflection operations
  *
- * @version 1.0
- * @since 1.0
- * @see ReflectionUtil
  * @author Roman Pejs
+ * @version 1.0
+ * @see ReflectionUtil
+ * @since 1.0
  */
+@Slf4j
 public class ReflectionUtil {
 
     /**
@@ -56,23 +62,6 @@ public class ReflectionUtil {
 
 
     /**
-     * Get value of a field in an object
-     *
-     * @param obj   object to get field value from
-     * @param field field to get value of
-     * @return value of the field
-     */
-    public static Object getFieldValue(Object obj, Field field) {
-        try {
-            field.setAccessible(true);
-            return field.get(obj);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    /**
      * Check if the given class is a wrapper class or a String
      *
      * @param type The class to check
@@ -92,15 +81,69 @@ public class ReflectionUtil {
 
 
     /**
-     * Check if a field is modifiable
+     * Check if the given classes have a common superclass
      *
-     * @param modifier The modifier of the field
-     * @return True if the field is modifiable, false otherwise
+     * @param clazz1 the first class
+     * @param clazz2 the second class
+     * @return true if the classes have a common superclass, false otherwiseł
      */
-    public static boolean isModifiable(int modifier) {
-        return !Modifier.isFinal(modifier) || !Modifier.isStatic(modifier);
+    public static boolean hasCommonSuperclass(Class<?> clazz1, Class<?> clazz2) {
+
+        // Build the set of superclasses for clazz1, excluding Object.
+        Set<Class<?>> superClasses1 = new HashSet<>();
+        for (Class<?> c = clazz1.getSuperclass(); c != null && !c.equals(Object.class); c = c.getSuperclass()) {
+            superClasses1.add(c);
+        }
+
+        // Walk up the hierarchy of clazz2 (excluding Object) and check for a match.
+        for (Class<?> c = clazz2.getSuperclass(); c != null && !c.equals(Object.class); c = c.getSuperclass()) {
+            if (superClasses1.contains(c)) {
+                return true;
+            }
+        }
+        return false;
     }
 
+
+    /**
+     * Get the field from the parent object
+     *
+     * @param parent parent object
+     * @param obj    object to get the field for
+     * @return field of the object in the parent object
+     */
+    public static Field getFieldFromParent(Object parent, Object obj) {
+        if (parent == null || obj == null) {
+            return null;
+        }
+        Field[] fields = ReflectionUtil.getAllFields(parent.getClass());
+        for (Field f : fields) {
+            f.setAccessible(true);
+            try {
+                if (f.get(parent) == obj) {
+                    return f;
+                }
+            } catch (IllegalAccessException e) {
+                log.error("Could not access field " + f.getName(), e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the class from the type
+     *
+     * @param type the type to get the class from
+     * @return the class of the type
+     */
+    public static Class<?> getClassFromType(Type type) {
+        if (type instanceof Class<?>) {
+            return (Class<?>) type;
+        } else if (type instanceof ParameterizedType) {
+            return (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
+        }
+        throw new IllegalArgumentException("Type " + type + " is not a class or parameterized type");
+    }
 
     /**
      * Converts a string value to its corresponding primitive type value.
@@ -135,11 +178,17 @@ public class ReflectionUtil {
             return value.charAt(0);
         } else if (primitiveType == String.class) {
             return value;
-        }else {
+        } else {
             throw new IllegalArgumentException("Unsupported primitive type: " + primitiveType);
         }
     }
 
+    /**
+     * Get the default value for a given type
+     *
+     * @param type the type to get the default value for
+     * @return the default value for the type
+     */
     public static Object getDefaultValue(Class<?> type) {
         if (type.equals(int.class) || type.equals(Integer.class)) {
             return 0;
@@ -163,6 +212,13 @@ public class ReflectionUtil {
     }
 
 
+    /**
+     * Check if the given value is in the correct format for the given class
+     *
+     * @param value the value to check
+     * @param clazz the class to check the value against
+     * @return true if the value is in the correct format, false otherwise
+     */
     public static boolean isCorrectFormat(Object value, Class<?> clazz) {
         if (clazz.equals(int.class) || clazz.equals(Integer.class)) {
             try {

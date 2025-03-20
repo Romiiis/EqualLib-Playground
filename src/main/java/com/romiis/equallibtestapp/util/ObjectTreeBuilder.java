@@ -1,239 +1,208 @@
 package com.romiis.equallibtestapp.util;
 
-import com.romiis.equallibtestapp.components.common.ObjectReference;
-import javafx.scene.control.TreeItem;
+import com.romiis.equallibtestapp.components.treeView.FieldNode;
+import com.romiis.equallibtestapp.components.treeView.FieldNodeType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
+/**
+ * Builds a tree of objects with lazy-loaded children.
+ */
 @Slf4j
 public class ObjectTreeBuilder {
 
     /**
-     * Create a tree structure for the given object, but lazily.
-     * <p>
-     * Instead of immediately populating children, we create a LazyTreeItem.
-     * That item will load its children on first expansion.
+     * The default length of an array to show in the tree.
      */
-    public static TreeItem<ObjectReference> createTree(TreeItem<ObjectReference> parent,
-                                                       Set<Object> visited,
-                                                       boolean nestedInCollectionOrArray) {
-        // We just return a LazyTreeItem that wraps the parent’s ObjectReference.
-        // The actual reflection logic is in LazyTreeItem.loadChildren().
-        return new LazyTreeItem(parent.getValue(), visited, nestedInCollectionOrArray);
-    }
+    private final int DEFAULT_ARRAY_LENGTH = 10;
 
     /**
-     * Handle an array object.
-     * <p>
-     * (Identical to your original logic except that 'parent' here should be a LazyTreeItem.)
+     * The set of visited objects to prevent infinite recursion.
      */
-    public static TreeItem<ObjectReference> handleArray(TreeItem<ObjectReference> parent,
-                                                        Set<Object> visited,
-                                                        boolean nestedInCollectionOrArray) {
+    private Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
 
-        ObjectReference parentValue = parent.getValue();
-        Object array = ReflectionUtil.getFieldValue(parentValue.getInObject(), parentValue.getField());
-        int length = Array.getLength(array);
-
-        if (!nestedInCollectionOrArray) {
-            // add the "edit" node if not nested
-            TreeItem<ObjectReference> edit = new TreeItem<>(
-                    new ObjectReference(true, array, parentValue.getField())
-            );
-            parent.getChildren().add(edit);
-        }
-
-        for (int i = 0; i < length; i++) {
-            Object element = Array.get(array, i);
-
-            // Create a child that references array + field + index
-            TreeItem<ObjectReference> child = new LazyTreeItem(
-                    new ObjectReference(array, parentValue.getField(), i),
-                    visited,
-                    nestedInCollectionOrArray
-            );
-
-            // If the element is not null and already visited => cycle
-            if (element != null && visited.contains(element)) {
-                child.getChildren().add(
-                        new TreeItem<>(new ObjectReference(element, null, true))
-                );
-            }
-
-            // If the element is an enum => replace child with a direct leaf
-            if (element != null && element.getClass().isEnum()) {
-                child = new TreeItem<>(new ObjectReference(element, null, i));
-            }
-            // If the element is a complex object => we remain with the lazy item
-            // (which will expand deeper if user opens it)
-            // Otherwise (primitive/wrapper/string), the lazy item won't have children.
-
-            parent.getChildren().add(child);
-        }
-
-        return parent;
-    }
 
     /**
-     * Expand all items in the TreeView (root and all children).
-     * <p>
-     * (Unchanged – when you expand, lazy nodes will load children.)
+     * Builds a tree starting from the given root object with lazy-loaded children.
+     *
+     * @param root     the object to build the tree from
+     * @param maxDepth the maximum depth to explore (0 means only the root)
+     * @return the root FieldNode representing the object tree
      */
-    public static void expandAll(TreeItem<?> item) {
-        item.setExpanded(true);
+    public FieldNode buildTree(Object root, int maxDepth) {
+        // Use IdentityHashMap for reference equality.
+
+        return buildNode("root", root, null, null, 0, maxDepth);
     }
 
+
     /**
-     * A custom TreeItem that duplicates the original reflection logic,
-     * but only executes it once (lazily) on first expansion.
+     * Builds a FieldNode from the given object, field, and parent object.
+     *
+     * @param name         the name of the field
+     * @param obj          the object to build the node from
+     * @param field        the field of the object
+     * @param parentObject the parent object of the object
+     * @param currentDepth the current depth of the node
+     * @param maxDepth     the maximum depth to explore
+     * @return the FieldNode representing the object
      */
-    private static class LazyTreeItem extends TreeItem<ObjectReference> {
-
-        private final Set<Object> visited;
-        private final boolean nestedInCollectionOrArray;
-        private boolean childrenLoaded = false;
-
-        public LazyTreeItem(ObjectReference value, Set<Object> visited, boolean nestedInCollectionOrArray) {
-            super(value);
-            this.visited = visited;
-            this.nestedInCollectionOrArray = nestedInCollectionOrArray;
-
-            // Attach a listener that loads children the first time it is expanded
-            expandedProperty().addListener((obs, wasExpanded, isNowExpanded) -> {
-                if (isNowExpanded && !childrenLoaded) {
-                    loadChildren();
-                    childrenLoaded = true;
-                }
-            });
+    protected FieldNode buildNode(String name, Object obj, Field field, Object parentObject,
+                                  int currentDepth, int maxDepth) {
+        Class<?> type;
+        if (obj != null) {
+            type = obj.getClass();
+        } else if (field != null) {
+            type = field.getType();
+        } else {
+            type = null;
         }
-
-        /**
-         * Perform the exact same reflection logic that was originally in createTree(...),
-         * but do it here so it only runs when expanded.
-         */
-        private void loadChildren() {
-            // The original code used "parent" TreeItem, but here "this" is the TreeItem
-            // so we replicate that logic with "this" references.
-            Object obj = getValue().getInObject();
-
-            // If index != null, it means this TreeItem references a specific array element
-            if (getValue().getIndex() != null && obj != null) {
-                obj = Array.get(obj, getValue().getIndex());
-            }
-
-            // if the object is null, there's nothing to reflect
-            if (obj == null) {
-                // add a placeholder if you want (the original code returned a new node)
-                return;
-            }
-
-            // If we've already visited, add a cycle leaf and stop
-            if (visited.contains(obj)) {
-                if (!getValue().getField().getType().isArray()){
-                    getChildren().add(
-                            new TreeItem<>(new ObjectReference(obj, null, true))
-                    );
-            }
-
-                return;
-            }
-
+        // If the object is non-null, add it to the visited set.
+        if (obj != null) {
             visited.add(obj);
+        }
 
-            // If it's a collection or map at top level, add "edit" node
-            if ((obj instanceof Collection || obj instanceof Map) && !nestedInCollectionOrArray) {
-                TreeItem<ObjectReference> edit = new TreeItem<>(
-                        new ObjectReference(true, obj, getValue().getField())
+        return new FieldNode(this, name, type, obj, field, parentObject, currentDepth, maxDepth, determineNodeType(parentObject, field));
+    }
+
+
+    /**
+     * Builds the children of the given object with lazy-loaded children.
+     *
+     * @param obj          the object to build the children from
+     * @param currentDepth the current depth of the node
+     * @param maxDepth     the maximum depth to explore
+     * @param visited      the set of visited objects
+     * @param owner        the parent object of the object
+     * @return the list of FieldNodes representing the children of the object
+     */
+    public List<FieldNode> buildChildren(Object obj, int currentDepth, int maxDepth, Set<Object> visited, Object owner) {
+        List<FieldNode> children = new ArrayList<>();
+        if (obj == null || currentDepth > maxDepth) {
+            return children;
+        }
+        // Check if this object has been visited already
+        if (visited.contains(obj)) {
+            // Optionally, you can add a cyclic reference node instead of simply returning.
+            FieldNode cycleNode = new FieldNode(this, "(cyclic reference)", null, null, null, obj, currentDepth, maxDepth, FieldNodeType.NON_EDITABLE);
+            children.add(cycleNode);
+            return children;
+        }
+
+        Class<?> clazz = obj.getClass();
+
+        // Do not expand simple types (primitives, wrappers, String, enums)
+        if (isSimpleType(clazz)) {
+            return children;
+        }
+
+        // Handling arrays, collections, maps, and regular objects remains the same,
+        // but ensure you pass the visited set to all recursive calls.
+        if (clazz.isArray()) {
+            int length = Array.getLength(obj);
+            int countToShow = Math.min(length, DEFAULT_ARRAY_LENGTH);
+            // Only add the edit node if the owner is not a Collection or Map.
+            if (!(owner instanceof Collection) && !(owner instanceof Map)) {
+                FieldNode editNode = new FieldNode(
+                        this, "(Edit Array...)", null, obj, null, obj, currentDepth, maxDepth, FieldNodeType.ARRAY_EDITABLE
                 );
-                getChildren().add(edit);
+                children.add(editNode);
             }
 
-            // Reflect all fields (same code as your original)
-            Field[] fields = ReflectionUtil.getAllFields(obj.getClass());
-            Object finalObj = obj;
+            // Get the array's component type (even if elements are null)
+            Class<?> componentType = clazz.getComponentType();
 
-            Arrays.stream(fields).forEach(field -> {
-                field.setAccessible(true);
-                try {
-                    Object fieldValue = field.get(finalObj);
-
-                    // If the object is itself a collection/map, or we were already nested
-                    // pass that forward
-                    boolean nestedInCol = (finalObj instanceof Collection || finalObj instanceof Map)
-                            || nestedInCollectionOrArray;
-
-                    // If fieldValue is null
-                    if (fieldValue == null) {
-                        getChildren().add(
-                                new TreeItem<>(new ObjectReference(finalObj, field, null))
-                        );
-                        return;
-                    }
-
-                    if (visited.contains(fieldValue)) {
-                        getChildren().add(
-                                new TreeItem<>(new ObjectReference(finalObj, field, true))
-                        );
-                        return;
-                    }
-
-                    // If it's an array => handle array
-                    if (field.getType().isArray()) {
-                        TreeItem<ObjectReference> arrayItem = new LazyTreeItem(
-                                new ObjectReference(finalObj, field),
-                                visited,
-                                nestedInCol
-                        );
-                        getChildren().add(
-                                handleArray(arrayItem, visited, nestedInCol)
-                        );
-                    }
-                    // If it's an enum
-                    else if (field.getType().isEnum()) {
-                        getChildren().add(
-                                new TreeItem<>(new ObjectReference(finalObj, field))
-                        );
-                    }
-                    // If it's a complex object => recurse
-                    else if (!field.getType().isPrimitive()
-                            && !ReflectionUtil.isWrapperOrString(field.getType())) {
-                        TreeItem<ObjectReference> child = new LazyTreeItem(
-                                new ObjectReference(fieldValue, field),
-                                visited,
-                                nestedInCol
-                        );
-                        getChildren().add(child);
-                    }
-                    // else => it's a primitive/wrapper/string => direct leaf
-                    else {
-                        TreeItem<ObjectReference> childNode = new TreeItem<>(
-                                new ObjectReference(finalObj, field)
-                        );
-                        getChildren().add(childNode);
-                    }
-
-                } catch (IllegalAccessException e) {
-                    log.error("Error getting field value", e);
+            for (int i = 0; i < countToShow; i++) {
+                Object element = Array.get(obj, i);
+                FieldNode node;
+                if (element == null) {
+                    // When the element is null, pass the component type as the type info.
+                    node = new FieldNode(this, "[" + i + "]", componentType, null, null, obj, currentDepth, maxDepth, FieldNodeType.NON_EDITABLE);
+                } else {
+                    // Otherwise, use the usual buildNode method.
+                    node = buildNode("[" + i + "]", element, null, obj, currentDepth, maxDepth);
                 }
-            });
+                children.add(node);
+            }
+            if (length > DEFAULT_ARRAY_LENGTH) {
+                FieldNode summaryNode = new FieldNode(
+                        this, "(" + (length - DEFAULT_ARRAY_LENGTH) + " more...)", null, null, null, obj, currentDepth, maxDepth, FieldNodeType.INFO
+                );
+                children.add(summaryNode);
+            }
+        } else {
+
+            if (Collection.class.isAssignableFrom(clazz) && !(owner instanceof Collection) && !(owner instanceof Map)) {
+                Field node = ReflectionUtil.getFieldFromParent(owner, obj);
+                FieldNode editNode = new FieldNode(this, "(Edit Collection...)", clazz.getComponentType(), obj, node, obj, currentDepth, maxDepth, FieldNodeType.ARRAY_EDITABLE);
+                children.add(editNode);
+            } else if (Map.class.isAssignableFrom(clazz) && !(owner instanceof Map) && !(owner instanceof Collection)) {
+                Field node = ReflectionUtil.getFieldFromParent(owner, obj);
+
+                FieldNode editNode = new FieldNode(this, "(Edit Map...)", clazz.getComponentType(), obj, node, obj, currentDepth, maxDepth, FieldNodeType.ARRAY_EDITABLE);
+                children.add(editNode);
+            }
+
+            Field[] fields = ReflectionUtil.getAllFields(clazz);
+            for (Field f : fields) {
+                f.setAccessible(true);
+                try {
+                    Object fieldValue = f.get(obj);
+                    FieldNode node = buildNode(f.getName(), fieldValue, f, obj, currentDepth, maxDepth);
+                    children.add(node);
+                } catch (IllegalAccessException e) {
+                    log.error("Could not access field " + f.getName(), e);
+                }
+            }
+        }
+        return children;
+    }
+
+
+    /**
+     * Determines the type of the field node based on the field and parent object.
+     *
+     * @param parentObject the parent object of the field
+     * @param f            the field to determine the type of
+     * @return the type of the field node
+     */
+    private FieldNodeType determineNodeType(Object parentObject, Field f) {
+        if (f == null || parentObject == null) {
+            return FieldNodeType.NON_EDITABLE;
+        } else if (Modifier.isFinal(f.getModifiers()) && Modifier.isStatic(f.getModifiers())) {
+            return FieldNodeType.NON_EDITABLE;
+        } else if (parentObject.getClass().isArray()) {
+            return FieldNodeType.NON_EDITABLE;
+        } else if (isSimpleType(f.getType())) {
+            return FieldNodeType.EDITABLE;
         }
 
-        /**
-         * By default, we return false so it can be expanded.
-         * Otherwise, JavaFX might treat it as a leaf before we load children.
-         */
-        @Override
-        public boolean isLeaf() {
-            // If you truly want to disable expansion for, say, primitives or strings,
-            // you'd do a type check here. But to mirror the original code's structure
-            // (where everything can be expanded), we return false.
-            return false;
-        }
+
+        return FieldNodeType.NON_EDITABLE;
     }
+
+    /**
+     * Checks if the given class is a simple type.
+     *
+     * @param clazz the class to check
+     * @return true if the class is a simple type, false otherwise
+     */
+    public boolean isSimpleType(Class<?> clazz) {
+        return clazz.isPrimitive()
+                || clazz.equals(String.class)
+                || clazz.equals(Boolean.class)
+                || clazz.equals(Byte.class)
+                || clazz.equals(Character.class)
+                || clazz.equals(Short.class)
+                || clazz.equals(Integer.class)
+                || clazz.equals(Long.class)
+                || clazz.equals(Float.class)
+                || clazz.equals(Double.class)
+                || clazz.isEnum();
+    }
+
 }

@@ -22,6 +22,7 @@ public class ObjectFillerUtil {
             return;
         }
 
+
         if (equals) {
             // Single-object BFS fill for obj1, then deep copy, then copy fields to obj2
             fillObjectBFS(obj1, arraySize, collectionSize, maxDepth);
