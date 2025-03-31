@@ -126,7 +126,11 @@ public class ObjectFillerUtil {
                             Object elem;
                             if (elementType.isPrimitive() || isWrapper(elementType)
                                     || elementType.equals(String.class) || elementType.isEnum()) {
-                                elem = randomValueForClass(elementType);
+                                if (elementType.equals(String.class)) {
+                                    elem = genereateUniqueString();
+                                } else {
+                                    elem = randomValueForClass(elementType);
+                                }
                             } else {
                                 if (depth <= 1) {
                                     elem = null;
@@ -155,7 +159,11 @@ public class ObjectFillerUtil {
                             // key
                             if (keyType.isPrimitive() || isWrapper(keyType)
                                     || keyType.equals(String.class) || keyType.isEnum()) {
-                                key = randomValueForClass(keyType);
+                                if (keyType.equals(String.class)) {
+                                    key = genereateUniqueString();
+                                } else {
+                                    key = randomValueForClass(keyType);
+                                }
                             } else {
                                 if (depth <= 1) {
                                     key = null;
@@ -404,8 +412,13 @@ public class ObjectFillerUtil {
             Object elem1, elem2;
             if (elementType.isPrimitive() || isWrapper(elementType)
                     || elementType.equals(String.class) || elementType.isEnum()) {
-                elem1 = randomValueForClass(elementType);
-                elem2 = randomValueForClass(elementType);
+                if (elementType.equals(String.class)) {
+                    elem1 = genereateUniqueString();
+                    elem2 = genereateUniqueString();
+                } else {
+                    elem1 = randomValueForClass(elementType);
+                    elem2 = randomValueForClass(elementType);
+                }
             } else {
                 if (depth <= 1) {
                     elem1 = null;
@@ -446,8 +459,13 @@ public class ObjectFillerUtil {
             // Build keys
             if (keyType.isPrimitive() || isWrapper(keyType)
                     || keyType.equals(String.class) || keyType.isEnum()) {
-                key1 = randomValueForClass(keyType);
-                key2 = randomValueForClass(keyType);
+                if (keyType.equals(String.class)) {
+                    key1 = genereateUniqueString();
+                    key2 = genereateUniqueString();
+                } else {
+                    key1 = randomValueForClass(keyType);
+                    key2 = randomValueForClass(keyType);
+                }
             } else {
                 if (depth <= 1) {
                     key1 = null;
@@ -521,11 +539,17 @@ public class ObjectFillerUtil {
         } else if (type.equals(char.class) || type.equals(Character.class)) {
             return (char) (RANDOM.nextInt(26) + 'a');
         } else if (type.equals(String.class)) {
-            return "Str" + RANDOM.nextInt(1000);
+            return "Str" + RANDOM.nextInt(100);
         }
         // otherwise null
         return null;
     }
+
+    public static String genereateUniqueString() {
+        return UUID.randomUUID().toString();
+    }
+
+
 
     // -------------------------------------------------------------------------
     // Create Collection / Map instances (unchanged from your original code)

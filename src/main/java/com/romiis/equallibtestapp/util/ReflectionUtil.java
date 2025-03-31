@@ -1,6 +1,6 @@
 package com.romiis.equallibtestapp.util;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -16,7 +16,7 @@ import java.util.Set;
  * @see ReflectionUtil
  * @since 1.0
  */
-@Slf4j
+@Log4j2
 public class ReflectionUtil {
 
     /**
@@ -89,6 +89,10 @@ public class ReflectionUtil {
      */
     public static boolean hasCommonSuperclass(Class<?> clazz1, Class<?> clazz2) {
 
+        if (clazz1.equals(clazz2)) {
+            return true;
+        }
+
         // Build the set of superclasses for clazz1, excluding Object.
         Set<Class<?>> superClasses1 = new HashSet<>();
         for (Class<?> c = clazz1.getSuperclass(); c != null && !c.equals(Object.class); c = c.getSuperclass()) {
@@ -101,6 +105,7 @@ public class ReflectionUtil {
                 return true;
             }
         }
+
         return false;
     }
 

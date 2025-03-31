@@ -13,14 +13,14 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import javafx.util.converter.DefaultStringConverter;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.*;
 
 /**
  * Controller for editing a Map object.
  */
-@Slf4j
+@Log4j2
 public class MapEditorController {
 
     @Getter

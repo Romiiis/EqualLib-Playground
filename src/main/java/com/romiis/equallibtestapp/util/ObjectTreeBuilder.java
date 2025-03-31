@@ -2,7 +2,7 @@ package com.romiis.equallibtestapp.util;
 
 import com.romiis.equallibtestapp.components.treeView.FieldNode;
 import com.romiis.equallibtestapp.components.treeView.FieldNodeType;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -12,7 +12,8 @@ import java.util.*;
 /**
  * Builds a tree of objects with lazy-loaded children.
  */
-@Slf4j
+@Log4j2
+
 public class ObjectTreeBuilder {
 
     /**

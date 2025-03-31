@@ -17,7 +17,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.converter.DefaultStringConverter;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 
-@Slf4j
+@Log4j2
 public class ArrayEditController {
 
     @Getter
@@ -318,10 +318,7 @@ public class ArrayEditController {
                     setEditable(false);
                 }
             });
-        }
-
-
-        else {
+        } else {
             // For generic Objects, use a ComboBox cell with default options.
             elementsList.setCellFactory(lv -> {
                 IndexedComboBoxCell cell = new IndexedComboBoxCell(CacheUtil.getInstance().getObjectsFitNames(elementType)

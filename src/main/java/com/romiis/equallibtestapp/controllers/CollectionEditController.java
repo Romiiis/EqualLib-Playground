@@ -2,7 +2,6 @@ package com.romiis.equallibtestapp.controllers;
 
 import com.romiis.equallibtestapp.CacheUtil;
 import com.romiis.equallibtestapp.MainClass;
-import com.romiis.equallibtestapp.util.DeepCopyUtil;
 import com.romiis.equallibtestapp.util.ReflectionUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,12 +15,11 @@ import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.converter.DefaultStringConverter;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
@@ -30,7 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-@Slf4j
+@Log4j2
 public class CollectionEditController {
 
     @Getter
@@ -75,7 +73,6 @@ public class CollectionEditController {
 
         init();
     }
-
 
 
     /**

@@ -46,7 +46,7 @@
         </columnConstraints>
         <Button fx:id="saveButton" text="Save" styleClass="save-button" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS"
                 maxWidth="Infinity"/>
-        <Button fx:id="cancelButton" text="Cancel" styleClass="remove-field-button" GridPane.columnIndex="2"
+        <Button fx:id="cancelButton" text="Cancel" styleClass="load-button" GridPane.columnIndex="2"
                 GridPane.hgrow="ALWAYS" maxWidth="Infinity"/>
     </GridPane>
     <!-- Bottom Buttons -->

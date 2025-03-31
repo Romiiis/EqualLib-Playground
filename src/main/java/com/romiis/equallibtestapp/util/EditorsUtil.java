@@ -19,14 +19,15 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.Collection;
 import java.util.Map;
 
 import static com.romiis.equallibtestapp.util.ReflectionUtil.getClassFromType;
 
-@Slf4j
+@Log4j2
+
 public class EditorsUtil {
 
     private MyTreeView treeView;

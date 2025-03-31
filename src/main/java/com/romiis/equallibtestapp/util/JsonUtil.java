@@ -3,7 +3,7 @@ package com.romiis.equallibtestapp.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.romiis.equallibtestapp.CacheUtil;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * Utility class for serializing and deserializing objects to and from JSON.
  */
-@Slf4j
+@Log4j2
 public class JsonUtil {
 
     /**

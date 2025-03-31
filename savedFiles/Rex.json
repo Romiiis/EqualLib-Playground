@@ -1,0 +1,20 @@
+{
+  "@class" : "Dog",
+  "name" : {
+    "@class" : "java.lang.String",
+    "value" : "Rex"
+  },
+  "@id" : 1,
+  "MAX_AGE" : {
+    "@class" : "int",
+    "value" : 100
+  },
+  "breed" : {
+    "@class" : "java.lang.String",
+    "value" : "Vlčák"
+  },
+  "age" : {
+    "@class" : "int",
+    "value" : 2
+  }
+}

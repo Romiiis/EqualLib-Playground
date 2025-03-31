@@ -1,6 +1,6 @@
 package com.romiis.equallibtestapp.util;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -25,7 +25,7 @@ import java.util.Set;
  * as part of the classpath—so that interdependent classes compile in order.
  * Files that never compile are ignored.
  */
-@Slf4j
+@Log4j2
 public class DynamicCompiler {
 
     /**

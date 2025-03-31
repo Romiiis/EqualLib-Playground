@@ -22,9 +22,14 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
-@Slf4j
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.Locale;
+
+@Log4j2
 public class MainSceneController {
 
     // --- Existing UI Components ---
@@ -33,7 +38,8 @@ public class MainSceneController {
     @FXML
     private MyTreeView treeView2;
 
-    @FXML private StackPane loadingOverlay;
+    @FXML
+    private StackPane loadingOverlay;
 
 
     @FXML
@@ -77,8 +83,6 @@ public class MainSceneController {
 
     @FXML
     private Spinner<Integer> maxDepthSpinnerFill;
-
-
 
 
     // --- Initialization ---
@@ -183,6 +187,50 @@ public class MainSceneController {
 
     // --- Comparison ---
 
+    @FXML
+    private void onMakeTestsButtonClick() {
+        int testCount = 12;
+
+        // Create your config and get the two objects to compare
+        EqualLibConfig config = createConfig();
+        Object object1 = treeView1.getSelectedObject();
+        Object object2 = treeView2.getSelectedObject();
+
+        // Prepare a background Task that returns (areEqual, elapsedNanos)
+        EqualLib.clearFieldCache();
+
+        float[] elapsedTimes = new float[testCount];
+
+        boolean t = true;
+        for (int i = 0; i < testCount; i++) {
+            long start = System.nanoTime();
+            boolean result = EqualLib.areEqual(object1, object2, config);
+            long end = System.nanoTime();
+            if (!result) {
+                t = false;
+            }
+            elapsedTimes[i] = (end - start) / 1_000_000.0f;
+        }
+
+        log.info("Current locale: " + Locale.getDefault());
+
+
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator(',');  // <– here’s the magic
+        DecimalFormat df = new DecimalFormat("0.###", symbols);
+
+        StringBuilder csv = new StringBuilder();
+        for (int i = 0; i < testCount; i++) {
+            csv.append(df.format(elapsedTimes[i])).append(";");
+
+        }
+        // Remove the last semicolon
+        csv.deleteCharAt(csv.length() - 1);
+
+        log.info(csv.toString() + "|" + t + "|");
+
+    }
+
 
     @FXML
     private void onCompareButtonClick() {
@@ -242,6 +290,7 @@ public class MainSceneController {
         Thread bgThread = new Thread(compareTask, "ComparisonThread");
         bgThread.setDaemon(true);
         bgThread.start();
+
     }
 
     /**
@@ -264,10 +313,6 @@ public class MainSceneController {
     }
 
 
-
-
-
-
     @FXML
     private CheckBox useEqualsAfterMaxDepth;
 
@@ -276,16 +321,15 @@ public class MainSceneController {
 
     @FXML
     private CheckBox compareByElementsAndKeys;
+
     private EqualLibConfig createConfig() {
         EqualLibConfig config = new EqualLibConfig();
-        config.setMaxDepth(maxDepthSpinner.getValue(), useEqualsAfterMaxDepth.isSelected())
-                .setCompareByElementsAndKeys(compareByElementsAndKeys.isSelected())
-                .equivalenceByInheritance(equivalenceByInheritance.isSelected())
-                .setIgnoredFields(ignoredFieldsList.getItems().toArray(new String[0]));
+        config.setMaxComparisonDepth(maxDepthSpinner.getValue(), useEqualsAfterMaxDepth.isSelected())
+                .setCompareCollectionsAsWhole(compareByElementsAndKeys.isSelected())
+                .setCompareInheritedFields(equivalenceByInheritance.isSelected())
+                .setIgnoredFieldPaths(ignoredFieldsList.getItems().toArray(new String[0]));
         return config;
     }
-
-
 
 
     @FXML
@@ -297,8 +341,6 @@ public class MainSceneController {
         }
         treeView1.save();
     }
-
-
 
 
     @FXML

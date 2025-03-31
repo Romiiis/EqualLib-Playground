@@ -151,6 +151,12 @@ public class FieldNode {
         if (parentObject != null && parentObject.getClass().isArray()) {
             return String.format("%s %s = %s", name, parentObject.getClass().getComponentType().getSimpleName(), value);
         }
+
+        if (type != null && (type.isArray() || Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type))) {
+
+            return String.format("%s %s (%s)", getModifierIcons(), name, typeName);
+
+        }
         return String.format("%s %s (%s) = %s", getModifierIcons(), name, typeName, value);
     }
 

@@ -5,7 +5,7 @@ import com.romiis.equallibtestapp.io.FileManager;
 import com.romiis.equallibtestapp.util.DeepCopyUtil;
 import com.romiis.equallibtestapp.util.DynamicCompiler;
 import com.romiis.equallibtestapp.util.JsonUtil;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -19,8 +19,10 @@ import java.util.Map;
  * <p>
  * Utility class to cache classes and objects.
  */
-@Slf4j
+@Log4j2
 public class CacheUtil {
+
+
 
     /**
      * The instance of the CacheUtil class

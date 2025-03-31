@@ -24,9 +24,9 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
-import java.util.*;
+import java.util.Optional;
 
 /**
  * MyTreeView.java
@@ -35,7 +35,7 @@ import java.util.*;
  * It handles selection changes, editing, saving, and loading of objects.
  * </p>
  */
-@Slf4j
+@Log4j2
 public class MyTreeView extends TreeView<FieldNode> {
 
     /**
@@ -132,7 +132,7 @@ public class MyTreeView extends TreeView<FieldNode> {
 
         objectTreeBuilder = new ObjectTreeBuilder();
         // Build the tree structure.
-        FieldNode rootItem = objectTreeBuilder.buildTree(selectedObject.get(), 3);
+        FieldNode rootItem = objectTreeBuilder.buildTree(selectedObject.get(), Integer.MAX_VALUE);
 
         // Wrap the FieldNode in a TreeItem and set it as the root of the TreeView.
         LazyTreeItem rootTreeItem = new LazyTreeItem(rootItem);
