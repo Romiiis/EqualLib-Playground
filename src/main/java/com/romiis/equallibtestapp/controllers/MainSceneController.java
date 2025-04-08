@@ -227,8 +227,14 @@ public class MainSceneController {
         // Remove the last semicolon
         csv.deleteCharAt(csv.length() - 1);
 
-        log.info(csv.toString() + "|" + t + "|");
+        log.info(csv + "|" + t + "|");
 
+        // Show the result in a dialog
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Test Results");
+        alert.setHeaderText("Test Results in CSV format");
+        alert.setContentText(String.valueOf(csv));
+        alert.showAndWait();
     }
 
 
