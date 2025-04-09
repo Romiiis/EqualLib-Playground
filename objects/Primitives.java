@@ -2,10 +2,10 @@ public class Primitives {
     boolean bool;
     Boolean boolObj;
 
-    int i;
+    volatile int i;
     Integer intObj;
 
-    long l;
+    transient long l;
     Long longObj;
 
     double d;

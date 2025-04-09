@@ -127,18 +127,19 @@
                         <items>
                             <!-- Left Side: Max Depth and Options -->
                             <VBox spacing="15" alignment="CENTER_LEFT" styleClass="column-box">
-                                <HBox spacing="10" alignment="CENTER_LEFT">
-                                    <Label text="Max Depth:" styleClass="panel-label">
-                                        <tooltip>
-                                            <Tooltip text="Limit how deep object comparison goes (-1 for no limit)."/>
-                                        </tooltip>
-                                    </Label>
-                                    <Spinner fx:id="maxDepthSpinner" prefWidth="100"/>
-                                </HBox>
+
                                 <VBox spacing="10" alignment="CENTER_LEFT">
-                                    <CheckBox fx:id="useEqualsAfterMaxDepth" text="Use Equals after max depth"/>
-                                    <CheckBox fx:id="equivalenceByInheritance" text="Include Inherited Fields"/>
-                                    <CheckBox fx:id="compareByElementsAndKeys" text="Compare Collections"/>
+                                    <HBox spacing="10" alignment="CENTER_LEFT">
+                                        <Label text="Max Depth:">
+                                            <tooltip>
+                                                <Tooltip text="Limit how deep object comparison goes (-1 for no limit)."/>
+                                            </tooltip>
+                                        </Label>
+                                        <Spinner fx:id="maxDepthSpinner" prefWidth="100"/>
+                                    </HBox>
+                                    <CheckBox fx:id="useEqualsAfterMaxDepth" text="Use equals() after max depth"/>
+                                    <CheckBox fx:id="equivalenceByInheritance" text="Compare only fields from superclass"/>
+                                    <CheckBox fx:id="compareByElementsAndKeys" text="Compare collections by elements"/>
                                 </VBox>
                             </VBox>
 

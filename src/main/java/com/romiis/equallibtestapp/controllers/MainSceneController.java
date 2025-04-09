@@ -331,7 +331,7 @@ public class MainSceneController {
     private EqualLibConfig createConfig() {
         EqualLibConfig config = new EqualLibConfig();
         config.setMaxComparisonDepth(maxDepthSpinner.getValue(), useEqualsAfterMaxDepth.isSelected())
-                .setCompareCollectionsAsWhole(compareByElementsAndKeys.isSelected())
+                .setCompareCollectionsByElements(compareByElementsAndKeys.isSelected())
                 .setCompareInheritedFields(equivalenceByInheritance.isSelected())
                 .setIgnoredFieldPaths(ignoredFieldsList.getItems().toArray(new String[0]));
         return config;
