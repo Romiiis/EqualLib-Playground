@@ -136,9 +136,9 @@
                         <phase>package</phase>
                         <configuration>
                             <mainClass>com.romiis.equallibtestapp.MainClass</mainClass>
-                            <launcher>app</launcher>
-                            <jlinkZipName>app</jlinkZipName>
-                            <jlinkImageName>app</jlinkImageName>
+                            <launcher>EqualLib-TestApp</launcher>
+                            <jlinkZipName>EqualLib - TestApp</jlinkZipName>
+                            <jlinkImageName>EqualLib - TestApp</jlinkImageName>
                             <options>
                                 <option>--add-modules</option>
                                 <option>ALL-MODULE-PATH</option>
