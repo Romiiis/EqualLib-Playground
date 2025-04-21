@@ -15,13 +15,13 @@ module com.romiis.equallibtestapp {
 
 
 
-    exports com.romiis.equallibtestapp.util;
-    opens com.romiis.equallibtestapp to javafx.fxml;
-    exports com.romiis.equallibtestapp;
-    exports com.romiis.equallibtestapp.controllers;
-    opens com.romiis.equallibtestapp.controllers to javafx.fxml;
-    exports com.romiis.equallibtestapp.components;
-    exports com.romiis.equallibtestapp.components.treeView;
-    exports com.romiis.equallibtestapp.components.listView;
+    exports com.romiis.equallib_playground.util;
+    opens com.romiis.equallib_playground to javafx.fxml;
+    exports com.romiis.equallib_playground;
+    exports com.romiis.equallib_playground.controllers;
+    opens com.romiis.equallib_playground.controllers to javafx.fxml;
+    exports com.romiis.equallib_playground.components;
+    exports com.romiis.equallib_playground.components.treeView;
+    exports com.romiis.equallib_playground.components.listView;
 
 }

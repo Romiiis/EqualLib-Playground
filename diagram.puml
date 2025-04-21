@@ -1,0 +1,148 @@
+@startuml
+skinparam linetype ortho
+skinparam packagePadding 100
+skinparam RankSep 40
+skinparam Nodesep 30
+
+
+' --- CONTROLLERS ---
+package com.romiis.equallib_playground.controllers #D6EAF8  {
+    class ArrayEditController
+    class CollectionEditController
+    class LoadObjectController
+    class MainSceneController
+    class MapEditorController
+
+    ArrayEditController -[hidden]-> CollectionEditController
+    CollectionEditController -[hidden]-> LoadObjectController
+    LoadObjectController -[hidden]-> MainSceneController
+    MainSceneController -[hidden]-> MapEditorController
+}
+
+' --- IO ---
+package com.romiis.equallib_playground.io #E5E8E8 {
+    class FileManager
+}
+
+' --- UTIL (v centru) ---
+package com.romiis.equallib_playground.util #FDEBD0 {
+    class DeepCopyUtil
+    class DynamicCompiler
+    class EditorsUtil
+    class JsonUtil
+    class ObjectFillerUtil
+    class ObjectTreeBuilder
+    class ReflectionUtil
+
+    DeepCopyUtil -[hidden]-> DynamicCompiler
+    DynamicCompiler -[hidden]-> EditorsUtil
+    EditorsUtil -[hidden]-> JsonUtil
+    JsonUtil -[hidden]-> ObjectFillerUtil
+    ObjectFillerUtil -[hidden]-> ObjectTreeBuilder
+    ObjectTreeBuilder -[hidden]-> ReflectionUtil
+}
+
+' --- COMPONENTS ---
+package com.romiis.equallib_playground.components #D5F5E3{
+    class ClassComboBox
+
+    package listView #FADBD8 {
+        class LoadObjectListView
+        class ClassListView
+        class SaveResult
+
+        LoadObjectListView -[hidden]-> ClassListView
+        ClassListView -[hidden]-> SaveResult
+    }
+
+    package treeView #FCF3CF {
+        class FieldNodeType
+        class LazyTreeItem
+        class MyTreeView
+        class FieldNode
+
+
+        FieldNode -[hidden]-> FieldNodeType
+        FieldNodeType -[hidden]-> LazyTreeItem
+        LazyTreeItem -[hidden]-> MyTreeView
+    }
+
+    ClassComboBox -[hidden]-> listView.LoadObjectListView
+}
+
+' --- ROOT CLASSES ---
+package com.romiis.equallib_playground {
+    class MainClass
+    class CacheUtil
+}
+
+MainClass -[hidden]-> CacheUtil
+
+
+' --- DEPENDENCIES ---
+
+CacheUtil-->FileManager
+CacheUtil-->DeepCopyUtil
+CacheUtil-->DynamicCompiler
+CacheUtil-->JsonUtil
+
+ObjectTreeBuilder-->FieldNode
+ObjectTreeBuilder-->FieldNodeType
+
+JsonUtil-->CacheUtil
+
+EditorsUtil-->MainClass
+EditorsUtil-->FieldNode
+EditorsUtil-->FieldNodeType
+EditorsUtil-->LazyTreeItem
+EditorsUtil-->MyTreeView
+EditorsUtil-->ArrayEditController
+EditorsUtil-->CollectionEditController
+EditorsUtil-->MapEditorController
+
+FileManager-->CacheUtil
+
+MapEditorController-->CacheUtil
+MapEditorController-->ReflectionUtil
+
+MainSceneController-->CacheUtil
+MainSceneController-->ClassListView
+MainSceneController-->MyTreeView
+MainSceneController-->ObjectFillerUtil
+MainSceneController-->ReflectionUtil
+
+LoadObjectController-->CacheUtil
+LoadObjectController-->MyTreeView
+LoadObjectController-->ClassComboBox
+LoadObjectController-->LoadObjectListView
+
+CollectionEditController-->CacheUtil
+CollectionEditController-->MainClass
+CollectionEditController-->ReflectionUtil
+
+ArrayEditController-->CacheUtil
+ArrayEditController-->MainClass
+ArrayEditController-->ReflectionUtil
+
+ClassComboBox-->LoadObjectListView
+
+MyTreeView-->MainClass
+MyTreeView-->ClassListView
+MyTreeView-->SaveResult
+MyTreeView-->LoadObjectController
+MyTreeView-->FileManager
+MyTreeView-->EditorsUtil
+MyTreeView-->JsonUtil
+MyTreeView-->ObjectTreeBuilder
+MyTreeView-->ReflectionUtil
+
+FieldNode-->ObjectTreeBuilder
+
+LoadObjectListView-->CacheUtil
+LoadObjectListView-->MyTreeView
+
+ClassListView-->MyTreeView
+
+
+
+@enduml

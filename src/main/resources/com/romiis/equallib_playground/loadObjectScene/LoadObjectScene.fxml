@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.romiis.equallib_playground.components.treeView.MyTreeView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import com.romiis.equallib_playground.components.listView.ClassListView?>
+<?import com.romiis.equallib_playground.components.listView.LoadObjectListView?>
+<?import com.romiis.equallib_playground.components.ClassComboBox?>
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.romiis.equallib_playground.controllers.LoadObjectController"
+            prefHeight="400.0" prefWidth="600.0"
+            stylesheets="@loadScene.css" >
+
+    <left>
+        <AnchorPane>
+            <VBox spacing="10" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                <padding>
+                    <Insets top="10" right="10" bottom="20" left="10"/>
+                </padding>
+
+                <Label text="Filter by Class:"/>
+                <ClassComboBox fx:id="classFilter" prefWidth="200"/>
+
+                <LoadObjectListView fx:id="objectListView" VBox.vgrow="ALWAYS"/>
+
+                <!-- Přidaná tlačítka -->
+                <HBox spacing="10" HBox.hgrow="ALWAYS" alignment="CENTER">
+                    <Button text="Load" fx:id="loadButton" HBox.hgrow="ALWAYS" onAction="#loadObject" styleClass="load-button"/>
+                    <Button text="Cancel" fx:id="cancelButton" HBox.hgrow="ALWAYS" onAction="#cancel" styleClass="cancel-button"/>
+                </HBox>
+            </VBox>
+        </AnchorPane>
+    </left>
+
+    <center>
+        <AnchorPane>
+            <MyTreeView fx:id="treeView" AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="20.0"
+                        AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
+            <padding>
+                <Insets top="10" right="10" bottom="20" left="10"/>
+            </padding>
+            </MyTreeView>
+        </AnchorPane>
+    </center>
+
+</BorderPane>
+
+
