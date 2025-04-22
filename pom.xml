@@ -98,7 +98,7 @@
     <!-- =                       Build                            = -->
     <!-- ========================================================= -->
     <build>
-        <!-- standard resources – zabalené do JARu -->
+        <!-- standard resources –zabalené doJARu -->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -106,7 +106,6 @@
         </resources>
 
         <plugins>
-
             <!-- Kompilátor -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -142,8 +141,8 @@
                     <launcher>EqualLibPlayground</launcher>
 
                     <!-- výstup -->
-                    <jlinkImageName>app</jlinkImageName>
-                    <jlinkZipName>EqualLib-Playground</jlinkZipName>
+                    <jlinkImageName>EqualLib-Playground</jlinkImageName>
+<!--                    <jlinkZipName>EqualLib-Playground</jlinkZipName>-->
 
                     <options>
                         <option>--add-modules</option><option>ALL-MODULE-PATH</option>
@@ -189,7 +188,7 @@
                             <target>
                                 <!-- source:   ${basedir}/classes -->
                                 <!-- target:   ${project.build.directory}/app/bin/classes -->
-                                <copy todir="${project.build.directory}/app/bin/classes">
+                                <copy todir="${project.build.directory}/EqualLib-Playground/bin/classes">
                                     <fileset dir="${basedir}/classes" includes="**/*"/>
                                 </copy>
                             </target>
@@ -223,6 +222,31 @@
                         --add-opens=java.base/jdk.internal.misc=EqualLib
                     </argLine>
                 </configuration>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>dist-zip</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <!-- jméno ZIPu -->
+                            <finalName>${project.artifactId}-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <!-- ukaž mu, kde je ten nový XML descriptor -->
+                            <descriptors>
+                                <descriptor>src/assembly/dist.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>
