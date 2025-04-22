@@ -3,7 +3,6 @@ package com.romiis.equallib_playground.controllers;
 import com.romiis.equallib_playground.CacheUtil;
 import com.romiis.equallib_playground.MainClass;
 import com.romiis.equallib_playground.util.ReflectionUtil;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -26,7 +25,12 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-
+/**
+ * ArrayEditController.java
+ * <p>
+ * Controller for editing arrays in a JavaFX application.
+ * Provides functionality to edit, save, and cancel changes to arrays.
+ */
 @Log4j2
 public class ArrayEditController {
 
@@ -34,7 +38,6 @@ public class ArrayEditController {
     private Object array;
     private String arrayName;
 
-    // For nested arrays: holds the reference to the parent array and the index where this array is stored.
     private Object parentArray;
     private int parentIndex = -1;
 
@@ -51,7 +54,6 @@ public class ArrayEditController {
     @FXML
     private Button cancelButton;
 
-    // Local copy of array elements (to preserve types, nested arrays, etc.)
     private ObservableList<Object> observableElements;
 
     /*==================== Initialization ====================*/
@@ -127,7 +129,7 @@ public class ArrayEditController {
     }
 
     /**
-     * Loads the current array elements into the local observable list.
+     * Loads the array elements into an observable list for display.
      */
     private void loadArrayIntoObservableElements() {
         observableElements = FXCollections.observableArrayList();
@@ -139,7 +141,10 @@ public class ArrayEditController {
     }
 
     /**
-     * Converts the local observableElements into a list of Strings for display.
+     * Converts the observable list of objects into a list of strings for display.
+     *
+     * @param list the observable list to convert
+     * @return an observable list of strings
      */
     private ObservableList<String> convertToStringList(ObservableList<Object> list) {
         ObservableList<String> strings = FXCollections.observableArrayList();
@@ -229,7 +234,10 @@ public class ArrayEditController {
     /*==================== Cell Factory Setup ====================*/
 
     /**
-     * Configures the ListView cell factory based on the element type.
+     * Sets up the ListView editor based on the element type.
+     * Configures the cell factory for different types of elements.
+     *
+     * @param elementType the type of elements in the array
      */
     private void setupListViewEditor(Class<?> elementType) {
         if (elementType.isEnum()) {
@@ -337,7 +345,11 @@ public class ArrayEditController {
     /*==================== Conversion and Save ====================*/
 
     /**
-     * Converts a String from the editor into an object of the correct type.
+     * Converts a string to the appropriate element type.
+     *
+     * @param value       the string value to convert
+     * @param elementType the class of the element type
+     * @return the converted object
      */
     private Object convertStringToElement(String value, Class<?> elementType) {
         if (elementType.isEnum()) {
@@ -419,7 +431,9 @@ public class ArrayEditController {
     }
 
     /**
-     * Adjusts the local copy's length. When increasing, new entries get default values.
+     * Changes the length of the array and clears the elements.
+     *
+     * @param newLength the new length of the array
      */
     private void changeLength(int newLength) {
         Class<?> elementType = array.getClass().getComponentType();

@@ -3,7 +3,6 @@ package com.romiis.equallib_playground.controllers;
 import com.romiis.equallib_playground.CacheUtil;
 import com.romiis.equallib_playground.MainClass;
 import com.romiis.equallib_playground.util.ReflectionUtil;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -29,6 +28,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * CollectionEditController.java
+ * <p>
+ * Controller for editing collections in a JavaFX application.
+ * Provides functionality to add, remove, and edit elements in a collection.
+ */
 @Log4j2
 public class CollectionEditController {
 
@@ -37,7 +42,6 @@ public class CollectionEditController {
     private String collectionName;
     private Class<?> elementType;
 
-    // Backup copy to restore original content on cancel.
     private List<Object> backupCollection;
 
     @FXML
@@ -59,8 +63,11 @@ public class CollectionEditController {
     /*==================== Initialization ====================*/
 
     /**
-     * Sets up the editor with a collection, its name, and the expected element type.
-     * The provided collection is preserved and updated upon saving.
+     * Sets the collection to be edited.
+     *
+     * @param collection     The collection to be edited.
+     * @param collectionName The name of the collection.
+     * @param elementType    The type of elements in the collection.
      */
     public void setAssignedCollection(Collection<?> collection, String collectionName, Type elementType) {
         if (collection == null) {
@@ -130,7 +137,10 @@ public class CollectionEditController {
     }
 
     /**
-     * Converts the observable elements into a String list for display.
+     * Converts the observable list of objects to a list of strings for display.
+     *
+     * @param list The observable list of objects.
+     * @return An observable list of strings.
      */
     private ObservableList<String> convertToStringList(ObservableList<Object> list) {
         ObservableList<String> strings = FXCollections.observableArrayList();
@@ -150,7 +160,9 @@ public class CollectionEditController {
     /*==================== Cell Factory Setup ====================*/
 
     /**
-     * Configures the ListView cell factory based on the element type.
+     * Sets up the ListView editor based on the type of elements in the collection.
+     *
+     * @param elementType The type of elements in the collection.
      */
     private void setupListViewEditor(Class<?> elementType) {
         if (elementType.isEnum()) {
@@ -264,7 +276,9 @@ public class CollectionEditController {
     }
 
     /**
-     * Sets up drag and drop on a cell to allow reordering.
+     * Sets up drag-and-drop functionality for the ListView cells.
+     *
+     * @param cell The ListCell to set up.
      */
     private void setupDragAndDrop(ListCell<String> cell) {
         cell.setOnDragDetected(event -> {
@@ -302,7 +316,11 @@ public class CollectionEditController {
     /*==================== Conversion and Save ====================*/
 
     /**
-     * Converts a String from the editor into an object of the correct type.
+     * Converts a string value to the appropriate type based on the element type.
+     *
+     * @param value       The string value to convert.
+     * @param elementType The type of the element.
+     * @return The converted object.
      */
     private Object convertStringToElement(String value, Class<?> elementType) {
         if (elementType.isEnum()) {

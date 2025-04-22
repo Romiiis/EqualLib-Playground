@@ -8,7 +8,6 @@ import com.romiis.equallib_playground.components.treeView.MyTreeView;
 import com.romiis.equallib_playground.controllers.ArrayEditController;
 import com.romiis.equallib_playground.controllers.CollectionEditController;
 import com.romiis.equallib_playground.controllers.MapEditorController;
-
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -27,10 +26,18 @@ import java.util.Map;
 
 import static com.romiis.equallib_playground.util.ReflectionUtil.getClassFromType;
 
+/**
+ * EditorsUtil.java
+ * <p>
+ * Utility class to handle the creation and management of various editors for different field types.
+ * This includes text fields, boolean selectors, enum selectors, and more complex structures like arrays and collections.
+ */
 @Log4j2
-
 public class EditorsUtil {
 
+    /**
+     * The tree view instance to be modified.
+     */
     private MyTreeView treeView;
 
     /**

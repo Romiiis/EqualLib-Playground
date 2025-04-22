@@ -6,6 +6,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+/**
+ * DeepCopyUtil.java
+ * <p>
+ * Utility class to perform deep copies of objects.
+ * <p>
+ * This class provides a method to create a deep copy of an object, including all its fields and sub-objects.
+ * It uses reflection to access private fields and handles arrays, collections, and maps.
+ */
 public class DeepCopyUtil {
 
     /**

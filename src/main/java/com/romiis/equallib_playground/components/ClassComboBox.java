@@ -7,13 +7,24 @@ import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import lombok.Setter;
 
+/**
+ * ClassComboBox.java
+ * <p>
+ * Represents a ComboBox for selecting classes. Used to filter the objects in the list view by class.
+ */
 public class ClassComboBox extends ComboBox<Class<?>> {
 
+    /**
+     * The string to display for the "ALL" option
+     */
     private final String ALL = "All";
 
     @Setter
     private LoadObjectListView objectListView;
 
+    /**
+     * Create a new ClassComboBox instance
+     */
     public ClassComboBox() {
         super();
 
@@ -57,6 +68,9 @@ public class ClassComboBox extends ComboBox<Class<?>> {
     }
 
 
+    /**
+     * Initialize the click handler for the ComboBox
+     */
     private void initializeClickHandler() {
         this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             // Do something with the selected class

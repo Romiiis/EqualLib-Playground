@@ -2,13 +2,11 @@ package com.romiis.equallib_playground.controllers;
 
 import com.romiis.core.EqualLib;
 import com.romiis.core.EqualLibConfig;
-
 import com.romiis.equallib_playground.CacheUtil;
 import com.romiis.equallib_playground.components.listView.ClassListView;
 import com.romiis.equallib_playground.components.treeView.MyTreeView;
 import com.romiis.equallib_playground.util.ObjectFillerUtil;
 import com.romiis.equallib_playground.util.ReflectionUtil;
-
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -30,38 +28,35 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+/**
+ * MainSceneController.java
+ * <p>
+ * This class is the controller for the main scene of the application.
+ * It handles the UI components and their interactions.
+ */
 @Log4j2
 public class MainSceneController {
 
-    // --- Existing UI Components ---
     @FXML
     private MyTreeView treeView1;
     @FXML
     private MyTreeView treeView2;
-
     @FXML
     private StackPane loadingOverlay;
-
-
     @FXML
     private ClassListView objectListView1;
     @FXML
     private ClassListView objectListView2;
-
     @FXML
     private Label comparisonResult;
-
     @FXML
     private Label comparisonTime;
-
     @FXML
     private ListView<String> ignoredFieldsList;
     @FXML
     private TextField newIgnoredField;
     @FXML
     private Spinner<Integer> maxDepthSpinner;
-
-    // --- New UI Components for Fill Objects Panel ---
     @FXML
     private TitledPane fillSettingsPane;
     @FXML
@@ -78,15 +73,22 @@ public class MainSceneController {
     private RadioButton differentRadio;
     @FXML
     private ToggleGroup fillToggleGroup;
-
     @FXML
     private Slider maxDepthSliderFill;
-
     @FXML
     private Spinner<Integer> maxDepthSpinnerFill;
+    @FXML
+    private CheckBox useEqualsAfterMaxDepth;
+    @FXML
+    private CheckBox equivalenceByInheritance;
+    @FXML
+    private CheckBox compareByElementsAndKeys;
 
 
-    // --- Initialization ---
+    /**
+     * The initialize method is called when the FXML file is loaded.
+     * It initializes the UI components and sets up event handlers.
+     */
     @FXML
     private void initialize() {
         CacheUtil.getInstance().updateCache();
@@ -101,18 +103,29 @@ public class MainSceneController {
         treeView2.setClassListView(objectListView2);
     }
 
-    // Initialize the spinner with appropriate value factory for max depth.
+    /**
+     * Initializes the max depth spinner with a value factory.
+     * The spinner allows values from -1 (unlimited) to 100.
+     */
     private void initializeMaxDepthSpinner() {
         SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory =
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(-1, 100, -1);
         maxDepthSpinner.setValueFactory(valueFactory);
     }
 
+    /**
+     * Initializes the objects in the list views.
+     * This method populates the list views with classes from the cache.
+     */
     private void initializeObjects() {
         objectListView1.getItems().addAll(CacheUtil.getInstance().getClasses(true));
         objectListView2.getItems().addAll(CacheUtil.getInstance().getClasses(true));
     }
 
+    /**
+     * Initializes the fill settings for the fill objects panel.
+     * This method sets up the sliders and spinners for array size and collection size.
+     */
     private void initializeFillSettings() {
         // When the slider changes, update the spinner.
         arraySizeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -155,12 +168,25 @@ public class MainSceneController {
         similarRadio.setSelected(true);
     }
 
-    // Helper method to compare two Integer values safely.
+    /**
+     * Helper method to check if two Integer values are equal.
+     * This is used to avoid NullPointerExceptions when comparing Integer objects.
+     *
+     * @param a The Integer object
+     * @param b The int value
+     * @return true if they are equal, false otherwise
+     */
     private boolean newIntEquals(Integer a, int b) {
         return a != null && a.intValue() == b;
     }
 
 
+    /**
+     * Helper method to check if two Integer values are equal.
+     * This is used to avoid NullPointerExceptions when comparing Integer objects.
+     *
+     * @param event The ActionEvent
+     */
     @FXML
     private void onAddIgnoredField(ActionEvent event) {
         String ignoredField = newIgnoredField.getText().trim();
@@ -169,11 +195,21 @@ public class MainSceneController {
         }
     }
 
+    /**
+     * Adds the ignored field to the list view and clears the text field.
+     *
+     * @param ignoredField The ignored field to add
+     */
     private void addIgnoredFieldToList(String ignoredField) {
         ignoredFieldsList.getItems().add(ignoredField);
         newIgnoredField.clear();
     }
 
+    /**
+     * Removes the selected ignored field from the list view.
+     *
+     * @param event The ActionEvent
+     */
     @FXML
     private void onRemoveIgnoredField(ActionEvent event) {
         String selectedField = ignoredFieldsList.getSelectionModel().getSelectedItem();
@@ -182,12 +218,19 @@ public class MainSceneController {
         }
     }
 
+    /**
+     * Removes the ignored field from the list view.
+     *
+     * @param selectedField The ignored field to remove
+     */
     private void removeIgnoredFieldFromList(String selectedField) {
         ignoredFieldsList.getItems().remove(selectedField);
     }
 
-    // --- Comparison ---
 
+    /**
+     * Button handler for the "Make Tests" button.
+     */
     @FXML
     private void onMakeTestsButtonClick() {
         int testCount = 12;
@@ -239,6 +282,10 @@ public class MainSceneController {
     }
 
 
+    /**
+     * Button handler for the "Compare" button.
+     * This method compares two objects selected in the tree views.
+     */
     @FXML
     private void onCompareButtonClick() {
         // Create your config and get the two objects to compare
@@ -301,8 +348,10 @@ public class MainSceneController {
     }
 
     /**
-     * Formats elapsed time in nanoseconds as ns, µs, ms, or s,
-     * depending on magnitude.
+     * Helper method to format the comparison time in a human-readable format.
+     *
+     * @param nanos The time in nanoseconds
+     * @return A formatted string representing the comparison time
      */
     private String calculateComparisonTime(long nanos) {
         if (nanos < 1_000) {
@@ -320,15 +369,11 @@ public class MainSceneController {
     }
 
 
-    @FXML
-    private CheckBox useEqualsAfterMaxDepth;
-
-    @FXML
-    private CheckBox equivalenceByInheritance;
-
-    @FXML
-    private CheckBox compareByElementsAndKeys;
-
+    /**
+     * Creates a configuration object for the comparison.
+     *
+     * @return An EqualLibConfig object with the current settings
+     */
     private EqualLibConfig createConfig() {
         EqualLibConfig config = new EqualLibConfig();
         config.setMaxComparisonDepth(maxDepthSpinner.getValue(), useEqualsAfterMaxDepth.isSelected())
@@ -339,6 +384,10 @@ public class MainSceneController {
     }
 
 
+    /**
+     * Button handler for the "Clear" button.
+     * This method clears the selected objects in both tree views.
+     */
     @FXML
     public void onSaveAsButton1Click() throws Exception {
         if (maxDepthSpinnerFill.getValue() >= 1000) {
@@ -350,6 +399,10 @@ public class MainSceneController {
     }
 
 
+    /**
+     * Button handler for the "Clear" button.
+     * This method clears the selected objects in both tree views.
+     */
     @FXML
     public void onSaveAsButton2Click() throws Exception {
         if (maxDepthSpinnerFill.getValue() >= 1000) {
@@ -360,17 +413,28 @@ public class MainSceneController {
         treeView2.save();
     }
 
+    /**
+     * Button handler for the "Load" button.
+     * This method loads the selected objects in both tree views.
+     */
     @FXML
     public void onLoadButtonClick() {
         treeView1.load();
     }
 
+    /**
+     * Button handler for the "Load" button.
+     * This method loads the selected objects in both tree views.
+     */
     @FXML
     public void onLoadButton2Click() {
         treeView2.load();
     }
 
-    // --- Fill Button Handler ---
+    /**
+     * Button handler for the "Fill" button.
+     * This method fills the selected objects in both tree views with random data.
+     */
     @FXML
     public void onFillButtonClick(ActionEvent event) {
         int arraySize = arraySizeSpinner.getValue();

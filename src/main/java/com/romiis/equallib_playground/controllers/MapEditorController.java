@@ -2,8 +2,6 @@ package com.romiis.equallib_playground.controllers;
 
 import com.romiis.equallib_playground.CacheUtil;
 import com.romiis.equallib_playground.util.ReflectionUtil;
-
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,20 +18,25 @@ import lombok.extern.log4j.Log4j2;
 import java.util.*;
 
 /**
- * Controller for editing a Map object.
+ * MapEditorController.java
+ * <p>
+ * This class is used to edit a map in a JavaFX TableView.
+ * It allows the user to edit the keys and values of the map entries.
+ * <p>
+ * The map is displayed in a TableView with two columns: one for keys and one for values.
+ * The user can edit the keys and values directly in the table.
+ * <p>
  */
 @Log4j2
 public class MapEditorController {
 
     @Getter
     private Map<?, ?> map;
+
     private String mapName;
     private Class<?> keyType;
     private Class<?> valueType;
-
-    // Backup copy for cancellation.
     private List<Map.Entry<Object, Object>> backupEntries;
-
     @FXML
     private TableView<Map.Entry<Object, Object>> entriesTable;
     @FXML
@@ -51,11 +54,15 @@ public class MapEditorController {
     @FXML
     private Button cancelButton;
 
-    // Local copy of the map entries.
     private ObservableList<Map.Entry<Object, Object>> observableEntries;
 
     /**
-     * Initializes the editor with the given map, name, and expected key/value types.
+     * Sets the map to be edited.
+     *
+     * @param map       Map to be edited
+     * @param mapName   Name of the map
+     * @param keyType   Type of the keys
+     * @param valueType Type of the values
      */
     public void setAssignedMap(Map<?, ?> map, String mapName, Class<?> keyType, Class<?> valueType) {
         if (map == null) {
@@ -88,7 +95,11 @@ public class MapEditorController {
     }
 
     /**
-     * Creates a deep copy of the map entries.
+     * Creates a copy of the map entries for display in the TableView.
+     * This is necessary to avoid modifying the original map directly.
+     *
+     * @param map The map to copy entries from
+     * @return A list of entries copied from the map
      */
     private List<Map.Entry<Object, Object>> copyEntries(Map<?, ?> map) {
         List<Map.Entry<Object, Object>> entries = new ArrayList<>();
@@ -160,7 +171,10 @@ public class MapEditorController {
     }
 
     /**
-     * Configures a TableColumn to use an editor based on the given type.
+     * Sets up the cell editor for a given column based on the expected type.
+     *
+     * @param column The column to set up
+     * @param type   The expected type of the column
      */
     private void setupColumnEditor(TableColumn<Map.Entry<Object, Object>, String> column, Class<?> type) {
         if (type.isEnum()) {
@@ -219,7 +233,11 @@ public class MapEditorController {
     }
 
     /**
-     * Checks if the new key already exists in another row.
+     * Checks if the new key is a duplicate of any existing keys in the observable entries.
+     *
+     * @param newKey     The new key to check
+     * @param currentRow The current row index
+     * @return true if the new key is a duplicate, false otherwise
      */
     private boolean isDuplicateKey(Object newKey, int currentRow) {
         for (int i = 0; i < observableEntries.size(); i++) {
@@ -234,7 +252,10 @@ public class MapEditorController {
     }
 
     /**
-     * Replaces the entry at the given index with an updated key.
+     * Updates the key of an entry at the specified row index.
+     *
+     * @param rowIndex The index of the entry to update
+     * @param newKey   The new key to set
      */
     private void updateEntryKey(int rowIndex, Object newKey) {
         Map.Entry<Object, Object> oldEntry = observableEntries.get(rowIndex);
@@ -243,7 +264,11 @@ public class MapEditorController {
     }
 
     /**
-     * Converts a String into an object of the specified type.
+     * Converts a string value to the specified type.
+     *
+     * @param value The string value to convert
+     * @param type  The target type
+     * @return The converted object, or null if conversion fails
      */
     private Object convertStringToElement(String value, Class<?> type) {
         if (type.isEnum()) {
@@ -261,10 +286,17 @@ public class MapEditorController {
         return CacheUtil.getInstance().getObjectByName(value, true);
     }
 
+    /**
+     * Refreshes the TableView to reflect any changes made to the observable entries.
+     */
     private void refreshTableView() {
         entriesTable.refresh();
     }
 
+    /**
+     * Handles the action of adding a new entry to the map.
+     * It creates a new entry with default values for the key and value types.
+     */
     private void handleAddAction() {
         Object defaultKey = ReflectionUtil.getDefaultValue(keyType);
         Object defaultValue = ReflectionUtil.getDefaultValue(valueType);
@@ -272,6 +304,10 @@ public class MapEditorController {
         refreshTableView();
     }
 
+    /**
+     * Handles the action of removing the selected entry from the map.
+     * It removes the selected entry from the observable entries list.
+     */
     private void handleRemoveAction() {
         Map.Entry<Object, Object> selectedEntry = entriesTable.getSelectionModel().getSelectedItem();
         if (selectedEntry != null) {
@@ -309,6 +345,9 @@ public class MapEditorController {
         closeWindow();
     }
 
+    /**
+     * Closes the window.
+     */
     private void closeWindow() {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
         stage.close();
@@ -346,12 +385,4 @@ public class MapEditorController {
         }
     }
 
-    /**
-     * A TextField cell that displays its index before the item.
-     */
-    private class IndexedTextFieldCell extends TextFieldTableCell<Map.Entry<Object, Object>, String> {
-        public IndexedTextFieldCell() {
-            super(new DefaultStringConverter());
-        }
-    }
 }

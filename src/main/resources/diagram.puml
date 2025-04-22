@@ -3,6 +3,7 @@ skinparam linetype ortho
 skinparam packagePadding 100
 skinparam RankSep 40
 skinparam Nodesep 30
+allowmixing
 
 
 ' --- CONTROLLERS ---
@@ -143,6 +144,27 @@ LoadObjectListView-->MyTreeView
 
 ClassListView-->MyTreeView
 
+' --- FXML FILES AS COMPONENTS (plain rectangles) ---
+package "FXML Files" #F8F8F8 {
+  component "ArrayEditScene.fxml"      as FXML_ArrayEdit
+  component "CollectionEditScene.fxml" as FXML_CollectionEdit
+  component "LoadObjectScene.fxml"     as FXML_LoadObject
+  component "MainScene.fxml"           as FXML_Main
+  component "MapEditScene.fxml"        as FXML_MapEdit
+
+    FXML_ArrayEdit -[hidden]-> FXML_CollectionEdit
+    FXML_CollectionEdit -[hidden]-> FXML_LoadObject
+    FXML_LoadObject -[hidden]-> FXML_Main
+    FXML_Main -[hidden]-> FXML_MapEdit
+    FXML_ArrayEdit -[hidden]-> FXML_MapEdit
+}
+
+' --- PROPOJENÍ fx:controller ---
+ArrayEditController      --> FXML_ArrayEdit
+CollectionEditController --> FXML_CollectionEdit
+LoadObjectController     --> FXML_LoadObject
+MainSceneController      --> FXML_Main
+MapEditorController      --> FXML_MapEdit
 
 
 @enduml

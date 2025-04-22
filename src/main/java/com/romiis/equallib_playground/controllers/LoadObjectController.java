@@ -1,10 +1,9 @@
 package com.romiis.equallib_playground.controllers;
 
 import com.romiis.equallib_playground.CacheUtil;
-import com.romiis.equallib_playground.components.treeView.MyTreeView;
 import com.romiis.equallib_playground.components.ClassComboBox;
 import com.romiis.equallib_playground.components.listView.LoadObjectListView;
-
+import com.romiis.equallib_playground.components.treeView.MyTreeView;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
@@ -20,8 +19,6 @@ import lombok.Setter;
  */
 public class LoadObjectController {
 
-
-    // --- UI Components ---
 
     /**
      * The tree view to assign the object to
@@ -96,6 +93,10 @@ public class LoadObjectController {
     }
 
 
+    /**
+     * Cancel the loading of the object
+     * After clicking the cancel button, the window is closed without loading an object
+     */
     @FXML
     private void cancel() {
         close();

@@ -7,6 +7,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+/**
+ * FieldNode.java
+ * <p>
+ * Represents a node in the object tree, encapsulating field information and its value.
+ * <p>
+ * This class is used to represent a node in the object tree. It contains information about the field, its value,
+ * and its children. It also provides methods to update the value and get the children.
+ */
 @Getter
 public class FieldNode {
     private final String name;
@@ -22,7 +30,17 @@ public class FieldNode {
     private final ObjectTreeBuilder builder;
 
     /**
-     * Primary constructor including the node type.
+     * Constructor for FieldNode.
+     *
+     * @param builder      The ObjectTreeBuilder instance used to build the tree.
+     * @param name         The name of the field.
+     * @param type         The type of the field.
+     * @param value        The value of the field.
+     * @param field        The Field object representing the field.
+     * @param parentObject The parent object containing this field.
+     * @param currentDepth The current depth in the tree.
+     * @param maxDepth     The maximum depth allowed in the tree.
+     * @param nodeType     The type of this node (e.g., ARRAY_EDITABLE, INFO).
      */
     public FieldNode(ObjectTreeBuilder builder, String name, Class<?> type, Object value, Field field, Object parentObject,
                      int currentDepth, int maxDepth, FieldNodeType nodeType) {
@@ -60,12 +78,6 @@ public class FieldNode {
         return children;
     }
 
-    /**
-     * Allows manually adding a child node.
-     */
-    public void addChild(FieldNode child) {
-        this.children.add(child);
-    }
 
     /**
      * Updates the value represented by this node and writes the change back to the underlying object,
@@ -190,16 +202,5 @@ public class FieldNode {
         return "";
     }
 
-
-    public void refreshChildren() {
-        childrenLoaded = false;
-
-        // Clear the children list to force a reload
-        children.clear();
-
-        // Get the children again
-        getChildren();
-
-    }
 
 }

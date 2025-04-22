@@ -2,27 +2,50 @@ package com.romiis.equallib_playground.util;
 
 import java.lang.reflect.*;
 import java.util.*;
-import java.lang.reflect.Array;
 
+/**
+ * ObjectFillerUtil.java
+ * <p>
+ * Utility class to fill objects with random values or similar values.
+ */
 public class ObjectFillerUtil {
 
+    /**
+     * Random instance for generating random values
+     */
     private static final Random RANDOM = new Random();
-    private static final int MAX_DEPTH = 10;
 
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
+    /**
+     * Maximum depth for filling objects (default is 10)
+     */
+    private static final int MAX_DEPTH_DEFAULT = 10;
+
+    /**
+     * Fill objects with random values or similar values.
+     *
+     * @param obj1   the first object to fill
+     * @param obj2   the second object to fill
+     * @param equals if true, the objects will be filled with similar values
+     */
     public static void fillObjects(Object obj1, Object obj2, boolean equals) {
-        fillObjects(obj1, obj2, equals, 3, 3, MAX_DEPTH);
+        fillObjects(obj1, obj2, equals, 3, 3, MAX_DEPTH_DEFAULT);
     }
 
+    /**
+     * Fill objects with random values or similar values.
+     *
+     * @param obj1           the first object to fill
+     * @param obj2           the second object to fill
+     * @param equals         if true, the objects will be filled with similar values
+     * @param arraySize      the size of arrays to create
+     * @param collectionSize the size of collections to create
+     * @param maxDepth       the maximum depth for filling objects
+     */
     public static void fillObjects(Object obj1, Object obj2, boolean equals,
                                    int arraySize, int collectionSize, int maxDepth) {
         if (obj1 == null || obj2 == null) {
             return;
         }
-
-
         if (equals) {
             // Single-object BFS fill for obj1, then deep copy, then copy fields to obj2
             fillObjectBFS(obj1, arraySize, collectionSize, maxDepth);
@@ -34,9 +57,14 @@ public class ObjectFillerUtil {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Single-object BFS fill
-    // -------------------------------------------------------------------------
+    /*
+     * Fill a single object with random values using BFS.
+     *
+     * @param root          the root object to fill
+     * @param arraySize     the size of arrays to create
+     * @param collectionSize the size of collections to create
+     * @param maxDepth      the maximum depth for filling objects
+     */
     private static void fillObjectBFS(Object root, int arraySize, int collectionSize, int maxDepth) {
         // visited set to detect cycles
         Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -209,9 +237,15 @@ public class ObjectFillerUtil {
         } // end while
     }
 
-    // -------------------------------------------------------------------------
-    // Two‐objects BFS fill with different random values
-    // -------------------------------------------------------------------------
+    /*
+     * Fill two objects with random values using BFS.
+     *
+     * @param root1         the first object to fill
+     * @param root2         the second object to fill
+     * @param arraySize     the size of arrays to create
+     * @param collectionSize the size of collections to create
+     * @param maxDepth      the maximum depth for filling objects
+     */
     private static void fillObjectsDifferentBFS(Object root1, Object root2,
                                                 int arraySize, int collectionSize, int maxDepth) {
         // Two visited sets, one per object tree
@@ -276,8 +310,7 @@ public class ObjectFillerUtil {
                     }
                     // 3) ARRAY
                     else if (fieldType.isArray()) {
-                        handleDifferentArrayBFS(obj1, obj2, field, arraySize, collectionSize,
-                                visited1, visited2, queue, depth);
+                        handleDifferentArrayBFS(obj1, obj2, field, arraySize, queue, depth);
                     }
                     // 4) COLLECTION
                     else if (Collection.class.isAssignableFrom(fieldType)) {
@@ -315,9 +348,16 @@ public class ObjectFillerUtil {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Helper for array creation BFS (SINGLE FILL)
-    // -------------------------------------------------------------------------
+    /*
+     * Create and fill an array using BFS.
+     *
+     * @param arrayType      the type of the array
+     * @param arraySize      the size of the array
+     * @param collectionSize the size of collections to create
+     * @param depth          the maximum depth for filling objects
+     * @param visited        the set of visited objects
+     * @return the filled array
+     */
     private static Object createAndFillArrayBFS(Class<?> arrayType,
                                                 int arraySize, int collectionSize,
                                                 int depth,
@@ -353,12 +393,21 @@ public class ObjectFillerUtil {
         return arr;
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers for "Different" BFS expansions
-    // -------------------------------------------------------------------------
+    /*
+     * Handle filling of different array types using BFS.
+     *
+     * @param obj1           the first object to fill
+     * @param obj2           the second object to fill
+     * @param field          the field to fill
+     * @param arraySize      the size of arrays to create
+     * @param collectionSize the size of collections to create
+     * @param visited1       the set of visited objects for obj1
+     * @param visited2       the set of visited objects for obj2
+     * @param queue          the queue for BFS
+     * @param depth          the maximum depth for filling objects
+     */
     private static void handleDifferentArrayBFS(Object obj1, Object obj2, Field field,
-                                                int arraySize, int collectionSize,
-                                                Set<Object> visited1, Set<Object> visited2,
+                                                int arraySize,
                                                 Queue<DualFillTask> queue, int depth)
             throws Exception {
         Class<?> compType = field.getType().getComponentType();
@@ -394,6 +443,19 @@ public class ObjectFillerUtil {
         }
     }
 
+    /*
+     * Handle filling of different collection types using BFS.
+     *
+     * @param obj1           the first object to fill
+     * @param obj2           the second object to fill
+     * @param field          the field to fill
+     * @param arraySize      the size of arrays to create
+     * @param collectionSize the size of collections to create
+     * @param visited1       the set of visited objects for obj1
+     * @param visited2       the set of visited objects for obj2
+     * @param queue          the queue for BFS
+     * @param depth          the maximum depth for filling objects
+     */
     private static void handleDifferentCollectionBFS(Object obj1, Object obj2, Field field,
                                                      int arraySize, int collectionSize,
                                                      Set<Object> visited1, Set<Object> visited2,
@@ -434,6 +496,19 @@ public class ObjectFillerUtil {
         }
     }
 
+    /*
+     * Handle filling of different map types using BFS.
+     *
+     * @param obj1           the first object to fill
+     * @param obj2           the second object to fill
+     * @param field          the field to fill
+     * @param arraySize      the size of arrays to create
+     * @param collectionSize the size of collections to create
+     * @param visited1       the set of visited objects for obj1
+     * @param visited2       the set of visited objects for obj2
+     * @param queue          the queue for BFS
+     * @param depth          the maximum depth for filling objects
+     */
     private static void handleDifferentMapBFS(Object obj1, Object obj2, Field field,
                                               int arraySize, int collectionSize,
                                               Set<Object> visited1, Set<Object> visited2,
@@ -497,9 +572,12 @@ public class ObjectFillerUtil {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Copy fields (unchanged from your original code)
-    // -------------------------------------------------------------------------
+    /*
+     * Copy fields from one object to another.
+     *
+     * @param source the source object
+     * @param target the target object
+     */
     private static void copyFields(Object source, Object target) {
         List<Field> fields = getAllFields(source.getClass());
         for (Field field : fields) {
@@ -515,9 +593,12 @@ public class ObjectFillerUtil {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Random Value for Class (unchanged from your original code)
-    // -------------------------------------------------------------------------
+    /*
+     * Generate a random value for a given class type.
+     *
+     * @param type the class type
+     * @return a random value of the specified type
+     */
     private static Object randomValueForClass(Class<?> type) {
         if (type.isEnum()) {
             Object[] enumConstants = type.getEnumConstants();
@@ -545,15 +626,22 @@ public class ObjectFillerUtil {
         return null;
     }
 
+    /*
+     * Generate a unique string (UUID).
+     *
+     * @return a unique string
+     */
     public static String genereateUniqueString() {
         return UUID.randomUUID().toString();
     }
 
 
-
-    // -------------------------------------------------------------------------
-    // Create Collection / Map instances (unchanged from your original code)
-    // -------------------------------------------------------------------------
+    /*
+     * Create a new collection instance based on the class type.
+     *
+     * @param collectionClass the class type of the collection
+     * @return a new collection instance
+     */
     private static Collection<Object> createCollectionInstance(Class<?> collectionClass) {
         if (!collectionClass.isInterface() && !Modifier.isAbstract(collectionClass.getModifiers())) {
             try {
@@ -571,6 +659,13 @@ public class ObjectFillerUtil {
         return new ArrayList<>();
     }
 
+
+    /*
+     * Create a new map instance based on the class type.
+     *
+     * @param mapClass the class type of the map
+     * @return a new map instance
+     */
     private static Map<Object, Object> createMapInstance(Class<?> mapClass) {
         if (!mapClass.isInterface() && !Modifier.isAbstract(mapClass.getModifiers())) {
             try {
@@ -589,9 +684,12 @@ public class ObjectFillerUtil {
         return new LinkedHashMap<>();
     }
 
-    // -------------------------------------------------------------------------
-    // Reflection utilities (unchanged from your original code)
-    // -------------------------------------------------------------------------
+    /*
+     * Get all fields of a class, including inherited fields.
+     *
+     * @param clazz the class to inspect
+     * @return a list of fields
+     */
     private static List<Field> getAllFields(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();
         while (clazz != null && !clazz.equals(Object.class)) {
@@ -601,6 +699,13 @@ public class ObjectFillerUtil {
         return fields;
     }
 
+    /*
+     * Get the generic type of a field.
+     *
+     * @param field the field to inspect
+     * @param index the index of the generic type
+     * @return the class of the generic type, or null if not found
+     */
     private static Class<?> getGenericType(Field field, int index) {
         Type genericType = field.getGenericType();
         if (genericType instanceof ParameterizedType) {
@@ -613,6 +718,12 @@ public class ObjectFillerUtil {
         return null;
     }
 
+    /*
+     * Check if a class is a wrapper type.
+     *
+     * @param type the class to check
+     * @return true if it is a wrapper type, false otherwise
+     */
     private static boolean isWrapper(Class<?> type) {
         return type.equals(Integer.class) || type.equals(Long.class) ||
                 type.equals(Double.class) || type.equals(Float.class) ||
@@ -620,10 +731,9 @@ public class ObjectFillerUtil {
                 type.equals(Short.class) || type.equals(Character.class);
     }
 
-    // -------------------------------------------------------------------------
-    // "Task" holder classes for BFS
-    // -------------------------------------------------------------------------
-    // For single-object BFS
+    /*
+     * Task for filling an object in BFS.
+     */
     private static class FillTask {
         final Object obj;
         final int depth;
@@ -634,7 +744,6 @@ public class ObjectFillerUtil {
         }
     }
 
-    // For two-object BFS
     private static class DualFillTask {
         final Object obj1;
         final Object obj2;

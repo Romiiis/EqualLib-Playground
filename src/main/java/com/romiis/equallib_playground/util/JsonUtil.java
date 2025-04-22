@@ -13,13 +13,21 @@ import java.util.*;
 
 
 /**
+ * JsonUtil.java
+ * <p>
  * Utility class for serializing and deserializing objects to and from JSON.
+ * This class handles complex objects, collections, maps, and cycles in object graphs.
+ * It uses Jackson for JSON processing and provides methods to serialize and deserialize objects.
+ * It also includes methods for handling primitive types, arrays, collections, and maps.
  */
 @Log4j2
 public class JsonUtil {
 
     /**
      * Serializes an object into a JSON string.
+     *
+     * @param obj The object to serialize.
+     * @return The JSON string representation of the object.
      */
     public static String serialize(Object obj) {
         try {
@@ -33,8 +41,13 @@ public class JsonUtil {
         }
     }
 
+
     /**
      * Deserializes a JSON string into an object.
+     *
+     * @param json The JSON string to deserialize.
+     * @return The deserialized object.
+     * @throws Exception If deserialization fails.
      */
     public static Object deserialize(String json) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
@@ -54,8 +67,12 @@ public class JsonUtil {
     //region ----------Serialization methods----------
 
     /**
-     * Recursively serializes an object into a structured Map representation.
-     * Uses cycle detection to avoid infinite recursion.
+     * Recursively serializes an object into a JSON-compatible format.
+     *
+     * @param obj     The object to serialize.
+     * @param visited A map to track visited objects for cycle detection.
+     * @return A JSON-compatible representation of the object.
+     * @throws Exception If serialization fails.
      */
     private static Object serializeObject(Object obj, Map<Object, Integer> visited) throws Exception {
         if (obj == null) {
@@ -128,7 +145,11 @@ public class JsonUtil {
     }
 
     /**
-     * Serializes a primitive or String field.
+     * Creates a simple field representation for primitive types and String.
+     *
+     * @param type  The class type of the field.
+     * @param value The value of the field.
+     * @return A map representing the field.
      */
     private static Map<String, Object> createSimpleField(Class<?> type, Object value) {
         Map<String, Object> map = new HashMap<>();
@@ -137,8 +158,15 @@ public class JsonUtil {
         return map;
     }
 
+
     /**
-     * Serializes an array field with cycle detection.
+     * Serializes an array by iterating over its elements.
+     *
+     * @param type    The class type of the array.
+     * @param value   The array to serialize.
+     * @param visited A map to track visited objects for cycle detection.
+     * @return A map representing the serialized array.
+     * @throws Exception If serialization fails.
      */
     private static Map<String, Object> serializeArray(Class<?> type, Object value, Map<Object, Integer> visited) throws Exception {
         Map<String, Object> map = new HashMap<>();
@@ -158,7 +186,11 @@ public class JsonUtil {
     }
 
     /**
-     * Serializes an enum field.
+     * Creates a field representation for enum types.
+     *
+     * @param type  The class type of the enum.
+     * @param value The value of the enum.
+     * @return A map representing the enum field.
      */
     private static Map<String, Object> createEnumField(Class<?> type, Object value) {
         Map<String, Object> map = new HashMap<>();
@@ -169,6 +201,9 @@ public class JsonUtil {
 
     /**
      * Checks if a class is a primitive type or its wrapper.
+     *
+     * @param clazz The class to check.
+     * @return True if the class is a primitive type or its wrapper, false otherwise.
      */
     private static boolean isPrimitiveOrWrapper(Class<?> clazz) {
         return clazz.isPrimitive() || Set.of(
@@ -179,6 +214,11 @@ public class JsonUtil {
 
     /**
      * Serializes a Collection by iterating over its elements.
+     *
+     * @param collection The collection to serialize.
+     * @param visited    A map to track visited objects for cycle detection.
+     * @return A map representing the serialized collection.
+     * @throws Exception If serialization fails.
      */
     private static Map<String, Object> serializeCollection(Collection<?> collection, Map<Object, Integer> visited) throws Exception {
         Map<String, Object> map = new HashMap<>();
@@ -197,6 +237,11 @@ public class JsonUtil {
 
     /**
      * Serializes a Map by iterating over its entries.
+     *
+     * @param m       The map to serialize.
+     * @param visited A map to track visited objects for cycle detection.
+     * @return A map representing the serialized map.
+     * @throws Exception If serialization fails.
      */
     private static Map<String, Object> serializeMap(Map<?, ?> m, Map<Object, Integer> visited) throws Exception {
         Map<String, Object> map = new HashMap<>();
@@ -220,7 +265,13 @@ public class JsonUtil {
     //region ----------Deserialization methods----------
 
     /**
-     * Recursively deserializes an object from a JSON node using the provided context.
+     * Deserializes an object from a JSON node using the provided context.
+     *
+     * @param obj     The object to deserialize into.
+     * @param node    The JSON node representing the object.
+     * @param context A map to track visited objects for cycle detection.
+     * @return The deserialized object.
+     * @throws Exception If deserialization fails.
      */
     private static Object deserializeObject(Object obj, JsonNode node, Map<Integer, Object> context) throws Exception {
         if (obj == null || node == null) {
@@ -310,6 +361,12 @@ public class JsonUtil {
 
     /**
      * Deserializes an array from a JSON node using the provided context.
+     *
+     * @param node          The JSON node representing the array.
+     * @param componentType The component type of the array.
+     * @param context       A map to track visited objects for cycle detection.
+     * @return The deserialized array.
+     * @throws Exception If deserialization fails.
      */
     private static Object deserializeArray(JsonNode node, Class<?> componentType, Map<Integer, Object> context) throws Exception {
         if (node == null || node.isNull() || !node.isArray()) {
@@ -323,6 +380,16 @@ public class JsonUtil {
         return array;
     }
 
+    /**
+     * Deserializes a Collection from a JSON node using the provided context.
+     *
+     * @param node            The JSON node representing the collection.
+     * @param collectionClass The class of the collection.
+     * @param genericType     The generic type of the collection.
+     * @param context         A map to track visited objects for cycle detection.
+     * @return The deserialized collection.
+     * @throws Exception If deserialization fails.
+     */
     private static Object deserializeCollection(JsonNode node, Class<?> collectionClass, Type genericType, Map<Integer, Object> context) throws Exception {
         if (node == null || node.isNull() || !node.has("value") || node.get("value").isNull()) {
             return null;
@@ -337,6 +404,13 @@ public class JsonUtil {
 
     /**
      * Deserializes a Map from a JSON node using the provided context.
+     *
+     * @param node        The JSON node representing the map.
+     * @param mapClass    The class of the map.
+     * @param genericType The generic type of the map.
+     * @param context     A map to track visited objects for cycle detection.
+     * @return The deserialized map.
+     * @throws Exception If deserialization fails.
      */
     private static Object deserializeMap(JsonNode node, Class<?> mapClass, Type genericType, Map<Integer, Object> context) throws Exception {
         if (node == null || node.isNull() || !node.has("value") || node.get("value").isNull()) {
@@ -353,8 +427,14 @@ public class JsonUtil {
         return map;
     }
 
+
     /**
-     * Helper method that inspects a JSON node and deserializes it appropriately using the provided context.
+     * Deserializes an element from a JSON node using the provided context.
+     *
+     * @param node    The JSON node representing the element.
+     * @param context A map to track visited objects for cycle detection.
+     * @return The deserialized element.
+     * @throws Exception If deserialization fails.
      */
     private static Object deserializeElement(JsonNode node, Map<Integer, Object> context) throws Exception {
         if (node == null || node.isNull()) {
@@ -383,7 +463,13 @@ public class JsonUtil {
     }
 
     /**
-     * Deserializes a primitive, wrapper, or string value using the provided context.
+     * Deserializes an object from a JSON node using the provided context.
+     * This method handles primitive types, arrays, collections, and maps.
+     *
+     * @param node    The JSON node representing the object.
+     * @param context A map to track visited objects for cycle detection.
+     * @return The deserialized object.
+     * @throws Exception If deserialization fails.
      */
     private static Object deserializeObjectWithType(JsonNode node, Map<Integer, Object> context) throws Exception {
         if (node == null || node.isNull()) {
@@ -425,15 +511,15 @@ public class JsonUtil {
         };
     }
 
-    // Overloaded version for backward compatibility.
-    private static Object deserializeObjectWithType(JsonNode node) throws Exception {
-        return deserializeObjectWithType(node, new HashMap<>());
-    }
     //endregion
 
 
     /**
      * Creates an instance for a Collection.
+     *
+     * @param collectionClass The class of the collection.
+     * @return A new instance of the collection.
+     * @throws Exception If instantiation fails.
      */
     private static Collection<Object> createCollectionInstance(Class<?> collectionClass) throws Exception {
         if (!collectionClass.isInterface() && !Modifier.isAbstract(collectionClass.getModifiers())) {
@@ -450,6 +536,10 @@ public class JsonUtil {
 
     /**
      * Creates an instance for a Map.
+     *
+     * @param mapClass The class of the map.
+     * @return A new instance of the map.
+     * @throws Exception If instantiation fails.
      */
     private static Map<Object, Object> createMapInstance(Class<?> mapClass) throws Exception {
         if (!mapClass.isInterface() && !Modifier.isAbstract(mapClass.getModifiers())) {
@@ -462,8 +552,11 @@ public class JsonUtil {
     }
 
     /**
-     * Determines the correct class for a field given its JSON "@class" string,
-     * handling both primitive types and multi-dimensional arrays.
+     * Determines the class type from a class name.
+     *
+     * @param className The class name.
+     * @return The corresponding Class object.
+     * @throws Exception If the class cannot be found.
      */
     public static Class<?> determineFieldClass(String className) throws Exception {
         return switch (className) {

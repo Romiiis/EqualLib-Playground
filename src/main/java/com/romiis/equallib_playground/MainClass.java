@@ -8,6 +8,11 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.Locale;
 
+/**
+ * MainClass.java
+ * <p>
+ * The main class of the application. Starts the JavaFX application.
+ */
 public class MainClass extends Application {
 
     /**

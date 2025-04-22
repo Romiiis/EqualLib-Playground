@@ -9,7 +9,6 @@ import com.romiis.equallib_playground.util.EditorsUtil;
 import com.romiis.equallib_playground.util.JsonUtil;
 import com.romiis.equallib_playground.util.ObjectTreeBuilder;
 import com.romiis.equallib_playground.util.ReflectionUtil;
-
 import javafx.animation.FadeTransition;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -44,8 +43,6 @@ public class MyTreeView extends TreeView<FieldNode> {
      */
     private final ObjectProperty<Object> selectedObject = new SimpleObjectProperty<>();
 
-
-    private ObjectTreeBuilder objectTreeBuilder = null;
 
     /**
      * Reference to the class list view.
@@ -131,7 +128,7 @@ public class MyTreeView extends TreeView<FieldNode> {
         }
 
 
-        objectTreeBuilder = new ObjectTreeBuilder();
+        ObjectTreeBuilder objectTreeBuilder = new ObjectTreeBuilder();
         // Build the tree structure.
         FieldNode rootItem = objectTreeBuilder.buildTree(selectedObject.get(), Integer.MAX_VALUE);
 

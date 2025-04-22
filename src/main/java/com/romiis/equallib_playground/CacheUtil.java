@@ -23,7 +23,6 @@ import java.util.Map;
 public class CacheUtil {
 
 
-
     /**
      * The instance of the CacheUtil class
      */
@@ -283,7 +282,12 @@ public class CacheUtil {
     }
 
 
-
+    /**
+     * Get the names of all objects that fit the given class.
+     *
+     * @param clazz the class to filter by
+     * @return a list of object names
+     */
     public List<String> getObjectsFitNames(Class<?> clazz) {
         List<String> names = new ArrayList<>();
         for (String name : loadedObjectsPool.keySet()) {
