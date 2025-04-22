@@ -97,8 +97,8 @@
                 <directory>src/main/resources</directory>
             </resource>
             <resource>
-                <directory>objects</directory>
-                <targetPath>objects</targetPath>
+                <directory>classes</directory>
+                <targetPath>classes</targetPath>
                 <includes>
                     <include>**/*</include>
                 </includes>
@@ -143,14 +143,14 @@
                                 <option>--add-modules</option>
                                 <option>ALL-MODULE-PATH</option>
                                 <!-- Your custom opens -->
-                                <option>--add-opens=java.base/java.util=com.romiis.equallib_playground</option>
-                                <option>--add-opens=java.base/java.lang=com.romiis.equallib_playground</option>
-                                <option>--add-opens=java.base/java.security=com.romiis.equallib_playground</option>
-                                <option>--add-opens=java.base/java.util.concurrent=com.romiis.equallib_playground</option>
-                                <option>--add-opens=java.base/java.io=com.romiis.equallib_playground</option>
-                                <option>--add-opens=java.base/jdk.internal.reflect=com.romiis.equallib_playground</option>
-                                <option>--add-opens=java.base/java.lang.ref=com.romiis.equallib_playground</option>
-                                <option>--add-opens=java.base/jdk.internal.misc=com.romiis.equallib_playground</option>
+                                <option>--add-opens=java.base/java.util=equallib_playground</option>
+                                <option>--add-opens=java.base/java.lang=equallib_playground</option>
+                                <option>--add-opens=java.base/java.security=equallib_playground</option>
+                                <option>--add-opens=java.base/java.util.concurrent=equallib_playground</option>
+                                <option>--add-opens=java.base/java.io=equallib_playground</option>
+                                <option>--add-opens=java.base/jdk.internal.reflect=equallib_playground</option>
+                                <option>--add-opens=java.base/java.lang.ref=equallib_playground</option>
+                                <option>--add-opens=java.base/jdk.internal.misc=equallib_playground</option>
                                 <option>--add-opens=java.base/java.util=EqualLib</option>
                                 <option>--add-opens=java.base/java.lang=EqualLib</option>
                                 <option>--add-opens=java.base/java.security=EqualLib</option>
