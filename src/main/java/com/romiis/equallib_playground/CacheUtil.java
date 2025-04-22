@@ -49,7 +49,7 @@ public class CacheUtil {
     /**
      * The path to the objects folder
      */
-    private static final String OBJECTS_PATH = "objects";
+    private static final String CLASSES_DIRECTORY = "classes";
 
 
     /**
@@ -60,7 +60,7 @@ public class CacheUtil {
         loadedClassesPool = new ArrayList<>();
         loadedObjectsPool = new HashMap<>();
         try {
-            classLoader = DynamicCompiler.compile(OBJECTS_PATH);
+            classLoader = DynamicCompiler.compile(CLASSES_DIRECTORY);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -110,7 +110,7 @@ public class CacheUtil {
      * @return an array of class names
      */
     public String[] getAllClasses() {
-        File folder = new File(OBJECTS_PATH);
+        File folder = new File(CLASSES_DIRECTORY);
         File[] listOfFiles = folder.listFiles();
         if (listOfFiles == null) {
             return new String[0];

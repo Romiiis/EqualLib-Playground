@@ -1,4 +1,4 @@
-module com.romiis.equallibtestapp {
+module EqualLibPlayground {
     requires javafx.controls;
     requires javafx.fxml;
     requires EqualLib;

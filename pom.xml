@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.romiis</groupId>
-    <artifactId>equalLibTestApp</artifactId>
+    <artifactId>EqualLib-Playground</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>equalLibTestApp</name>
 
@@ -136,21 +136,21 @@
                         <phase>package</phase>
                         <configuration>
                             <mainClass>com.romiis.equallib_playground.MainClass</mainClass>
-                            <launcher>EqualLib-TestApp</launcher>
-                            <jlinkZipName>EqualLib - TestApp</jlinkZipName>
-                            <jlinkImageName>EqualLib - TestApp</jlinkImageName>
+                            <launcher>EqualLib-Playground</launcher>
+                            <jlinkZipName>EqualLib - Playground</jlinkZipName>
+                            <jlinkImageName>EqualLib - Playground</jlinkImageName>
                             <options>
                                 <option>--add-modules</option>
                                 <option>ALL-MODULE-PATH</option>
                                 <!-- Your custom opens -->
-                                <option>--add-opens=java.base/java.util=equallib_playground</option>
-                                <option>--add-opens=java.base/java.lang=equallib_playground</option>
-                                <option>--add-opens=java.base/java.security=equallib_playground</option>
-                                <option>--add-opens=java.base/java.util.concurrent=equallib_playground</option>
-                                <option>--add-opens=java.base/java.io=equallib_playground</option>
-                                <option>--add-opens=java.base/jdk.internal.reflect=equallib_playground</option>
-                                <option>--add-opens=java.base/java.lang.ref=equallib_playground</option>
-                                <option>--add-opens=java.base/jdk.internal.misc=equallib_playground</option>
+                                <option>--add-opens=java.base/java.util=EqualLibPlayground</option>
+                                <option>--add-opens=java.base/java.lang=EqualLibPlayground</option>
+                                <option>--add-opens=java.base/java.security=EqualLibPlayground</option>
+                                <option>--add-opens=java.base/java.util.concurrent=EqualLibPlayground</option>
+                                <option>--add-opens=java.base/java.io=EqualLibPlayground</option>
+                                <option>--add-opens=java.base/jdk.internal.reflect=EqualLibPlayground</option>
+                                <option>--add-opens=java.base/java.lang.ref=EqualLibPlayground</option>
+                                <option>--add-opens=java.base/jdk.internal.misc=EqualLibPlayground</option>
                                 <option>--add-opens=java.base/java.util=EqualLib</option>
                                 <option>--add-opens=java.base/java.lang=EqualLib</option>
                                 <option>--add-opens=java.base/java.security=EqualLib</option>
@@ -180,8 +180,8 @@
                         </goals>
                         <configuration>
                             <target>
-                                <copy todir="${project.build.directory}/app/bin/objects">
-                                    <fileset dir="${basedir}/objects" includes="**/*"/>
+                                <copy todir="${project.build.directory}/app/bin/classes">
+                                    <fileset dir="${basedir}/classes" includes="**/*"/>
                                 </copy>
                             </target>
                         </configuration>
@@ -194,14 +194,14 @@
                 <version>3.0.0-M7</version>
                 <configuration>
                     <argLine>
-                        --add-opens=java.base/java.util=com.romiis.equallib_playground
-                        --add-opens=java.base/java.lang=com.romiis.equallib_playground
-                        --add-opens=java.base/java.security=com.romiis.equallib_playground
-                        --add-opens=java.base/java.util.concurrent=com.romiis.equallib_playground
-                        --add-opens=java.base/java.io=com.romiis.equallib_playground
-                        --add-opens=java.base/jdk.internal.reflect=com.romiis.equallib_playground
-                        --add-opens=java.base/java.lang.ref=com.romiis.equallib_playground
-                        --add-opens=java.base/jdk.internal.misc=com.romiis.equallib_playground
+                        --add-opens=java.base/java.util=EqualLibPlayground
+                        --add-opens=java.base/java.lang=cEqualLibPlayground
+                        --add-opens=java.base/java.security=EqualLibPlayground
+                        --add-opens=java.base/java.util.concurrent=EqualLibPlayground
+                        --add-opens=java.base/java.io=EqualLibPlayground
+                        --add-opens=java.base/jdk.internal.reflect=EqualLibPlayground
+                        --add-opens=java.base/java.lang.ref=EqualLibPlayground
+                        --add-opens=java.base/jdk.internal.misc=EqualLibPlayground
                         --add-opens=java.base/java.util=EqualLib
                         --add-opens=java.base/java.lang=EqualLib
                         --add-opens=java.base/java.security=EqualLib
