@@ -7,13 +7,16 @@
     <groupId>com.romiis</groupId>
     <artifactId>EqualLib-Playground</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>equalLibTestApp</name>
+    <name>EqualLibPlayground</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.10.2</junit.version>
     </properties>
 
+    <!-- ========================================================= -->
+    <!-- =                     Dependencies                       = -->
+    <!-- ========================================================= -->
     <dependencies>
         <!-- Lombok -->
         <dependency>
@@ -35,7 +38,7 @@
             <version>17.0.6</version>
         </dependency>
 
-        <!-- Log4j 2 (Modular) -->
+        <!-- Log4j 2 -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -47,7 +50,7 @@
             <version>2.24.3</version>
         </dependency>
 
-        <!-- Other UI dependencies -->
+        <!-- Other UI libs -->
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
@@ -59,7 +62,7 @@
             <version>12.3.1</version>
         </dependency>
 
-        <!-- Testing -->
+        <!-- Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -73,7 +76,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Optional: If you're using this actively -->
+        <!-- Optional extras -->
         <dependency>
             <groupId>com.jcabi</groupId>
             <artifactId>jcabi-log</artifactId>
@@ -91,20 +94,20 @@
         </dependency>
     </dependencies>
 
+    <!-- ========================================================= -->
+    <!-- =                       Build                            = -->
+    <!-- ========================================================= -->
     <build>
+        <!-- standard resources – zabalené do JARu -->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
-            <resource>
-                <directory>classes</directory>
-                <targetPath>classes</targetPath>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
         </resources>
+
         <plugins>
+
+            <!-- Kompilátor -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -122,64 +125,70 @@
                 </configuration>
             </plugin>
 
-            <!-- JavaFX JLink Plugin -->
+            <!-- JavaFX (jlink) -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <executions>
                     <execution>
-                        <id>default-cli</id>
-                        <goals>
-                            <goal>jlink</goal>
-                        </goals>
+                        <id>create-runtime-image</id>
+                        <goals><goal>jlink</goal></goals>
                         <phase>package</phase>
-                        <configuration>
-                            <mainClass>com.romiis.equallib_playground.MainClass</mainClass>
-                            <launcher>EqualLib-Playground</launcher>
-                            <jlinkZipName>EqualLib - Playground</jlinkZipName>
-                            <jlinkImageName>EqualLib - Playground</jlinkImageName>
-                            <options>
-                                <option>--add-modules</option>
-                                <option>ALL-MODULE-PATH</option>
-                                <!-- Your custom opens -->
-                                <option>--add-opens=java.base/java.util=EqualLibPlayground</option>
-                                <option>--add-opens=java.base/java.lang=EqualLibPlayground</option>
-                                <option>--add-opens=java.base/java.security=EqualLibPlayground</option>
-                                <option>--add-opens=java.base/java.util.concurrent=EqualLibPlayground</option>
-                                <option>--add-opens=java.base/java.io=EqualLibPlayground</option>
-                                <option>--add-opens=java.base/jdk.internal.reflect=EqualLibPlayground</option>
-                                <option>--add-opens=java.base/java.lang.ref=EqualLibPlayground</option>
-                                <option>--add-opens=java.base/jdk.internal.misc=EqualLibPlayground</option>
-                                <option>--add-opens=java.base/java.util=EqualLib</option>
-                                <option>--add-opens=java.base/java.lang=EqualLib</option>
-                                <option>--add-opens=java.base/java.security=EqualLib</option>
-                                <option>--add-opens=java.base/java.util.concurrent=EqualLib</option>
-                                <option>--add-opens=java.base/java.io=EqualLib</option>
-                                <option>--add-opens=java.base/jdk.internal.reflect=EqualLib</option>
-                                <option>--add-opens=java.base/java.lang.ref=EqualLib</option>
-                                <option>--add-opens=java.base/jdk.internal.misc=EqualLib</option>
-                            </options>
-                            <stripDebug>true</stripDebug>
-                            <noManPages>true</noManPages>
-                            <noHeaderFiles>true</noHeaderFiles>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <mainClass>com.romiis.equallib_playground.MainClass</mainClass>
+                    <launcher>EqualLibPlayground</launcher>
+
+                    <!-- výstup -->
+                    <jlinkImageName>app</jlinkImageName>
+                    <jlinkZipName>app</jlinkZipName>
+
+                    <options>
+                        <option>--add-modules</option><option>ALL-MODULE-PATH</option>
+                        <!-- EqualLibPlayground -->
+                        <option>--add-opens=java.base/java.util=EqualLibPlayground</option>
+                        <option>--add-opens=java.base/java.lang=EqualLibPlayground</option>
+                        <option>--add-opens=java.base/java.security=EqualLibPlayground</option>
+                        <option>--add-opens=java.base/java.util.concurrent=EqualLibPlayground</option>
+                        <option>--add-opens=java.base/java.io=EqualLibPlayground</option>
+                        <option>--add-opens=java.base/jdk.internal.reflect=EqualLibPlayground</option>
+                        <option>--add-opens=java.base/java.lang.ref=EqualLibPlayground</option>
+                        <option>--add-opens=java.base/jdk.internal.misc=EqualLibPlayground</option>
+                        <!-- EqualLib -->
+                        <option>--add-opens=java.base/java.util=EqualLib</option>
+                        <option>--add-opens=java.base/java.lang=EqualLib</option>
+                        <option>--add-opens=java.base/java.security=EqualLib</option>
+                        <option>--add-opens=java.base/java.util.concurrent=EqualLib</option>
+                        <option>--add-opens=java.base/java.io=EqualLib</option>
+                        <option>--add-opens=java.base/jdk.internal.reflect=EqualLib</option>
+                        <option>--add-opens=java.base/java.lang.ref=EqualLib</option>
+                        <option>--add-opens=java.base/jdk.internal.misc=EqualLib</option>
+                        <!-- Logs -->
+                        <option>-Dlog4j2.enableJndiLookup=false</option>
+                        <option>-Dlog4j2.disableJmx=true</option>
+                    </options>
+
+                    <stripDebug>true</stripDebug>
+                    <noManPages>true</noManPages>
+                    <noHeaderFiles>true</noHeaderFiles>
+                </configuration>
             </plugin>
-            <!-- Post-jlink file copy -->
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>3.1.0</version>
                 <executions>
                     <execution>
+                        <id>copy-classes-to-image</id>
                         <phase>package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
+                        <goals><goal>run</goal></goals>
                         <configuration>
                             <target>
+                                <!-- source:   ${basedir}/classes -->
+                                <!-- target:   ${project.build.directory}/app/bin/classes -->
                                 <copy todir="${project.build.directory}/app/bin/classes">
                                     <fileset dir="${basedir}/classes" includes="**/*"/>
                                 </copy>
@@ -188,6 +197,8 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Testy -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -195,7 +206,7 @@
                 <configuration>
                     <argLine>
                         --add-opens=java.base/java.util=EqualLibPlayground
-                        --add-opens=java.base/java.lang=cEqualLibPlayground
+                        --add-opens=java.base/java.lang=EqualLibPlayground
                         --add-opens=java.base/java.security=EqualLibPlayground
                         --add-opens=java.base/java.util.concurrent=EqualLibPlayground
                         --add-opens=java.base/java.io=EqualLibPlayground
@@ -213,7 +224,7 @@
                     </argLine>
                 </configuration>
             </plugin>
-        </plugins>
 
+        </plugins>
     </build>
 </project>
