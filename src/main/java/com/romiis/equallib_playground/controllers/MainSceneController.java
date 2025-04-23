@@ -33,6 +33,9 @@ import java.util.Locale;
  * <p>
  * This class is the controller for the main scene of the application.
  * It handles the UI components and their interactions.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Log4j2
 public class MainSceneController {

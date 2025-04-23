@@ -19,6 +19,9 @@ import java.util.*;
  * This class handles complex objects, collections, maps, and cycles in object graphs.
  * It uses Jackson for JSON processing and provides methods to serialize and deserialize objects.
  * It also includes methods for handling primitive types, arrays, collections, and maps.
+ *
+ * @author romiis
+ * @version 1.0
  */
 @Log4j2
 public class JsonUtil {

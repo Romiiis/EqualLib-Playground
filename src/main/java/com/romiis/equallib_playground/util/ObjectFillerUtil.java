@@ -7,6 +7,9 @@ import java.util.*;
  * ObjectFillerUtil.java
  * <p>
  * Utility class to fill objects with random values or similar values.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 public class ObjectFillerUtil {
 
@@ -57,7 +60,7 @@ public class ObjectFillerUtil {
         }
     }
 
-    /*
+    /**
      * Fill a single object with random values using BFS.
      *
      * @param root          the root object to fill
@@ -237,7 +240,7 @@ public class ObjectFillerUtil {
         } // end while
     }
 
-    /*
+    /**
      * Fill two objects with random values using BFS.
      *
      * @param root1         the first object to fill
@@ -348,7 +351,7 @@ public class ObjectFillerUtil {
         }
     }
 
-    /*
+    /**
      * Create and fill an array using BFS.
      *
      * @param arrayType      the type of the array
@@ -393,16 +396,13 @@ public class ObjectFillerUtil {
         return arr;
     }
 
-    /*
+    /**
      * Handle filling of different array types using BFS.
      *
      * @param obj1           the first object to fill
      * @param obj2           the second object to fill
      * @param field          the field to fill
      * @param arraySize      the size of arrays to create
-     * @param collectionSize the size of collections to create
-     * @param visited1       the set of visited objects for obj1
-     * @param visited2       the set of visited objects for obj2
      * @param queue          the queue for BFS
      * @param depth          the maximum depth for filling objects
      */
@@ -443,7 +443,7 @@ public class ObjectFillerUtil {
         }
     }
 
-    /*
+    /**
      * Handle filling of different collection types using BFS.
      *
      * @param obj1           the first object to fill
@@ -496,7 +496,7 @@ public class ObjectFillerUtil {
         }
     }
 
-    /*
+    /**
      * Handle filling of different map types using BFS.
      *
      * @param obj1           the first object to fill
@@ -572,7 +572,7 @@ public class ObjectFillerUtil {
         }
     }
 
-    /*
+    /**
      * Copy fields from one object to another.
      *
      * @param source the source object
@@ -593,7 +593,7 @@ public class ObjectFillerUtil {
         }
     }
 
-    /*
+    /**
      * Generate a random value for a given class type.
      *
      * @param type the class type
@@ -626,7 +626,7 @@ public class ObjectFillerUtil {
         return null;
     }
 
-    /*
+    /**
      * Generate a unique string (UUID).
      *
      * @return a unique string
@@ -636,7 +636,7 @@ public class ObjectFillerUtil {
     }
 
 
-    /*
+    /**
      * Create a new collection instance based on the class type.
      *
      * @param collectionClass the class type of the collection
@@ -660,7 +660,7 @@ public class ObjectFillerUtil {
     }
 
 
-    /*
+    /**
      * Create a new map instance based on the class type.
      *
      * @param mapClass the class type of the map
@@ -684,7 +684,7 @@ public class ObjectFillerUtil {
         return new LinkedHashMap<>();
     }
 
-    /*
+    /**
      * Get all fields of a class, including inherited fields.
      *
      * @param clazz the class to inspect
@@ -699,7 +699,7 @@ public class ObjectFillerUtil {
         return fields;
     }
 
-    /*
+    /**
      * Get the generic type of a field.
      *
      * @param field the field to inspect
@@ -718,7 +718,7 @@ public class ObjectFillerUtil {
         return null;
     }
 
-    /*
+    /**
      * Check if a class is a wrapper type.
      *
      * @param type the class to check
@@ -731,7 +731,7 @@ public class ObjectFillerUtil {
                 type.equals(Short.class) || type.equals(Character.class);
     }
 
-    /*
+    /**
      * Task for filling an object in BFS.
      */
     private static class FillTask {

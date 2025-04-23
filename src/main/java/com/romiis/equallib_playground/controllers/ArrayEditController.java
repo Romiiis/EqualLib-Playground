@@ -30,6 +30,9 @@ import java.util.Optional;
  * <p>
  * Controller for editing arrays in a JavaFX application.
  * Provides functionality to edit, save, and cancel changes to arrays.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Log4j2
 public class ArrayEditController {

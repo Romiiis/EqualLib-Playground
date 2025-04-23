@@ -8,8 +8,10 @@ import java.util.List;
  * LazyTreeItem.java
  * <p>
  * Represents a TreeItem that loads its children lazily.
- * <p>
  * This class is used to represent a TreeItem that loads its children lazily. It is used to improve performance when dealing with large trees.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 public class LazyTreeItem extends TreeItem<FieldNode> {
     private boolean childrenLoaded = false;

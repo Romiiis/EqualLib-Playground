@@ -10,7 +10,9 @@ import lombok.Setter;
  * <p>
  * This class is used to display classes in the main scene. It is used to select a class to display in the tree view.
  * It also handles the case where the tree view is modified and shows an alert to save the changes.
- * <p>
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Setter
 public class ClassListView extends ListView<Class<?>> {

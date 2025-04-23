@@ -1,9 +1,20 @@
 @startuml
 skinparam linetype ortho
-skinparam packagePadding 100
-skinparam RankSep 40
-skinparam Nodesep 30
+skinparam classBackgroundColor #ffffff
+skinparam ArrowColor Gray
+skinparam DefaultFontName "Arial"
+skinparam Shadowing false
+
+skinparam nodesep 20
+skinparam ranksep 25
+skinparam packagePadding 20
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam DefaultFontSize 12
+
+
 allowmixing
+
 
 
 ' --- CONTROLLERS ---
@@ -11,6 +22,7 @@ package com.romiis.equallib_playground.controllers #D6EAF8  {
     class ArrayEditController
     class CollectionEditController
     class LoadObjectController
+
     class MainSceneController
     class MapEditorController
 
@@ -92,16 +104,16 @@ ObjectTreeBuilder-->FieldNodeType
 
 JsonUtil-->CacheUtil
 
-EditorsUtil-->MainClass
-EditorsUtil-->FieldNode
-EditorsUtil-->FieldNodeType
-EditorsUtil-->LazyTreeItem
-EditorsUtil-->MyTreeView
-EditorsUtil-->ArrayEditController
-EditorsUtil-->CollectionEditController
-EditorsUtil-->MapEditorController
+EditorsUtil-up->MainClass
+EditorsUtil-up->FieldNode
+EditorsUtil-up->FieldNodeType
+EditorsUtil-up->LazyTreeItem
+EditorsUtil-up->MyTreeView
+EditorsUtil-up->ArrayEditController
+EditorsUtil-up->CollectionEditController
+EditorsUtil-down->MapEditorController
 
-FileManager-->CacheUtil
+FileManager-up->CacheUtil
 
 MapEditorController-->CacheUtil
 MapEditorController-->ReflectionUtil
@@ -112,10 +124,10 @@ MainSceneController-->MyTreeView
 MainSceneController-->ObjectFillerUtil
 MainSceneController-->ReflectionUtil
 
-LoadObjectController-->CacheUtil
-LoadObjectController-->MyTreeView
-LoadObjectController-->ClassComboBox
-LoadObjectController-->LoadObjectListView
+LoadObjectController-up->CacheUtil
+LoadObjectController-up->MyTreeView
+LoadObjectController-up->ClassComboBox
+LoadObjectController-up->LoadObjectListView
 
 CollectionEditController-->CacheUtil
 CollectionEditController-->MainClass
@@ -130,7 +142,7 @@ ClassComboBox-->LoadObjectListView
 MyTreeView-->MainClass
 MyTreeView-->ClassListView
 MyTreeView-->SaveResult
-MyTreeView-->LoadObjectController
+MyTreeView-up->LoadObjectController
 MyTreeView-->FileManager
 MyTreeView-->EditorsUtil
 MyTreeView-->JsonUtil

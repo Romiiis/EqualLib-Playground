@@ -31,6 +31,9 @@ import static com.romiis.equallib_playground.util.ReflectionUtil.getClassFromTyp
  * <p>
  * Utility class to handle the creation and management of various editors for different field types.
  * This includes text fields, boolean selectors, enum selectors, and more complex structures like arrays and collections.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Log4j2
 public class EditorsUtil {
@@ -311,6 +314,8 @@ public class EditorsUtil {
 
     /**
      * Checks if a given type is a numeric type.
+     * @param type The class type to check.
+     * @return True if the type is numeric, false otherwise.
      */
     private boolean isNumericType(Class<?> type) {
         return type.equals(Integer.class) || type.equals(int.class)
@@ -322,7 +327,12 @@ public class EditorsUtil {
     }
 
     /**
-     * Converts a String to an instance of the target numeric type.
+     * Converts a string to the specified numeric type.
+     *
+     * @param input The string to convert.
+     * @param targetType The target numeric type.
+     * @return The converted value.
+     * @throws NumberFormatException If the conversion fails.
      */
     private Object convertFromString(String input, Class<?> targetType) throws NumberFormatException {
         if (targetType.equals(Integer.class) || targetType.equals(int.class)) {

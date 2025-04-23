@@ -25,7 +25,9 @@ import java.util.*;
  * <p>
  * The map is displayed in a TableView with two columns: one for keys and one for values.
  * The user can edit the keys and values directly in the table.
- * <p>
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Log4j2
 public class MapEditorController {

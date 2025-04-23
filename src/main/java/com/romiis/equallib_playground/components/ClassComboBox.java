@@ -11,6 +11,9 @@ import lombok.Setter;
  * ClassComboBox.java
  * <p>
  * Represents a ComboBox for selecting classes. Used to filter the objects in the list view by class.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 public class ClassComboBox extends ComboBox<Class<?>> {
 

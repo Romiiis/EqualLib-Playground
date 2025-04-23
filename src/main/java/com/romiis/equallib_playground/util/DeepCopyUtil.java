@@ -13,6 +13,9 @@ import java.util.*;
  * <p>
  * This class provides a method to create a deep copy of an object, including all its fields and sub-objects.
  * It uses reflection to access private fields and handles arrays, collections, and maps.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 public class DeepCopyUtil {
 
@@ -109,12 +112,12 @@ public class DeepCopyUtil {
     }
 
     /**
-     * Copy array elements. For each element, we do the same logic:
-     * - If null, skip
-     * - Force lazy init
-     * - If immutable, store as is
-     * - Else if in cache, re-use
-     * - Else allocate, cache, and enqueue
+     * Copy all elements of an array into a new array.
+     * This is done iteratively to avoid recursion.
+     * @param originalArray the original array
+     * @param copyArray the copy array
+     * @param copyCache the cache for already copied objects
+     * @param queue the queue for processing pairs of original and copy objects
      */
     private static void copyArrayElements(Object originalArray,
                                           Object copyArray,
@@ -130,7 +133,13 @@ public class DeepCopyUtil {
     }
 
     /**
-     * Copy all fields (including inherited ones) from original to copy, using the same iterative approach.
+     * Copy all fields of an object to another object using the given cache.
+     * This version copies every field, including those that are normally considered
+     * lazy or cached.
+     *
+     * @param original  the original object
+     * @param copy      the object to copy to
+     * @param copyCache the cache of already copied objects
      */
     private static void copyAllFields(Object original,
                                       Object copy,
@@ -167,8 +176,13 @@ public class DeepCopyUtil {
     }
 
     /**
-     * "Resolves" a sub-object by performing the same lazy-init + caching logic
-     * in a non-recursive way. Returns the copy to be set in the parent's field/array index.
+     * Resolve a sub-object by checking if it's already in the cache or needs to be copied.
+     * This method handles lazy initialization and immutable objects.
+     *
+     * @param subObject the sub-object to resolve
+     * @param copyCache the cache of already copied objects
+     * @param queue the queue for processing pairs of original and copy objects
+     * @return the resolved sub-object
      */
     private static Object resolveSubObject(Object subObject,
                                            Map<Object, Object> copyCache,
@@ -201,9 +215,11 @@ public class DeepCopyUtil {
 
     /**
      * Force lazy initialization on an object by invoking all public no-argument getters.
-     * Also triggers size() or toArray() calls for Collections/Maps/Sets.
-     * <p>
-     * This is the same as your original method, unchanged.
+     * This will (hopefully) trigger the computation of any lazy fields.
+     *
+     * @param object the object to force lazy initialization on
+     * @param <T>    the type of the object
+     * @return the object with (hopefully) all lazy fields initialized
      */
     @SuppressWarnings("unchecked")
     private static <T> T forceLazyInitialization(T object) {
@@ -236,7 +252,10 @@ public class DeepCopyUtil {
     }
 
     /**
-     * Check if a class is immutable (same as original).
+     * Check if a class is immutable.
+     *
+     * @param clazz the class to check
+     * @return true if the class is immutable, false otherwise
      */
     private static boolean isImmutable(Class<?> clazz) {
         return clazz.isPrimitive() ||
@@ -253,7 +272,10 @@ public class DeepCopyUtil {
     }
 
     /**
-     * Allocate a new instance of a class without calling its constructors (same as original).
+     * Allocate an instance of a class using Unsafe.
+     * @param clazz the class to allocate
+     * @return the allocated instance
+     * @throws Exception if an error occurs during allocation
      */
     private static Object allocateInstance(Class<?> clazz) throws Exception {
         Method unsafeConstructor = UnsafeHolder.UNSAFE.getClass().getDeclaredMethod("allocateInstance", Class.class);

@@ -24,6 +24,9 @@ import java.util.Set;
  * It attempts to compile files individually in multiple passes—using the output of previous passes
  * as part of the classpath—so that interdependent classes compile in order.
  * Files that never compile are ignored.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Log4j2
 public class DynamicCompiler {

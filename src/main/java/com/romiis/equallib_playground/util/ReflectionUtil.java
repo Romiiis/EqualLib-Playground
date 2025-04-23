@@ -11,6 +11,8 @@ import java.util.Set;
 /**
  * Utility class for reflection operations
  *
+ * @author Romiis
+ * @version 1.0
  */
 @Log4j2
 public class ReflectionUtil {

@@ -10,6 +10,9 @@ import lombok.Setter;
  * LoadObjectListView.java
  * <p>
  * Represents a ListView for the loaded objects. Used to display the loaded objects and select them.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Setter
 public class LoadObjectListView extends ListView<String> {

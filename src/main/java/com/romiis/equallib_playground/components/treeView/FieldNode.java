@@ -14,6 +14,9 @@ import java.util.*;
  * <p>
  * This class is used to represent a node in the object tree. It contains information about the field, its value,
  * and its children. It also provides methods to update the value and get the children.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Getter
 public class FieldNode {

@@ -13,6 +13,9 @@ import java.io.IOException;
  * FileManager.java
  * <p>
  * Handles file saving and loading
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Log4j2
 public class FileManager {

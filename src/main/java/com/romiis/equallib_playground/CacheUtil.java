@@ -18,6 +18,9 @@ import java.util.Map;
  * CacheUtil.java
  * <p>
  * Utility class to cache classes and objects.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Log4j2
 public class CacheUtil {
@@ -53,6 +56,7 @@ public class CacheUtil {
 
     /**
      * Create a new instance of the CacheUtil class
+     * Singleton pattern
      */
     private CacheUtil() {
         super();
@@ -66,7 +70,6 @@ public class CacheUtil {
         }
 
     }
-
 
     /**
      * Update the cache by loading classes and objects

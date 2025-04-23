@@ -15,7 +15,9 @@ import lombok.Setter;
  * <p>
  * This class is used to control the LoadObject scene. It is used to load an object from the cache and assign it to the tree view.
  * It also provides a filter to filter objects by class.
- * <p>
+ *
+ * @author Romiis
+ * @version 1.0
  */
 public class LoadObjectController {
 

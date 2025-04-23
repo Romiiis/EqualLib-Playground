@@ -6,6 +6,9 @@ package com.romiis.equallib_playground.components.treeView;
  * Enum to represent the type of a field node in the object tree.
  * <p>
  * This enum is used to represent the type of a field node in the object tree. It is used to determine how to handle the field node.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 public enum FieldNodeType {
     EDITABLE,

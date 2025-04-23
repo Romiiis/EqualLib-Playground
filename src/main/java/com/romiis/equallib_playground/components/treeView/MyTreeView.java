@@ -33,7 +33,9 @@ import java.util.Optional;
  * <p>
  * Custom TreeView component for displaying and editing object fields in MainScene.
  * It handles selection changes, editing, saving, and loading of objects.
- * </p>
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Log4j2
 public class MyTreeView extends TreeView<FieldNode> {

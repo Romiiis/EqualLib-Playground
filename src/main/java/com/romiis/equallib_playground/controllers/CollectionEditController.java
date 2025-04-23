@@ -33,6 +33,9 @@ import java.util.List;
  * <p>
  * Controller for editing collections in a JavaFX application.
  * Provides functionality to add, remove, and edit elements in a collection.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Log4j2
 public class CollectionEditController {

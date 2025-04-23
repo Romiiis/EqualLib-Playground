@@ -11,6 +11,10 @@ import java.util.*;
 
 /**
  * Builds a tree of objects with lazy-loaded children.
+ * This class is responsible for creating a tree structure from an object,
+ *
+ * @author Romiis
+ * @version 1.0
  */
 @Log4j2
 
@@ -24,7 +28,7 @@ public class ObjectTreeBuilder {
     /**
      * The set of visited objects to prevent infinite recursion.
      */
-    private Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+    private final Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
 
 
     /**
@@ -35,8 +39,6 @@ public class ObjectTreeBuilder {
      * @return the root FieldNode representing the object tree
      */
     public FieldNode buildTree(Object root, int maxDepth) {
-        // Use IdentityHashMap for reference equality.
-
         return buildNode("root", root, null, null, 0, maxDepth);
     }
 

@@ -12,6 +12,9 @@ import java.util.Locale;
  * MainClass.java
  * <p>
  * The main class of the application. Starts the JavaFX application.
+ *
+ * @author Romiis
+ * @version 1.0
  */
 public class MainClass extends Application {
 
