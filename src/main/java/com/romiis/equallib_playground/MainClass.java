@@ -3,6 +3,7 @@ package com.romiis.equallib_playground;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -38,6 +39,8 @@ public class MainClass extends Application {
         Locale.setDefault(new Locale("cs", "CZ")); // 👈 sets decimal separator to comma
         FXMLLoader fxmlLoader = new FXMLLoader(MainClass.class.getResource(MAIN_SCENE_FXML));
         Scene scene = new Scene(fxmlLoader.load(), 1000, 650);
+        stage.getIcons().add(new Image(this.getClass().getResourceAsStream("/EqualLib-PlaygroundIcon-noBgr.png")));
+
         stage.setTitle("EqualLib Test App");
         stage.setScene(scene);
         stage.show();
