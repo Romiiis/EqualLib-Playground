@@ -1,3 +1,6 @@
+/**
+ * EqualLibPlayground
+ */
 module EqualLibPlayground {
     requires javafx.controls;
     requires javafx.fxml;
@@ -15,13 +18,13 @@ module EqualLibPlayground {
 
 
 
-    exports com.romiis.equallib_playground.util;
-    opens com.romiis.equallib_playground to javafx.fxml;
-    exports com.romiis.equallib_playground;
-    exports com.romiis.equallib_playground.controllers;
-    opens com.romiis.equallib_playground.controllers to javafx.fxml;
-    exports com.romiis.equallib_playground.components;
-    exports com.romiis.equallib_playground.components.treeView;
-    exports com.romiis.equallib_playground.components.listView;
+    exports com.romiiis.equallib_playground.util;
+    opens com.romiiis.equallib_playground to javafx.fxml;
+    exports com.romiiis.equallib_playground;
+    exports com.romiiis.equallib_playground.controllers;
+    opens com.romiiis.equallib_playground.controllers to javafx.fxml;
+    exports com.romiiis.equallib_playground.components;
+    exports com.romiiis.equallib_playground.components.treeView;
+    exports com.romiiis.equallib_playground.components.listView;
 
 }

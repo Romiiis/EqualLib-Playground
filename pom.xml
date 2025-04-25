@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.romiis</groupId>
+    <groupId>com.romiiis</groupId>
     <artifactId>EqualLib-Playground</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>EqualLibPlayground</name>
@@ -21,7 +21,7 @@
 
         <!-- ================== EqualLib ================== -->
         <dependency>
-            <groupId>com.romiis</groupId>
+            <groupId>com.romiiis</groupId>
             <artifactId>EqualLib</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
@@ -141,7 +141,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.romiis.equallib_playground.MainClass</mainClass>
+                    <mainClass>com.romiiis.equallib_playground.MainClass</mainClass>
                     <launcher>EqualLib-Playground</launcher>
 
                     <!-- výstup -->

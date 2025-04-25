@@ -42,7 +42,7 @@ Make sure [EqualLib](https://github.com/Romiiis/EqualLib) is installed locally a
 ```xml
 <dependencies>
   <dependency>
-    <groupId>com.romiis</groupId>
+    <groupId>com.Romiiis</groupId>
     <artifactId>EqualLib</artifactId>
     <version>1.0.0</version> <!-- Replace with the correct version -->
   </dependency>
