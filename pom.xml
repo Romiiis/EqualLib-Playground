@@ -6,7 +6,7 @@
 
     <groupId>com.romiiis</groupId>
     <artifactId>EqualLib-Playground</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>EqualLibPlayground</name>
 
     <properties>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.romiiis</groupId>
             <artifactId>EqualLib</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <!-- ============================================== -->
 
@@ -146,7 +146,6 @@
 
                     <!-- výstup -->
                     <jlinkImageName>EqualLib-Playground</jlinkImageName>
-<!--                    <jlinkZipName>EqualLib-Playground</jlinkZipName>-->
 
                     <options>
                         <option>--add-modules</option><option>ALL-MODULE-PATH</option>
@@ -190,8 +189,6 @@
                         <goals><goal>run</goal></goals>
                         <configuration>
                             <target>
-                                <!-- source:   ${basedir}/classes -->
-                                <!-- target:   ${project.build.directory}/app/bin/classes -->
                                 <copy todir="${project.build.directory}/EqualLib-Playground/bin/classes">
                                     <fileset dir="${basedir}/classes" includes="**/*"/>
                                 </copy>

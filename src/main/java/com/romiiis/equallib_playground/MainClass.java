@@ -57,7 +57,7 @@ public class MainClass extends Application {
      */
     @Override
     public void start(Stage stage) throws IOException {
-        Locale.setDefault(new Locale("cs", "CZ")); // 👈 sets decimal separator to comma
+        Locale.setDefault(new Locale("cs", "CZ")); // sets decimal separator to comma
         FXMLLoader fxmlLoader = new FXMLLoader(MainClass.class.getResource(MAIN_SCENE_FXML));
         Scene scene = new Scene(fxmlLoader.load(), 1000, 650);
         stage.getIcons().add(new Image(this.getClass().getResourceAsStream("/EqualLib-PlaygroundIcon-noBgr.png")));
